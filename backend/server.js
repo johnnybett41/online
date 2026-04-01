@@ -34,6 +34,7 @@ app.use('/products', require('./routes/products'));
 app.use('/cart', require('./routes/cart'));
 app.use('/orders', require('./routes/orders'));
 app.use('/mpesa', require('./routes/mpesa'));
+app.use('/admin', require('./routes/admin'));
 
 dbReady
   .then(() => {

@@ -79,6 +79,7 @@ const Navbar = () => {
             <div className="user-menu">
               <User size={24} className="user-icon" />
               <div className="user-dropdown">
+                <Link to="/admin-stock">Stock Editor</Link>
                 <Link to="/orders">My Orders</Link>
                 <button onClick={logout}>Logout</button>
               </div>
@@ -130,6 +131,7 @@ const Navbar = () => {
 
           {user ? (
             <>
+              <Link to="/admin-stock" onClick={() => setIsMenuOpen(false)}>Stock Editor</Link>
               <Link to="/orders" onClick={() => setIsMenuOpen(false)}>My Orders</Link>
               <button onClick={() => { logout(); setIsMenuOpen(false); }}>Logout</button>
             </>

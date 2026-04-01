@@ -61,6 +61,10 @@ const Products = () => {
     return stockCount > 0 && stockCount <= 5;
   }).length;
   const soldOutCount = products.filter((product) => getStockCount(product) <= 0).length;
+  const almostSoldOutProducts = products
+    .filter((product) => getStockCount(product) > 0 && getStockCount(product) <= 5)
+    .sort((a, b) => getStockCount(a) - getStockCount(b))
+    .slice(0, 6);
 
   useEffect(() => {
     fetchProducts();
@@ -281,6 +285,36 @@ const Products = () => {
         <p>{filteredProducts.reduce((sum, product) => sum + Math.max(0, getStockCount(product)), 0)} items currently visible</p>
         {searchQuery && <p>Search results for: "{searchQuery}"</p>}
       </div>
+
+      {almostSoldOutProducts.length > 0 && (
+        <section className="low-stock-section">
+          <div className="low-stock-header">
+            <div>
+              <span className="low-stock-kicker">Filtered view</span>
+              <h2>Almost sold out</h2>
+              <p>These products are running low, so shoppers can see the remaining stock before checkout.</p>
+            </div>
+            <div className="low-stock-summary">
+              <span>{almostSoldOutProducts.length} items</span>
+              <span>stock at 5 or below</span>
+            </div>
+          </div>
+          <div className="low-stock-grid">
+            {almostSoldOutProducts.map((product) => (
+              <Link key={product.id} to={`/product/${product.id}`} className="low-stock-card">
+                <img src={product.image} alt={product.name} onError={handleImageError} />
+                <div className="low-stock-card-body">
+                  <span className={`low-stock-pill ${getStockCount(product) <= 0 ? 'sold-out' : ''}`}>
+                    {getStockLabel(product)}
+                  </span>
+                  <h3>{product.name}</h3>
+                  <p>KES {product.price}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className={`products-grid ${viewMode}`}>
         {filteredProducts.map(product => (

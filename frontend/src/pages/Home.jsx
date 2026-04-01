@@ -10,6 +10,7 @@ import {
   Sparkles,
   BadgeCheck,
   Clock3,
+  AlertTriangle,
 } from 'lucide-react';
 import './Home.css';
 
@@ -32,6 +33,7 @@ const Home = () => {
   const featuredProducts = catalog.slice(0, 6);
   const spotlightProduct = catalog[0];
   const categoryCount = new Set(catalog.map((product) => product.category)).size;
+  const lowStockProducts = catalog.filter((product) => Number(product.stock_quantity || 0) > 0 && Number(product.stock_quantity || 0) <= 5);
 
   const categories = [
     {
@@ -184,6 +186,32 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {lowStockProducts.length > 0 && (
+        <section className="inventory-alert">
+          <div className="section-container inventory-alert-inner">
+            <div className="inventory-alert-copy">
+              <div className="inventory-alert-badge">
+                <AlertTriangle size={16} />
+                Low stock alert
+              </div>
+              <h2>{lowStockProducts.length} products are almost sold out</h2>
+              <p>
+                A few store items are running low. Check the live catalog for stock counts before they disappear.
+              </p>
+            </div>
+            <div className="inventory-alert-actions">
+              <Link to="/products" className="cta-button primary">
+                View low stock items
+                <ArrowRight size={18} />
+              </Link>
+              <Link to="/products" className="cta-button secondary">
+                Browse catalog
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="trust-strip">
         <div className="section-container trust-grid">

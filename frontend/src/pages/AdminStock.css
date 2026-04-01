@@ -1,0 +1,243 @@
+.admin-stock-page {
+  padding: 32px 20px 72px;
+  background:
+    radial-gradient(circle at top left, rgba(249, 178, 51, 0.13), transparent 30%),
+    radial-gradient(circle at top right, rgba(102, 126, 234, 0.12), transparent 26%),
+    linear-gradient(180deg, #f7faff 0%, #eef3fb 100%);
+}
+
+.admin-stock-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-stock-hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 20px;
+  align-items: end;
+  padding: 28px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #0f172a 0%, #24385f 100%);
+  color: #fff;
+  box-shadow: 0 22px 48px rgba(12, 20, 35, 0.14);
+}
+
+.admin-kicker {
+  display: inline-flex;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-stock-hero h1 {
+  margin: 0 0 10px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.admin-stock-hero p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+}
+
+.admin-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-summary-card {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.admin-summary-card strong {
+  display: block;
+  font-size: 1.6rem;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.admin-summary-card span {
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.78);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+.admin-error {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.admin-toolbar {
+  margin: 18px 0;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 14px 32px rgba(12, 20, 35, 0.06);
+}
+
+.admin-toolbar input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #d6deeb;
+  font-size: 1rem;
+}
+
+.admin-stock-list {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-stock-card {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+  border-radius: 24px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 16px 34px rgba(12, 20, 35, 0.07);
+}
+
+.admin-stock-card img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #eff4fb, #dfe8f6);
+}
+
+.admin-stock-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-stock-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-stock-topline h3 {
+  margin: 8px 0 4px;
+  color: #0f172a;
+}
+
+.admin-stock-topline p {
+  margin: 0;
+  color: #5d6b82;
+}
+
+.admin-stock-topline strong {
+  color: #10213d;
+  white-space: nowrap;
+}
+
+.admin-status {
+  display: inline-flex;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-status.in-stock {
+  background: rgba(16, 185, 129, 0.14);
+  color: #0f766e;
+}
+
+.admin-status.low-stock {
+  background: rgba(245, 158, 11, 0.16);
+  color: #b45309;
+}
+
+.admin-status.sold-out {
+  background: rgba(239, 68, 68, 0.14);
+  color: #b91c1c;
+}
+
+.admin-stock-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-stock-actions label {
+  display: grid;
+  gap: 8px;
+  font-weight: 800;
+  color: #24344e;
+}
+
+.admin-stock-actions input {
+  max-width: 180px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #d6deeb;
+}
+
+.admin-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-action-row button {
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 1px solid #d6deeb;
+  background: #edf3ff;
+  color: #23416f;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-action-row button.primary {
+  background: linear-gradient(135deg, #10213d 0%, #27406b 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.admin-action-row button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@media (max-width: 960px) {
+  .admin-stock-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-stock-card {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-stock-card img {
+    width: 100%;
+    height: 180px;
+  }
+}
