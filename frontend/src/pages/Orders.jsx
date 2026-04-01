@@ -1,35 +1,123 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ArrowRight, FileText, Package, ShieldCheck, ShoppingBag } from 'lucide-react';
+import './PurchaseFlow.css';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      axios.get('/orders').then(res => setOrders(res.data));
-    }
+    const fetchOrders = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await axios.get('/orders');
+        setOrders(res.data);
+      } catch (error) {
+        console.error('Failed to load orders:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
   }, [user]);
 
   if (!user) {
-    return <div>Please login to view your orders.</div>;
+    return (
+      <div className="purchase-shell">
+        <div className="purchase-empty-state">
+          <FileText size={44} />
+          <h2>Please sign in to view your orders</h2>
+          <p>Your order history and payment status will appear here after login.</p>
+          <div className="empty-actions">
+            <Link to="/login" className="purchase-button primary">
+              Go to Login <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h2>Your Orders</h2>
-      {orders.length === 0 ? (
-        <p>No orders yet.</p>
-      ) : (
-        orders.map(order => (
-          <div key={order.id}>
-            <h3>Order #{order.id}</h3>
-            <p>Total: KES {order.total}</p>
-            <p>Status: {order.status === 'pending_payment' ? 'Payment Pending' : order.status === 'paid' ? 'Paid' : order.status}</p>
-            <p>Date: {new Date(order.created_at).toLocaleDateString()}</p>
+    <div className="purchase-shell">
+      <section className="purchase-hero">
+        <div>
+          <p className="purchase-kicker">Order history</p>
+          <h1>Track your purchases in one clean view.</h1>
+          <p>
+            Keep an eye on payment status, total spend, and recent orders without the clutter.
+          </p>
+        </div>
+        <div className="purchase-hero__badges">
+          <span><ShieldCheck size={16} /> Secure records</span>
+          <span><Package size={16} /> Purchase history</span>
+          <span><ShoppingBag size={16} /> {orders.length} orders</span>
+        </div>
+      </section>
+
+      {loading ? (
+        <div className="purchase-loading">Loading orders...</div>
+      ) : orders.length === 0 ? (
+        <div className="purchase-empty-state purchase-card">
+          <Package size={44} />
+          <h2>No orders yet</h2>
+          <p>When you complete a checkout, your orders will show up here.</p>
+          <div className="empty-actions">
+            <Link to="/products" className="purchase-button primary">
+              Browse Products <ArrowRight size={16} />
+            </Link>
           </div>
-        ))
+        </div>
+      ) : (
+        <div className="orders-grid">
+          {orders.map((order) => {
+            const statusLabel =
+              order.status === 'pending_payment'
+                ? 'Payment pending'
+                : order.status === 'paid'
+                ? 'Paid'
+                : order.status;
+
+            return (
+              <article key={order.id} className="purchase-card order-card">
+                <div className="order-card__top">
+                  <div>
+                    <p className="item-category">Order #{order.id}</p>
+                    <h2>KES {Number(order.total).toFixed(2)}</h2>
+                  </div>
+                  <span className={`status-pill status-${order.status}`}>{statusLabel}</span>
+                </div>
+
+                <div className="order-card__meta">
+                  <div>
+                    <span>Placed on</span>
+                    <strong>{new Date(order.created_at).toLocaleDateString()}</strong>
+                  </div>
+                  <div>
+                    <span>Reference</span>
+                    <strong>{order.id}</strong>
+                  </div>
+                </div>
+
+                <div className="order-card__footer">
+                  <span>Ready for review in your purchase timeline</span>
+                  <Link to="/products" className="inline-link">
+                    Shop again <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       )}
     </div>
   );
