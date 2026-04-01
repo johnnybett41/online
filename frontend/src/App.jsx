@@ -17,6 +17,11 @@ import Contact from './pages/Contact';
 import Shipping from './pages/Shipping';
 import Returns from './pages/Returns';
 import Warranty from './pages/Warranty';
+import FAQ from './pages/FAQ';
+import Support from './pages/Support';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import ForgotPassword from './pages/ForgotPassword';
 import About from './pages/About';
 import Wishlist from './pages/Wishlist';
 import './App.css';
@@ -44,6 +49,11 @@ function App() {
               <Route path="/shipping" element={<Shipping />} />
               <Route path="/returns" element={<Returns />} />
               <Route path="/warranty" element={<Warranty />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/about" element={<About />} />
               <Route path="/wishlist" element={<Wishlist />} />
             </Routes>

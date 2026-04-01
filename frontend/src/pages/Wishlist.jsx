@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import './Wishlist.css';
@@ -59,7 +60,7 @@ const Wishlist = () => {
       <div className="wishlist-container">
         <div className="login-prompt">
           <h2>Please log in to view your wishlist</h2>
-          <a href="/login" className="login-btn">Login</a>
+          <Link to="/login" className="login-btn">Login</Link>
         </div>
       </div>
     );
@@ -85,7 +86,7 @@ const Wishlist = () => {
           <div className="empty-content">
             <h2>Your wishlist is empty</h2>
             <p>Start adding items you love to your wishlist!</p>
-            <a href="/products" className="shop-btn">Browse Products</a>
+            <Link to="/products" className="shop-btn">Browse Products</Link>
           </div>
         </div>
       ) : (

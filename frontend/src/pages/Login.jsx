@@ -123,9 +123,9 @@ const Login = () => {
                 <input type="checkbox" />
                 <span>Keep me signed in</span>
               </label>
-              <a href="/forgot-password" className="text-link">
+              <Link to="/forgot-password" className="text-link">
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             <button type="submit" className="auth-btn" disabled={loading}>
@@ -135,7 +135,7 @@ const Login = () => {
           </form>
 
           <div className="auth-footer">
-            <span>Don’t have an account?</span>
+            <span>Don't have an account?</span>
             <Link to="/register">Create one</Link>
           </div>
         </div>

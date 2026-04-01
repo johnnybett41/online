@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
 import './Footer.css';
 
@@ -27,25 +28,25 @@ const Footer = () => {
         <div className="footer-section">
           <h4>Quick Links</h4>
           <ul>
-            <li><a href="/products">All Products</a></li>
-            <li><a href={`/products?category=${encodeURIComponent('Lighting')}`}>Lighting</a></li>
-            <li><a href={`/products?category=${encodeURIComponent('Switches & Sockets')}`}>Switches & Sockets</a></li>
-            <li><a href={`/products?category=${encodeURIComponent('Adaptors & Extensions')}`}>Adaptors & Extensions</a></li>
-            <li><a href={`/products?category=${encodeURIComponent('Protection Devices')}`}>Protection Devices</a></li>
-            <li><a href={`/products?category=${encodeURIComponent('Accessories')}`}>Accessories</a></li>
-            <li><a href="/blog">Blog</a></li>
+            <li><Link to="/products">All Products</Link></li>
+            <li><Link to={`/products?category=${encodeURIComponent('Lighting')}`}>Lighting</Link></li>
+            <li><Link to={`/products?category=${encodeURIComponent('Switches & Sockets')}`}>Switches & Sockets</Link></li>
+            <li><Link to={`/products?category=${encodeURIComponent('Adaptors & Extensions')}`}>Adaptors & Extensions</Link></li>
+            <li><Link to={`/products?category=${encodeURIComponent('Protection Devices')}`}>Protection Devices</Link></li>
+            <li><Link to={`/products?category=${encodeURIComponent('Accessories')}`}>Accessories</Link></li>
+            <li><Link to="/blog">Blog</Link></li>
           </ul>
         </div>
 
         <div className="footer-section">
           <h4>Customer Service</h4>
           <ul>
-            <li><a href="/contact">Contact Us</a></li>
-            <li><a href="/shipping">Shipping Info</a></li>
-            <li><a href="/returns">Returns & Exchanges</a></li>
-            <li><a href="/warranty">Warranty</a></li>
-            <li><a href="/faq">FAQ</a></li>
-            <li><a href="/support">Technical Support</a></li>
+            <li><Link to="/contact">Contact Us</Link></li>
+            <li><Link to="/shipping">Shipping Info</Link></li>
+            <li><Link to="/returns">Returns & Exchanges</Link></li>
+            <li><Link to="/warranty">Warranty</Link></li>
+            <li><Link to="/faq">FAQ</Link></li>
+            <li><Link to="/support">Technical Support</Link></li>
           </ul>
         </div>
 
@@ -92,7 +93,7 @@ const Footer = () => {
             </div>
           </div>
           <div className="copyright">
-            <p>&copy; 2024 ElectroHub. All rights reserved. | <a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms of Service</a></p>
+            <p>&copy; 2024 ElectroHub. All rights reserved. | <Link to="/privacy">Privacy Policy</Link> | <Link to="/terms">Terms of Service</Link></p>
           </div>
           <div className="certifications">
             <span>Certified:</span>
