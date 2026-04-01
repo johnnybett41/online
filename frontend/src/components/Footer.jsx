@@ -28,10 +28,11 @@ const Footer = () => {
           <h4>Quick Links</h4>
           <ul>
             <li><a href="/products">All Products</a></li>
-            <li><a href="/categories/power-protection">Power & Protection</a></li>
-            <li><a href="/categories/lighting">Lighting Solutions</a></li>
-            <li><a href="/categories/wiring">Wiring Accessories</a></li>
-            <li><a href="/categories/backup-power">Backup & Power</a></li>
+            <li><a href={`/products?category=${encodeURIComponent('Lighting')}`}>Lighting</a></li>
+            <li><a href={`/products?category=${encodeURIComponent('Switches & Sockets')}`}>Switches & Sockets</a></li>
+            <li><a href={`/products?category=${encodeURIComponent('Adaptors & Extensions')}`}>Adaptors & Extensions</a></li>
+            <li><a href={`/products?category=${encodeURIComponent('Protection Devices')}`}>Protection Devices</a></li>
+            <li><a href={`/products?category=${encodeURIComponent('Accessories')}`}>Accessories</a></li>
             <li><a href="/blog">Blog</a></li>
           </ul>
         </div>
@@ -67,9 +68,9 @@ const Footer = () => {
           <div className="newsletter">
             <h5>Subscribe to Newsletter</h5>
             <form className="newsletter-form" onSubmit={handleSubscribe}>
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
+              <input
+                type="email"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

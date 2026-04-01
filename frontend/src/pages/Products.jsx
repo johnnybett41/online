@@ -5,6 +5,27 @@ import { useAuth } from '../context/AuthContext';
 import { Heart, Filter, Grid, List } from 'lucide-react';
 import './Products.css';
 
+const CATEGORY_ORDER = [
+  'Lighting',
+  'Switches & Sockets',
+  'Adaptors & Extensions',
+  'Protection Devices',
+  'Accessories',
+];
+
+const sortCategories = (items) =>
+  [...items].sort((a, b) => {
+    const aIndex = CATEGORY_ORDER.indexOf(a);
+    const bIndex = CATEGORY_ORDER.indexOf(b);
+
+    if (aIndex === -1 && bIndex === -1) {
+      return a.localeCompare(b);
+    }
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  });
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -17,10 +38,15 @@ const Products = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
+  const categoryQuery = searchParams.get('category') || 'all';
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    setSelectedCategory(categoryQuery);
+  }, [categoryQuery]);
 
   useEffect(() => {
     filterAndSortProducts();
@@ -31,7 +57,7 @@ const Products = () => {
       const res = await axios.get('/products');
       setProducts(res.data);
       const uniqueCategories = [...new Set(res.data.map(p => p.category))];
-      setCategories(uniqueCategories);
+      setCategories(sortCategories(uniqueCategories));
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {

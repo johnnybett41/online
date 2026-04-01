@@ -14,7 +14,6 @@ const Home = () => {
   const fetchFeaturedProducts = async () => {
     try {
       const res = await axios.get('/products');
-      // Get first 6 products as featured
       setFeaturedProducts(res.data.slice(0, 6));
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -25,59 +24,67 @@ const Home = () => {
     {
       name: 'Lighting',
       icon: '💡',
-      description: 'LED bulbs, tubes, and lighting solutions',
-      link: '/products?category=Lighting'
+      description: 'LED bulbs and sensor lighting for everyday spaces',
+      link: `/products?category=${encodeURIComponent('Lighting')}`,
     },
     {
-      name: 'Power & Protection',
+      name: 'Switches & Sockets',
       icon: '🔌',
-      description: 'MCBs, RCDs, and power distribution',
-      link: '/products?category=Power & Protection'
+      description: 'Wall switches, sockets, plates, and waterproof fittings',
+      link: `/products?category=${encodeURIComponent('Switches & Sockets')}`,
     },
     {
-      name: 'Wiring Accessories',
-      icon: '🔧',
-      description: 'Sockets, switches, and wiring components',
-      link: '/products?category=Wiring Accessories'
+      name: 'Adaptors & Extensions',
+      icon: '🧩',
+      description: 'Extension sockets and adaptor solutions for flexible power',
+      link: `/products?category=${encodeURIComponent('Adaptors & Extensions')}`,
     },
     {
-      name: 'Backup & Power',
-      icon: '🔋',
-      description: 'Inverters, batteries, and solar solutions',
-      link: '/products?category=Backup & Power'
-    }
+      name: 'Protection Devices',
+      icon: '🛡️',
+      description: 'MCBs, guards, timers, and load protection gear',
+      link: `/products?category=${encodeURIComponent('Protection Devices')}`,
+    },
+    {
+      name: 'Accessories',
+      icon: '🧰',
+      description: 'Insulation tape and practical finishing accessories',
+      link: `/products?category=${encodeURIComponent('Accessories')}`,
+    },
   ];
 
   const features = [
     {
       icon: <Zap size={40} />,
       title: 'Quality Products',
-      description: 'Premium electrical products from trusted manufacturers'
+      description: 'Premium electrical products from trusted manufacturers',
     },
     {
       icon: <Shield size={40} />,
       title: 'Safety First',
-      description: 'All products meet safety standards and certifications'
+      description: 'All products meet safety standards and certifications',
     },
     {
       icon: <Truck size={40} />,
       title: 'Fast Delivery',
-      description: 'Quick delivery across Kenya with reliable shipping'
+      description: 'Quick delivery across Kenya with reliable shipping',
     },
     {
       icon: <Star size={40} />,
       title: 'Expert Support',
-      description: 'Technical guidance and customer support available'
-    }
+      description: 'Technical guidance and customer support available',
+    },
   ];
 
   return (
     <div className="home-container">
-      {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
           <h1>Power Your World with Quality Electrical Solutions</h1>
-          <p>Discover premium electrical products for homes and businesses. From lighting to power protection, we have everything you need.</p>
+          <p>
+            Discover premium electrical products for homes and businesses. From lighting to
+            protection devices, we have everything you need.
+          </p>
           <div className="hero-actions">
             <Link to="/products" className="cta-button primary">
               Shop Now
@@ -93,16 +100,13 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="features-section">
         <div className="section-container">
           <h2>Why Choose ElectroHub?</h2>
           <div className="features-grid">
             {features.map((feature, index) => (
               <div key={index} className="feature-card">
-                <div className="feature-icon">
-                  {feature.icon}
-                </div>
+                <div className="feature-icon">{feature.icon}</div>
                 <h3>{feature.title}</h3>
                 <p>{feature.description}</p>
               </div>
@@ -111,16 +115,13 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Categories Section */}
       <section className="categories-section">
         <div className="section-container">
           <h2>Shop by Category</h2>
           <div className="categories-grid">
             {categories.map((category, index) => (
               <Link key={index} to={category.link} className="category-card">
-                <div className="category-icon">
-                  {category.icon}
-                </div>
+                <div className="category-icon">{category.icon}</div>
                 <h3>{category.name}</h3>
                 <p>{category.description}</p>
                 <div className="category-link">
@@ -132,7 +133,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Products Section */}
       <section className="featured-section">
         <div className="section-container">
           <div className="section-header">
@@ -142,7 +142,7 @@ const Home = () => {
             </Link>
           </div>
           <div className="products-grid">
-            {featuredProducts.map(product => (
+            {featuredProducts.map((product) => (
               <div key={product.id} className="product-card">
                 <div className="product-image">
                   <img src={product.image} alt={product.name} />
@@ -170,7 +170,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="cta-section">
         <div className="section-container">
           <div className="cta-content">
