@@ -2,6 +2,7 @@ node_modules/
 *.db
 .env
 .env.*
+!.env.example
 .idea/
 .vscode/
 desktop.ini
