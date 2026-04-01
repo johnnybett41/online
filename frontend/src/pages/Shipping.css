@@ -1,0 +1,66 @@
+.shipping-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.shipping-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.shipping-header h1 {
+  font-size: 2.5rem;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
+
+.shipping-header p {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.shipping-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.info-section {
+  margin-bottom: 30px;
+}
+
+.info-section h3 {
+  color: #007bff;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.info-section p {
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.info-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.info-section ul li {
+  color: #333;
+  margin-bottom: 8px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.info-section ul li:before {
+  content: "•";
+  color: #007bff;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.info-section strong {
+  color: #1a1a1a;
+}

@@ -1,0 +1,10 @@
+node_modules/
+*.db
+.env
+.env.*
+.idea/
+.vscode/
+desktop.ini
+npm-debug.log*
+dist/
+build/
