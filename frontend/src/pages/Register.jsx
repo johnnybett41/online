@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Mail, LockKeyhole, ShieldCheck, Sparkles, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import logoLight from '../assets/electrohub-mark.svg';
 import logoDark from '../assets/electrohub-mark-dark.svg';
 import './Login.css';
@@ -13,7 +14,7 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
 
@@ -90,6 +91,31 @@ const Register = () => {
             <p className="auth-kicker">Sign up</p>
             <h2>Start shopping in seconds</h2>
             <p>Create your ElectroHub profile and keep everything in one place.</p>
+          </div>
+
+          <GoogleSignInButton
+            mode="signup"
+            onSuccess={async (credential) => {
+              setError('');
+              setLoading(true);
+
+              try {
+                await googleLogin(credential);
+                navigate('/');
+              } catch (authError) {
+                setError(authError.response?.data?.message || 'Google sign-up failed. Please try again.');
+              } finally {
+                setLoading(false);
+              }
+            }}
+            onError={(error) => {
+              console.error('Google sign-in error:', error);
+              setError('Google sign-in is unavailable right now.');
+            }}
+          />
+
+          <div className="auth-divider">
+            <span>or create with email</span>
           </div>
 
           <form className="auth-form" onSubmit={handleSubmit} autoComplete="on">

@@ -1,10 +1,88 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
+const crypto = require('crypto');
 const { db } = require('../db');
 
 const router = express.Router();
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+
+const dbGet = (sql, params = []) =>
+  new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve(row);
+    });
+  });
+
+const dbRun = (sql, params = []) =>
+  new Promise((resolve, reject) => {
+    db.run(sql, params, function runCallback(err) {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve(this);
+    });
+  });
+
+const makeUsernameSlug = (value) => {
+  const normalized = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
+    .replace(/^([0-9]+)/, '');
+
+  return normalized || 'googleuser';
+};
+
+const ensureUniqueUsername = async (baseUsername) => {
+  let candidate = baseUsername;
+  let suffix = 0;
+
+  while (await dbGet('SELECT id FROM users WHERE username = ?', [candidate])) {
+    suffix += 1;
+    candidate = `${baseUsername}${suffix}`;
+  }
+
+  return candidate;
+};
+
+const verifyGoogleCredential = async (credential) => {
+  const { data } = await axios.get('https://oauth2.googleapis.com/tokeninfo', {
+    params: { id_token: credential },
+    timeout: 10000,
+  });
+
+  if (GOOGLE_CLIENT_ID && data.aud !== GOOGLE_CLIENT_ID) {
+    throw new Error('Google account is not configured for this app');
+  }
+
+  if (!['accounts.google.com', 'https://accounts.google.com'].includes(data.iss)) {
+    throw new Error('Invalid Google token issuer');
+  }
+
+  if (String(data.email_verified) !== 'true') {
+    throw new Error('Google email is not verified');
+  }
+
+  return data;
+};
+
+const signSession = (user) => ({
+  token: jwt.sign({ id: user.id, email: user.email }, SECRET_KEY),
+  user: {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+  },
+});
 
 // Register
 router.post('/register', async (req, res) => {
@@ -74,6 +152,46 @@ router.post('/login', (req, res) => {
     const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY);
     res.json({ token, user: { id: user.id, username: user.username, email: user.email } });
   });
+});
+
+router.post('/google', async (req, res) => {
+  const { credential } = req.body;
+
+  if (!credential) {
+    return res.status(400).json({ message: 'Google credential is required' });
+  }
+
+  try {
+    const googleProfile = await verifyGoogleCredential(credential);
+    const email = googleProfile.email?.toLowerCase();
+
+    if (!email) {
+      return res.status(400).json({ message: 'Google account email is missing' });
+    }
+
+    let user = await dbGet('SELECT id, username, email FROM users WHERE email = ?', [email]);
+
+    if (!user) {
+      const nameSource = googleProfile.name || email.split('@')[0] || 'Google User';
+      const baseUsername = makeUsernameSlug(nameSource);
+      const username = await ensureUniqueUsername(baseUsername);
+      const randomPassword = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
+
+      const insertResult = await dbRun(
+        'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+        [username, email, randomPassword]
+      );
+
+      user = await dbGet('SELECT id, username, email FROM users WHERE id = ?', [insertResult.lastID]);
+    }
+
+    return res.json(signSession(user));
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    return res.status(401).json({
+      message: error.response?.data?.error_description || error.message || 'Google sign-in failed',
+    });
+  }
 });
 
 module.exports = router;

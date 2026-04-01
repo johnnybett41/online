@@ -221,6 +221,23 @@ You still need to add your M-Pesa credentials in the backend service environment
 
 The frontend automatically receives the backend URL through `VITE_API_URL`.
 
+## Google Sign-In
+
+The login and registration pages now support Google sign-in with the Google Identity Services popup flow. This lets users continue with their Google account and have the app create or reuse their local ElectroHub account automatically.
+
+### Setup Google Sign-In
+
+1. Create an OAuth 2.0 Client ID in the [Google Cloud Console](https://console.cloud.google.com/).
+2. Add these authorized JavaScript origins:
+   - `http://localhost:5173`
+   - Your live Render frontend URL, for example `https://your-frontend.onrender.com`
+3. Set `GOOGLE_CLIENT_ID` in the backend environment.
+4. If you deploy with the Render blueprint, the frontend receives `VITE_GOOGLE_CLIENT_ID` from the backend service automatically.
+5. If you run locally, set `VITE_GOOGLE_CLIENT_ID` in your frontend environment before building.
+6. Redeploy the frontend after setting the Google client ID so the Google button is included in the static build.
+
+The backend verifies the Google ID token server-side, then creates or logs in the matching ElectroHub user and issues your normal app JWT.
+
 ### Public URL
 
 After the Render deploy finishes, use the Render frontend service URL as your shared public link. That single URL will work on phone, laptop, and desktop because the app is responsive and the static site is configured to rewrite SPA routes back to `index.html`.

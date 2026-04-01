@@ -9,6 +9,13 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
+  const persistSession = (session) => {
+    setToken(session.token);
+    setUser(session.user);
+    localStorage.setItem('token', session.token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${session.token}`;
+  };
+
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -18,9 +25,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const res = await axios.post('/auth/login', { email, password });
-    setToken(res.data.token);
-    setUser(res.data.user);
-    localStorage.setItem('token', res.data.token);
+    persistSession(res.data);
+  };
+
+  const googleLogin = async (credential) => {
+    const res = await axios.post('/auth/google', { credential });
+    persistSession(res.data);
   };
 
   const register = async (username, email, password) => {
@@ -29,6 +39,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.disableAutoSelect();
+    }
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
@@ -36,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, login, googleLogin, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

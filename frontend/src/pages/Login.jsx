@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import logoLight from '../assets/electrohub-mark.svg';
 import logoDark from '../assets/electrohub-mark-dark.svg';
 import './Login.css';
@@ -12,7 +13,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
 
@@ -85,6 +86,31 @@ const Login = () => {
             <p className="auth-kicker">Sign in</p>
             <h2>Access your account</h2>
             <p>Use your email and password to continue shopping.</p>
+          </div>
+
+          <GoogleSignInButton
+            mode="signin"
+            onSuccess={async (credential) => {
+              setError('');
+              setLoading(true);
+
+              try {
+                await googleLogin(credential);
+                navigate('/');
+              } catch (authError) {
+                setError(authError.response?.data?.message || 'Google sign-in failed. Please try again.');
+              } finally {
+                setLoading(false);
+              }
+            }}
+            onError={(error) => {
+              console.error('Google sign-in error:', error);
+              setError('Google sign-in is unavailable right now.');
+            }}
+          />
+
+          <div className="auth-divider">
+            <span>or use email</span>
           </div>
 
           <form className="auth-form" onSubmit={handleSubmit} autoComplete="on">

@@ -30,3 +30,8 @@ services:
           name: online-backend
           type: web
           envVarKey: RENDER_EXTERNAL_URL
+      - key: VITE_GOOGLE_CLIENT_ID
+        fromService:
+          name: online-backend
+          type: web
+          envVarKey: GOOGLE_CLIENT_ID
