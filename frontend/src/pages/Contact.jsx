@@ -8,15 +8,27 @@ const Contact = () => {
   const faqs = [
     {
       question: 'How do I place an order?',
-      answer: 'Browse products, add the items you want to cart, then complete checkout and payment using the available flow.',
+      answer: 'Browse products, add items to cart, then go to checkout and complete payment with the available M-Pesa flow.',
     },
     {
       question: 'How long does delivery take?',
-      answer: 'Delivery depends on your location, stock availability, and dispatch timing. Most orders leave the store quickly once payment is confirmed.',
+      answer: 'Delivery depends on your location and stock availability, but most confirmed orders are dispatched quickly once payment is complete.',
     },
     {
-      question: 'What if my item arrives damaged?',
-      answer: 'Contact us right away with your order number and photos so we can help with a return, replacement, or exchange where applicable.',
+      question: 'What payment methods do you accept?',
+      answer: 'We currently support M-Pesa payment at checkout, and the payment prompt is triggered directly after your order is created.',
+    },
+    {
+      question: 'What is your warranty period?',
+      answer: 'All products have a 3-day warranty from the date of purchase for manufacturing defects and workmanship issues.',
+    },
+    {
+      question: 'Can I return or exchange an item?',
+      answer: 'Yes. Contact us within 3 days of delivery if you want a return or exchange, and we will guide you through the process.',
+    },
+    {
+      question: 'How do I know if a product is still available?',
+      answer: 'Each product page shows the remaining stock, and low-stock or sold-out items are clearly marked on the storefront.',
     },
     {
       question: 'How do I get technical support?',
