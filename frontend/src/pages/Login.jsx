@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
 
 const Login = () => {
@@ -19,7 +20,7 @@ const Login = () => {
     try {
       await login(email, password);
       navigate('/');
-    } catch (error) {
+    } catch (authError) {
       setError('Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
@@ -27,52 +28,110 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <h2>Welcome Back</h2>
-          <p>Sign in to your ElectroHub account</p>
-        </div>
+    <div className="auth-shell">
+      <div className="auth-shell__glow auth-shell__glow--one" />
+      <div className="auth-shell__glow auth-shell__glow--two" />
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          {error && <div className="error-message">{error}</div>}
-
-          <div className="form-group">
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder=" "
-              required
-              autoComplete="email"
-            />
-            <label htmlFor="email">Email Address</label>
+      <section className="auth-card auth-card--split">
+        <aside className="auth-hero">
+          <div className="auth-brand">
+            <span className="auth-brand__mark">EH</span>
+            <div>
+              <p>ElectroHub</p>
+              <h1>Welcome back.</h1>
+            </div>
           </div>
 
-          <div className="form-group">
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder=" "
-              required
-              autoComplete="current-password"
-            />
-            <label htmlFor="password">Password</label>
+          <p className="auth-hero__copy">
+            Sign in to manage your cart, track orders, and continue with a smoother shopping experience.
+          </p>
+
+          <div className="auth-hero__stats">
+            <div className="auth-stat">
+              <ShieldCheck size={18} />
+              Secure account access
+            </div>
+            <div className="auth-stat">
+              <Sparkles size={18} />
+              Modern product browsing
+            </div>
+            <div className="auth-stat">
+              <LockKeyhole size={18} />
+              Fast and private checkout
+            </div>
           </div>
 
-          <button type="submit" className="login-btn" disabled={loading}>
-            {loading && <span className="loading"></span>}
-            {loading ? 'Signing In...' : 'Sign In'}
-          </button>
-        </form>
+          <div className="auth-hero__panel">
+            <div className="auth-hero__panel-top">
+              <span>New here?</span>
+              <Link to="/register" className="ghost-link">
+                Create account <ArrowRight size={16} />
+              </Link>
+            </div>
+            <p>Register once and keep your shipping, cart, and orders in one place.</p>
+          </div>
+        </aside>
 
-        <div className="register-link">
-          Don't have an account? <Link to="/register">Sign up</Link>
+        <div className="auth-form-panel">
+          <div className="auth-heading">
+            <p className="auth-kicker">Sign in</p>
+            <h2>Access your account</h2>
+            <p>Use your email and password to continue shopping.</p>
+          </div>
+
+          <form className="auth-form" onSubmit={handleSubmit}>
+            {error && <div className="auth-error">{error}</div>}
+
+            <div className="auth-field">
+              <Mail size={18} className="auth-field__icon" />
+              <input
+                type="email"
+                id="login-email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder=" "
+                required
+                autoComplete="email"
+              />
+              <label htmlFor="login-email">Email address</label>
+            </div>
+
+            <div className="auth-field">
+              <LockKeyhole size={18} className="auth-field__icon" />
+              <input
+                type="password"
+                id="login-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder=" "
+                required
+                autoComplete="current-password"
+              />
+              <label htmlFor="login-password">Password</label>
+            </div>
+
+            <div className="auth-meta">
+              <label className="auth-check">
+                <input type="checkbox" />
+                <span>Keep me signed in</span>
+              </label>
+              <a href="/forgot-password" className="text-link">
+                Forgot password?
+              </a>
+            </div>
+
+            <button type="submit" className="auth-btn" disabled={loading}>
+              {loading ? 'Signing In...' : 'Sign In'}
+              {!loading && <ArrowRight size={18} />}
+            </button>
+          </form>
+
+          <div className="auth-footer">
+            <span>Don’t have an account?</span>
+            <Link to="/register">Create one</Link>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
