@@ -1,4 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
+const { seedProductsIfNeeded } = require('./seedProducts');
 
 const DB_PATH = process.env.DATABASE_PATH || './database.db';
 
@@ -9,51 +10,17 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
   console.log('Connected to the SQLite database.');
 });
 
-// Create tables
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
-    email TEXT UNIQUE,
-    password TEXT
-  )`);
+const dbReady = seedProductsIfNeeded(db)
+  .then((seeded) => {
+    if (seeded) {
+      console.log('Database initialized and sample products added.');
+    } else {
+      console.log('Products already seeded.');
+    }
+  })
+  .catch((err) => {
+    console.error('Database initialization failed:', err.message);
+    throw err;
+  });
 
-  db.run(`CREATE TABLE IF NOT EXISTS products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    description TEXT,
-    price REAL,
-    image TEXT,
-    category TEXT
-  )`);
-
-  db.run(`CREATE TABLE IF NOT EXISTS cart (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    product_id INTEGER,
-    quantity INTEGER,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (product_id) REFERENCES products (id)
-  )`);
-
-  db.run(`CREATE TABLE IF NOT EXISTS orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    total REAL,
-    status TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-
-  db.run(`CREATE TABLE IF NOT EXISTS order_items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    order_id INTEGER,
-    product_id INTEGER,
-    quantity INTEGER,
-    price REAL,
-    FOREIGN KEY (order_id) REFERENCES orders (id),
-    FOREIGN KEY (product_id) REFERENCES products (id)
-  )`);
-});
-
-module.exports = { db };
+module.exports = { db, dbReady };

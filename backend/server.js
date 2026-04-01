@@ -26,7 +26,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Import database
-const { db } = require('./db');
+const { db, dbReady } = require('./db');
 
 // Routes
 app.use('/auth', require('./routes/auth'));
@@ -35,8 +35,15 @@ app.use('/cart', require('./routes/cart'));
 app.use('/orders', require('./routes/orders'));
 app.use('/mpesa', require('./routes/mpesa'));
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+dbReady
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  });
 
 module.exports = { db };

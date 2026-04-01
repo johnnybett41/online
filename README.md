@@ -190,7 +190,7 @@ This repo includes a `render.yaml` blueprint for two services:
 - `online-backend` as a Node web service
 - `online-frontend` as a static site
 
-Render also mounts a persistent disk for the SQLite database and seeds products on deploy, so the catalog survives restarts.
+Render also mounts a persistent disk for the SQLite database, and the backend seeds products automatically on startup if the catalog is empty, so the catalog survives restarts.
 
 You still need to add your M-Pesa credentials in the backend service environment variables on Render:
 
