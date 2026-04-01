@@ -164,6 +164,7 @@ MPESA_SHORTCODE=your-shortcode
 MPESA_PASSKEY=your-passkey
 MPESA_BASE_URL=https://sandbox.safaricom.co.ke
 BASE_URL=http://localhost:5000
+DATABASE_PATH=./database.db
 ```
 
 ### Payment Flow
@@ -181,3 +182,22 @@ BASE_URL=http://localhost:5000
 - POST /api/mpesa/pay - Initiate M-Pesa payment
 - POST /api/mpesa/callback - M-Pesa payment confirmation callback
 - GET /api/mpesa/status/:checkoutRequestId - Check payment status
+
+## Deploying To Render
+
+This repo includes a `render.yaml` blueprint for two services:
+
+- `online-backend` as a Node web service
+- `online-frontend` as a static site
+
+Render also mounts a persistent disk for the SQLite database and seeds products on deploy, so the catalog survives restarts.
+
+You still need to add your M-Pesa credentials in the backend service environment variables on Render:
+
+- `MPESA_CONSUMER_KEY`
+- `MPESA_CONSUMER_SECRET`
+- `MPESA_SHORTCODE`
+- `MPESA_PASSKEY`
+- `MPESA_BASE_URL`
+
+The frontend automatically receives the backend URL through `VITE_API_URL`.

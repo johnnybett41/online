@@ -1,6 +1,8 @@
 const sqlite3 = require('sqlite3').verbose();
 
-const db = new sqlite3.Database('./database.db');
+const DB_PATH = process.env.DATABASE_PATH || './database.db';
+
+const db = new sqlite3.Database(DB_PATH);
 
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -47,7 +49,26 @@ db.serialize(() => {
     FOREIGN KEY (product_id) REFERENCES products (id)
   )`);
 
-  const products = [
+  db.get('SELECT COUNT(*) AS count FROM products', [], (countErr, row) => {
+    if (countErr) {
+      console.error('Error checking product count:', countErr.message);
+      return db.close((err) => {
+        if (err) {
+          console.error(err.message);
+        }
+      });
+    }
+
+    if (row.count > 0) {
+      console.log('Products already seeded.');
+      return db.close((err) => {
+        if (err) {
+          console.error(err.message);
+        }
+      });
+    }
+
+    const products = [
     { name: 'LED Bulb', description: 'Energy-efficient LED bulb', price: 250, image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop', category: 'Lighting' },
     { name: 'Power Strip', description: '6-outlet power strip with surge protection', price: 800, image: 'https://images.unsplash.com/photo-1625842268584-8f3296236761?w=400&h=400&fit=crop', category: 'Power' },
     { name: 'Extension Cord', description: '10-foot extension cord', price: 500, image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop', category: 'Power' },
@@ -81,17 +102,17 @@ db.serialize(() => {
     { name: 'Inverter Battery 150Ah', description: '150Ah tall tubular inverter battery - 12V', price: 22000, image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=400&fit=crop', category: 'Backup & Power' },
   ];
 
-  const stmt = db.prepare(`INSERT INTO products (name, description, price, image, category) VALUES (?, ?, ?, ?, ?)`);
-  products.forEach(product => {
-    stmt.run(product.name, product.description, product.price, product.image, product.category);
+    const stmt = db.prepare(`INSERT INTO products (name, description, price, image, category) VALUES (?, ?, ?, ?, ?)`);
+    products.forEach(product => {
+      stmt.run(product.name, product.description, product.price, product.image, product.category);
+    });
+    stmt.finalize(() => {
+      console.log('Database initialized and sample products added.');
+      db.close((err) => {
+        if (err) {
+          console.error(err.message);
+        }
+      });
+    });
   });
-  stmt.finalize();
-
-  console.log('Database initialized and sample products added.');
-});
-
-db.close((err) => {
-  if (err) {
-    console.error(err.message);
-  }
 });

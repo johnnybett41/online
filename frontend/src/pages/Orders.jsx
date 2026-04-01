@@ -8,7 +8,7 @@ const Orders = () => {
 
   useEffect(() => {
     if (user) {
-      axios.get('http://localhost:5000/orders').then(res => setOrders(res.data));
+      axios.get('/orders').then(res => setOrders(res.data));
     }
   }, [user]);
 

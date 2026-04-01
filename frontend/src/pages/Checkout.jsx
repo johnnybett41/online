@@ -13,7 +13,7 @@ const Checkout = () => {
 
   useEffect(() => {
     if (user) {
-      axios.get('http://localhost:5000/cart').then(res => setCartItems(res.data));
+      axios.get('/cart').then(res => setCartItems(res.data));
     }
   }, [user]);
 
@@ -21,7 +21,7 @@ const Checkout = () => {
 
   const handleCreateOrder = async () => {
     try {
-      const res = await axios.post('http://localhost:5000/orders', { total });
+      const res = await axios.post('/orders', { total });
       setOrderId(res.data.orderId);
     } catch (error) {
       alert('Failed to create order');
@@ -35,7 +35,7 @@ const Checkout = () => {
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/mpesa/pay', {
+      const res = await axios.post('/mpesa/pay', {
         phoneNumber: phoneNumber.startsWith('+') ? phoneNumber : `+254${phoneNumber.replace(/^0/, '')}`,
         amount: total,
         orderId
@@ -46,7 +46,7 @@ const Checkout = () => {
         // Poll for payment status
         const checkStatus = async () => {
           try {
-            const statusRes = await axios.get(`http://localhost:5000/mpesa/status/${res.data.checkoutRequestId}`);
+            const statusRes = await axios.get(`/mpesa/status/${res.data.checkoutRequestId}`);
             if (statusRes.data.ResponseCode === '0' && statusRes.data.ResultCode === '0') {
               setPaymentStatus('Payment successful! Order confirmed.');
               setTimeout(() => navigate('/orders'), 2000);

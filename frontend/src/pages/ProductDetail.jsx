@@ -19,11 +19,11 @@ const ProductDetail = () => {
 
   const fetchProduct = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/products/${id}`);
+      const res = await axios.get(`/products/${id}`);
       setProduct(res.data);
 
       // Fetch related products from same category
-      const allProductsRes = await axios.get('http://localhost:5000/products');
+      const allProductsRes = await axios.get('/products');
       const related = allProductsRes.data
         .filter(p => p.category === res.data.category && p.id !== res.data.id)
         .slice(0, 4);
@@ -41,7 +41,7 @@ const ProductDetail = () => {
       return;
     }
     try {
-      await axios.post('http://localhost:5000/cart', {
+      await axios.post('/cart', {
         user_id: user.id,
         product_id: product.id,
         quantity: quantity

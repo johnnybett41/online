@@ -28,7 +28,7 @@ const Products = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/products');
+      const res = await axios.get('/products');
       setProducts(res.data);
       const uniqueCategories = [...new Set(res.data.map(p => p.category))];
       setCategories(uniqueCategories);
@@ -86,7 +86,7 @@ const Products = () => {
       return;
     }
     try {
-      await axios.post('http://localhost:5000/cart', {
+      await axios.post('/cart', {
         user_id: user.id,
         product_id: productId,
         quantity: 1

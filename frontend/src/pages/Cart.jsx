@@ -9,13 +9,13 @@ const Cart = () => {
 
   useEffect(() => {
     if (user) {
-      axios.get('http://localhost:5000/cart').then(res => setCartItems(res.data));
+      axios.get('/cart').then(res => setCartItems(res.data));
     }
   }, [user]);
 
   const updateQuantity = async (id, quantity) => {
     try {
-      await axios.put(`http://localhost:5000/cart/${id}`, { quantity });
+      await axios.put(`/cart/${id}`, { quantity });
       setCartItems(cartItems.map(item => 
         item.id === id ? { ...item, quantity } : item
       ));
@@ -26,7 +26,7 @@ const Cart = () => {
 
   const removeItem = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/cart/${id}`);
+      await axios.delete(`/cart/${id}`);
       setCartItems(cartItems.filter(item => item.id !== id));
     } catch (error) {
       alert('Failed to remove item');

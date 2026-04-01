@@ -13,7 +13,7 @@ const Home = () => {
 
   const fetchFeaturedProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/products');
+      const res = await axios.get('/products');
       // Get first 6 products as featured
       setFeaturedProducts(res.data.slice(0, 6));
     } catch (error) {

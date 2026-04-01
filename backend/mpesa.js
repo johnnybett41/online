@@ -6,6 +6,7 @@ const CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || 'your-consumer-secr
 const SHORTCODE = process.env.MPESA_SHORTCODE || '174379'; // Test shortcode
 const PASSKEY = process.env.MPESA_PASSKEY || 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'; // Test passkey
 const BASE_URL = process.env.MPESA_BASE_URL || 'https://sandbox.safaricom.co.ke'; // Use https://api.safaricom.co.ke for production
+const PUBLIC_URL = process.env.RENDER_EXTERNAL_URL || process.env.BASE_URL || 'http://localhost:5000';
 
 // Cache access token to avoid unnecessary requests
 let accessTokenCache = {
@@ -101,7 +102,7 @@ async function initiateSTKPush(phoneNumber, amount, accountReference, transactio
       PartyA: validatedPhone,
       PartyB: SHORTCODE,
       PhoneNumber: validatedPhone,
-      CallBackURL: `${process.env.BASE_URL || 'http://localhost:5000'}/mpesa/callback`,
+      CallBackURL: new URL('/mpesa/callback', PUBLIC_URL).toString(),
       AccountReference: accountReference,
       TransactionDesc: transactionDesc || 'Payment for goods/services'
     };

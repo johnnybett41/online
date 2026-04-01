@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: online-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    preDeployCommand: npm run seed
+    startCommand: npm start
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_PATH
+        value: /opt/render/project/src/data/database.db
+    disk:
+      name: data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+  - type: web
+    name: online-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: online-backend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL

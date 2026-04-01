@@ -41,7 +41,7 @@ const Wishlist = () => {
     if (!user) return;
 
     try {
-      await axios.post('http://localhost:5000/cart', {
+      await axios.post('/cart', {
         user_id: user.id,
         product_id: product.id,
         quantity: 1
