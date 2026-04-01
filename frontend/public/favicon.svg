@@ -1,15 +1,19 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="64" y1="48" x2="448" y2="464" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#10213D"/>
-      <stop offset="0.55" stop-color="#27406B"/>
-      <stop offset="1" stop-color="#667EEA"/>
+    <linearGradient id="bg" x1="72" y1="60" x2="440" y2="452" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07162F"/>
+      <stop offset="0.45" stop-color="#17325F"/>
+      <stop offset="0.78" stop-color="#4F6FD4"/>
+      <stop offset="1" stop-color="#7B8FFF"/>
     </linearGradient>
     <linearGradient id="bolt" x1="184" y1="136" x2="328" y2="376" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFF4D6"/>
+      <stop stop-color="#FFFBEA"/>
+      <stop offset="0.5" stop-color="#FFE08B"/>
       <stop offset="1" stop-color="#F9B233"/>
     </linearGradient>
   </defs>
   <rect x="56" y="56" width="400" height="400" rx="104" fill="url(#bg)"/>
-  <path d="M268 120L170 282H238L214 392L346 224H278L300 120H268Z" fill="url(#bolt)" stroke="#FFF7E0" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M278 132L182 284H244L222 380L336 232H284L304 132H278Z" fill="#0A1428" opacity="0.26"/>
+  <path d="M270 118L174 278H240L218 388L344 224H282L302 118H270Z" fill="url(#bolt)" stroke="#FFF7E0" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M272 124L192 272H242L226 350L322 226H286L302 124H272Z" fill="white" opacity="0.14"/>
 </svg>

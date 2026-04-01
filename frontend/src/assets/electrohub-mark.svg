@@ -1,53 +1,86 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">ElectroHub logo</title>
-  <desc id="desc">A modern electrical mark with a lightning bolt inside a rounded square.</desc>
+  <desc id="desc">A brighter 3D-style electrical mark with a lightning bolt inside a rounded square.</desc>
   <defs>
-    <linearGradient id="bg" x1="64" y1="48" x2="448" y2="464" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#10213D"/>
-      <stop offset="0.55" stop-color="#27406B"/>
-      <stop offset="1" stop-color="#667EEA"/>
+    <linearGradient id="bg" x1="72" y1="60" x2="440" y2="452" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07162F"/>
+      <stop offset="0.45" stop-color="#17325F"/>
+      <stop offset="0.78" stop-color="#4F6FD4"/>
+      <stop offset="1" stop-color="#7B8FFF"/>
+    </linearGradient>
+    <linearGradient id="panelGlow" x1="120" y1="96" x2="384" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.26"/>
+      <stop offset="0.45" stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="bolt" x1="184" y1="136" x2="328" y2="376" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFF4D6"/>
+      <stop stop-color="#FFFBEA"/>
+      <stop offset="0.5" stop-color="#FFE08B"/>
       <stop offset="1" stop-color="#F9B233"/>
     </linearGradient>
-    <filter id="shadow" x="40" y="40" width="432" height="432" filterUnits="userSpaceOnUse">
-      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#10213D" flood-opacity="0.22"/>
+    <linearGradient id="boltEdge" x1="190" y1="150" x2="322" y2="362" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFDEB" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#FFF4D6" stop-opacity="0.1"/>
+    </linearGradient>
+    <filter id="shadow" x="32" y="32" width="448" height="448" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#06101F" flood-opacity="0.28"/>
+    </filter>
+    <filter id="boltShadow" x="152" y="108" width="230" height="324" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="10" dy="12" stdDeviation="8" flood-color="#07162F" flood-opacity="0.42"/>
     </filter>
   </defs>
 
   <rect x="56" y="56" width="400" height="400" rx="104" fill="url(#bg)" filter="url(#shadow)"/>
-  <circle cx="160" cy="162" r="14" fill="#FFD77B" opacity="0.9"/>
-  <circle cx="350" cy="166" r="10" fill="#A9C4FF" opacity="0.8"/>
-  <circle cx="350" cy="350" r="12" fill="#FFD77B" opacity="0.65"/>
+  <path d="M96 108C128 80 172 64 222 64H290C354 64 404 94 426 138C370 104 316 94 260 94C196 94 146 104 96 108Z" fill="#FFFFFF" opacity="0.12"/>
+  <path d="M90 104C136 88 182 80 232 80H286C342 80 388 94 420 118C392 74 346 48 286 48H222C162 48 112 72 90 104Z" fill="#FFFFFF" opacity="0.08"/>
+  <rect x="68" y="68" width="376" height="376" rx="96" fill="url(#panelGlow)"/>
+
+  <circle cx="156" cy="160" r="14" fill="#FFD77B"/>
+  <circle cx="348" cy="166" r="10" fill="#C8D8FF"/>
+  <circle cx="352" cy="350" r="12" fill="#FFD77B" opacity="0.92"/>
+
+  <g filter="url(#boltShadow)">
+    <path d="M278 132L182 284H244L222 380L336 232H284L304 132H278Z" fill="#0A1428" opacity="0.28"/>
+  </g>
 
   <path
-    d="M268 120L170 282H238L214 392L346 224H278L300 120H268Z"
+    d="M270 118L174 278H240L218 388L344 224H282L302 118H270Z"
     fill="url(#bolt)"
-    stroke="#FFF7E0"
+    stroke="url(#boltEdge)"
     stroke-width="8"
     stroke-linejoin="round"
   />
-
   <path
-    d="M148 358C169 388 204 408 244 408H268"
-    stroke="#A9C4FF"
+    d="M272 124L192 272H242L226 350L322 226H286L302 124H272Z"
+    fill="white"
+    opacity="0.14"
+  />
+  <path
+    d="M150 356C172 388 206 406 246 406H270"
+    stroke="#C8D8FF"
     stroke-width="16"
     stroke-linecap="round"
-    opacity="0.65"
+    opacity="0.72"
   />
   <path
     d="M364 166C352 150 336 138 318 132"
     stroke="#FFD77B"
     stroke-width="14"
     stroke-linecap="round"
-    opacity="0.7"
+    opacity="0.82"
   />
   <path
     d="M372 302C360 324 342 340 320 352"
-    stroke="#A9C4FF"
+    stroke="#C8D8FF"
     stroke-width="14"
     stroke-linecap="round"
-    opacity="0.7"
+    opacity="0.8"
+  />
+  <path
+    d="M118 246C142 200 182 172 228 160"
+    stroke="#FFFFFF"
+    stroke-width="10"
+    stroke-linecap="round"
+    opacity="0.22"
   />
 </svg>
