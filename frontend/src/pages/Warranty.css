@@ -1,0 +1,86 @@
+.warranty-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.warranty-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.warranty-header h1 {
+  font-size: 2.5rem;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
+
+.warranty-header p {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.warranty-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.warranty-info {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.warranty-period,
+.warranty-coverage,
+.warranty-exclusions,
+.warranty-process,
+.warranty-contact {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.warranty-period h3,
+.warranty-coverage h3,
+.warranty-exclusions h3,
+.warranty-process h3,
+.warranty-contact h3 {
+  color: #007bff;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.warranty-period p,
+.warranty-contact p {
+  color: #333;
+  line-height: 1.6;
+}
+
+.warranty-coverage ul,
+.warranty-exclusions ul,
+.warranty-process ol {
+  color: #333;
+  margin-left: 20px;
+}
+
+.warranty-coverage li,
+.warranty-exclusions li,
+.warranty-process li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.warranty-contact a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.warranty-contact a:hover {
+  text-decoration: underline;
+}
+
+.warranty-period strong {
+  color: #1a1a1a;
+  font-size: 1.1rem;
+}
