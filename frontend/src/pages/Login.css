@@ -79,17 +79,14 @@
   gap: 14px;
 }
 
-.auth-brand__mark {
+.auth-brand__logo {
   width: 56px;
   height: 56px;
-  display: grid;
-  place-items: center;
+  flex-shrink: 0;
   border-radius: 18px;
-  background: linear-gradient(135deg, #f9b233 0%, #ffd77b 100%);
-  color: #11203d;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  box-shadow: 0 16px 30px rgba(249, 178, 51, 0.25);
+  box-shadow: 0 16px 30px rgba(249, 178, 51, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 2px;
 }
 
 .auth-brand p {
