@@ -117,6 +117,11 @@ const Products = () => {
     alert('Added to wishlist!');
   };
 
+  const handleImageError = (event) => {
+    event.currentTarget.src =
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="%23f2f2f2"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23777" font-family="Arial, sans-serif" font-size="28">Image unavailable</text></svg>';
+  };
+
   const clearFilters = () => {
     setSelectedCategory('all');
     setPriceRange({ min: '', max: '' });
@@ -217,7 +222,7 @@ const Products = () => {
         {filteredProducts.map(product => (
           <div key={product.id} className="product-card">
             <div className="product-image">
-              <img src={product.image} alt={product.name} />
+              <img src={product.image} alt={product.name} onError={handleImageError} />
               <button
                 className="wishlist-btn"
                 onClick={() => addToWishlist(product)}

@@ -76,6 +76,11 @@ const ProductDetail = () => {
     setQuantity(prev => Math.max(1, prev + change));
   };
 
+  const handleImageError = (event) => {
+    event.currentTarget.src =
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="%23f2f2f2"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23777" font-family="Arial, sans-serif" font-size="28">Image unavailable</text></svg>';
+  };
+
   if (loading) {
     return (
       <div className="product-detail-container">
@@ -105,7 +110,7 @@ const ProductDetail = () => {
       <div className="product-detail">
         <div className="product-gallery">
           <div className="main-image">
-            <img src={product.image} alt={product.name} />
+            <img src={product.image} alt={product.name} onError={handleImageError} />
           </div>
         </div>
 
@@ -171,7 +176,7 @@ const ProductDetail = () => {
                 to={`/product/${relatedProduct.id}`}
                 className="related-card"
               >
-                <img src={relatedProduct.image} alt={relatedProduct.name} />
+                <img src={relatedProduct.image} alt={relatedProduct.name} onError={handleImageError} />
                 <h4>{relatedProduct.name}</h4>
                 <p>KES {relatedProduct.price}</p>
               </Link>

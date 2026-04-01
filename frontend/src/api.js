@@ -1,5 +1,12 @@
 import axios from 'axios';
 
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const normalizedApiUrl = rawApiUrl.replace(/^htpps:\/\//i, 'https://');
+
+if (normalizedApiUrl !== rawApiUrl) {
+  console.warn(`Fixed malformed API URL: ${rawApiUrl} -> ${normalizedApiUrl}`);
+}
+
+axios.defaults.baseURL = normalizedApiUrl;
 
 export default axios;
