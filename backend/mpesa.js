@@ -48,25 +48,33 @@ function validatePhoneNumber(phoneNumber) {
 
   // Check if it's already in international format
   if (cleanNumber.startsWith('+254')) {
-    return cleanNumber;
+    return cleanNumber.substring(1);
   }
 
   // Check if it starts with 0 (local format)
   if (cleanNumber.startsWith('0')) {
-    return `+254${cleanNumber.substring(1)}`;
+    return `254${cleanNumber.substring(1)}`;
   }
 
   // Check if it starts with 254 (without +)
   if (cleanNumber.startsWith('254')) {
-    return `+${cleanNumber}`;
+    return cleanNumber;
   }
 
   // If it's just the last 9 digits
   if (cleanNumber.length === 9 && /^[0-9]+$/.test(cleanNumber)) {
-    return `+254${cleanNumber}`;
+    return `254${cleanNumber}`;
   }
 
-  throw new Error('Invalid phone number format. Use format: +254XXXXXXXXX or 07XXXXXXXX');
+  throw new Error('Invalid phone number format. Use format: +254XXXXXXXXX, 07XXXXXXXX, or 254XXXXXXXXX');
+}
+
+function buildCallbackUrl(orderId) {
+  const callbackUrl = new URL('/mpesa/callback', PUBLIC_URL);
+  if (orderId) {
+    callbackUrl.searchParams.set('orderId', String(orderId));
+  }
+  return callbackUrl.toString();
 }
 
 // Validate amount
@@ -102,7 +110,7 @@ async function initiateSTKPush(phoneNumber, amount, accountReference, transactio
       PartyA: validatedPhone,
       PartyB: SHORTCODE,
       PhoneNumber: validatedPhone,
-      CallBackURL: new URL('/mpesa/callback', PUBLIC_URL).toString(),
+      CallBackURL: buildCallbackUrl(accountReference?.replace(/^Order-/, '')),
       AccountReference: accountReference,
       TransactionDesc: transactionDesc || 'Payment for goods/services'
     };
@@ -187,7 +195,8 @@ async function querySTKPush(checkoutRequestId) {
 function isConfigured() {
   return CONSUMER_KEY !== 'your-consumer-key' &&
          CONSUMER_SECRET !== 'your-consumer-secret' &&
-         SHORTCODE !== '174379';
+         SHORTCODE !== '174379' &&
+         PASSKEY !== 'your-m-pesa-passkey';
 }
 
 module.exports = {

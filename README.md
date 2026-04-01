@@ -148,10 +148,11 @@ The application now includes M-Pesa payment integration for secure mobile money 
 
 ### Setup M-Pesa
 
-1. Create a developer account at [Safaricom Developer Portal](https://developer.safaricom.co.ke/)
-2. Create an app and get your Consumer Key and Consumer Secret
-3. Set up your shortcode and passkey
-4. For testing, use the sandbox environment
+1. Create a developer account at the [Safaricom Developer Portal](https://developer.safaricom.co.ke/)
+2. Create an app and copy your Consumer Key and Consumer Secret
+3. Add the app's shortcode and passkey
+4. Start with sandbox first, then switch to production when your live credentials are ready
+5. Make sure your callback URL is publicly reachable. On Render, the backend builds it automatically from the service URL.
 
 ### Environment Variables
 
@@ -167,6 +168,12 @@ BASE_URL=http://localhost:5000
 DATABASE_PATH=./database.db
 ```
 
+For production Daraja credentials, change:
+
+```bash
+MPESA_BASE_URL=https://api.safaricom.co.ke
+```
+
 ### Payment Flow
 
 1. User adds items to cart and proceeds to checkout
@@ -176,6 +183,16 @@ DATABASE_PATH=./database.db
 5. User completes payment on their phone
 6. M-Pesa sends callback to confirm payment
 7. Order status is updated to 'paid'
+
+### Render Setup
+
+If you are deploying to Render:
+
+1. Set the backend environment variables in the Render dashboard.
+2. Keep `MPESA_BASE_URL` on the sandbox URL while testing.
+3. Add your live credentials later when Safaricom approves production access.
+4. Use the Render backend URL as the callback destination. The app now builds that URL automatically.
+5. Make sure the frontend points to the backend through `VITE_API_URL`.
 
 ### M-Pesa API Endpoints
 

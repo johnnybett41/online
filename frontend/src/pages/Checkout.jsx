@@ -66,7 +66,7 @@ const Checkout = () => {
     setSubmitting(true);
     try {
       const res = await axios.post('/mpesa/pay', {
-        phoneNumber: phoneNumber.startsWith('+') ? phoneNumber : `+254${phoneNumber.replace(/^0/, '')}`,
+        phoneNumber,
         amount: total,
         orderId,
       });
@@ -104,7 +104,7 @@ const Checkout = () => {
         <div className="purchase-empty-state">
           <Lock size={44} />
           <h2>Please sign in to checkout</h2>
-          <p>Secure checkout and M-Pesa payment are available once you’re logged in.</p>
+          <p>Secure checkout and M-Pesa payment are available once you're logged in.</p>
           <div className="empty-actions">
             <Link to="/login" className="purchase-button primary">
               Go to Login <ArrowRight size={16} />

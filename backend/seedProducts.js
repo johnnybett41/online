@@ -303,6 +303,19 @@ async function ensureSchema(db) {
     )`
   );
 
+  const orderColumns = await all(db, 'PRAGMA table_info(orders)');
+  const addOrderColumnIfMissing = async (name, definition) => {
+    const exists = orderColumns.some((column) => column.name === name);
+    if (!exists) {
+      await run(db, `ALTER TABLE orders ADD COLUMN ${definition}`);
+    }
+  };
+
+  await addOrderColumnIfMissing('mpesa_checkout_request_id', 'mpesa_checkout_request_id TEXT');
+  await addOrderColumnIfMissing('mpesa_receipt_number', 'mpesa_receipt_number TEXT');
+  await addOrderColumnIfMissing('mpesa_phone_number', 'mpesa_phone_number TEXT');
+  await addOrderColumnIfMissing('mpesa_paid_at', 'mpesa_paid_at DATETIME');
+
   await run(
     db,
     `CREATE TABLE IF NOT EXISTS order_items (
