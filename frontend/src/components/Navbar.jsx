@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Search, ShoppingCart, User, Menu, X, Heart, Sun, Moon } from 'lucide-react';
-import logo from '../assets/electrohub-mark.svg';
+import logoLight from '../assets/electrohub-mark.svg';
+import logoDark from '../assets/electrohub-mark-dark.svg';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -31,7 +32,11 @@ const Navbar = () => {
       <div className="navbar-container">
         <div className="navbar-brand">
           <Link to="/" className="brand-link">
-            <img src={logo} alt="ElectroHub logo" className="brand-logo" />
+            <img
+              src={isDarkMode ? logoDark : logoLight}
+              alt="ElectroHub logo"
+              className="brand-logo"
+            />
             <span className="brand-text">ElectroHub</span>
           </Link>
         </div>

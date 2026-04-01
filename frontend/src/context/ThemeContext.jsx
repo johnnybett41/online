@@ -22,15 +22,30 @@ export const ThemeProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    // Apply theme to document
-    if (isDarkMode) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light');
-      localStorage.setItem('theme', 'light');
+    const faviconHref = isDarkMode ? '/electrohub-favicon-dark.svg' : '/favicon.svg';
+    const themeColor = isDarkMode ? '#0f172a' : '#10213D';
+
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor);
+
+    let link = document.querySelector("link[rel='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
     }
+    link.type = 'image/svg+xml';
+    link.href = faviconHref;
+
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (!savedTheme) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  }, []);
 
   const toggleTheme = () => {
     setIsDarkMode(prev => !prev);

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import logo from '../assets/electrohub-mark.svg';
+import { useTheme } from '../context/ThemeContext';
+import logoLight from '../assets/electrohub-mark.svg';
+import logoDark from '../assets/electrohub-mark-dark.svg';
 import './Login.css';
 
 const Login = () => {
@@ -11,6 +13,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { isDarkMode } = useTheme();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -36,7 +39,11 @@ const Login = () => {
       <section className="auth-card auth-card--split">
         <aside className="auth-hero">
           <div className="auth-brand">
-            <img src={logo} alt="ElectroHub logo" className="auth-brand__logo" />
+            <img
+              src={isDarkMode ? logoDark : logoLight}
+              alt="ElectroHub logo"
+              className="auth-brand__logo"
+            />
             <div>
               <p>ElectroHub</p>
               <h1>Welcome back.</h1>
