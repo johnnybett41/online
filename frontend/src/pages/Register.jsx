@@ -92,7 +92,7 @@ const Register = () => {
             <p>Create your ElectroHub profile and keep everything in one place.</p>
           </div>
 
-          <form className="auth-form" onSubmit={handleSubmit}>
+          <form className="auth-form" onSubmit={handleSubmit} autoComplete="on">
             {error && <div className="auth-error">{error}</div>}
 
             <div className="auth-field">
@@ -100,11 +100,15 @@ const Register = () => {
               <input
                 type="text"
                 id="register-username"
+                name="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder=" "
                 required
                 autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
               />
               <label htmlFor="register-username">Username</label>
             </div>
@@ -114,11 +118,15 @@ const Register = () => {
               <input
                 type="email"
                 id="register-email"
+                name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder=" "
                 required
                 autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
               />
               <label htmlFor="register-email">Email address</label>
             </div>
@@ -128,11 +136,15 @@ const Register = () => {
               <input
                 type="password"
                 id="register-password"
+                name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder=" "
                 required
                 autoComplete="new-password"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
               />
               <label htmlFor="register-password">Password</label>
             </div>

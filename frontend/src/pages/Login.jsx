@@ -87,7 +87,7 @@ const Login = () => {
             <p>Use your email and password to continue shopping.</p>
           </div>
 
-          <form className="auth-form" onSubmit={handleSubmit}>
+          <form className="auth-form" onSubmit={handleSubmit} autoComplete="on">
             {error && <div className="auth-error">{error}</div>}
 
             <div className="auth-field">
@@ -95,11 +95,15 @@ const Login = () => {
               <input
                 type="email"
                 id="login-email"
+                name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder=" "
                 required
                 autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
               />
               <label htmlFor="login-email">Email address</label>
             </div>
@@ -109,11 +113,15 @@ const Login = () => {
               <input
                 type="password"
                 id="login-password"
+                name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder=" "
                 required
                 autoComplete="current-password"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
               />
               <label htmlFor="login-password">Password</label>
             </div>
