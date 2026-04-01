@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Heart, Filter, Grid, List } from 'lucide-react';
+import { loadCatalogCache, saveCatalogCache } from '../utils/catalogCache';
 import './Products.css';
 
 const CATEGORY_ORDER = [
@@ -51,6 +52,7 @@ const Products = () => {
   const [sortBy, setSortBy] = useState('name');
   const [viewMode, setViewMode] = useState('grid');
   const [loading, setLoading] = useState(true);
+  const [usingCachedCatalog, setUsingCachedCatalog] = useState(false);
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
@@ -82,10 +84,19 @@ const Products = () => {
     try {
       const res = await axios.get('/products');
       setProducts(res.data);
+      saveCatalogCache(res.data);
+      setUsingCachedCatalog(false);
       const uniqueCategories = [...new Set(res.data.map(p => p.category))];
       setCategories(sortCategories(uniqueCategories));
     } catch (error) {
       console.error('Error fetching products:', error);
+      const cachedProducts = loadCatalogCache();
+      if (cachedProducts.length > 0) {
+        setProducts(cachedProducts);
+        const uniqueCategories = [...new Set(cachedProducts.map((p) => p.category))];
+        setCategories(sortCategories(uniqueCategories));
+        setUsingCachedCatalog(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -193,6 +204,7 @@ const Products = () => {
       <div className="products-header">
         <h1>Our Products</h1>
         <p>Discover our wide range of electrical products</p>
+        {usingCachedCatalog && <p className="offline-note">You&apos;re seeing cached product data because the network is unavailable.</p>}
       </div>
 
       <div className="stock-overview">
@@ -302,7 +314,7 @@ const Products = () => {
           <div className="low-stock-grid">
             {almostSoldOutProducts.map((product) => (
               <Link key={product.id} to={`/product/${product.id}`} className="low-stock-card">
-                <img src={product.image} alt={product.name} onError={handleImageError} />
+                <img src={product.image} alt={product.name} onError={handleImageError} loading="lazy" decoding="async" />
                 <div className="low-stock-card-body">
                   <span className={`low-stock-pill ${getStockCount(product) <= 0 ? 'sold-out' : ''}`}>
                     {getStockLabel(product)}
@@ -320,7 +332,7 @@ const Products = () => {
         {filteredProducts.map(product => (
           <div key={product.id} className="product-card">
             <div className="product-image">
-              <img src={product.image} alt={product.name} onError={handleImageError} />
+              <img src={product.image} alt={product.name} onError={handleImageError} loading="lazy" decoding="async" />
               <span className={`stock-badge ${getStockCount(product) <= 0 ? 'sold-out' : getStockCount(product) <= 5 ? 'low-stock' : ''}`}>
                 {getStockLabel(product)}
               </span>

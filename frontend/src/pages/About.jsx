@@ -22,7 +22,7 @@ const About = () => {
             </p>
           </div>
           <div className="section-image">
-            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=300&fit=crop" alt="Electrical products" />
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&h=300&fit=crop" alt="Electrical products" loading="lazy" decoding="async" />
           </div>
         </section>
 
@@ -36,7 +36,7 @@ const About = () => {
             </p>
           </div>
           <div className="section-image">
-            <img src="https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=500&h=300&fit=crop" alt="Solar energy" />
+            <img src="https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=500&h=300&fit=crop" alt="Solar energy" loading="lazy" decoding="async" />
           </div>
         </section>
 
@@ -63,7 +63,7 @@ const About = () => {
             </div>
           </div>
           <div className="section-image">
-            <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=500&h=300&fit=crop" alt="Tools and equipment" />
+            <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=500&h=300&fit=crop" alt="Tools and equipment" loading="lazy" decoding="async" />
           </div>
         </section>
 
@@ -80,7 +80,7 @@ const About = () => {
             </ul>
           </div>
           <div className="section-image">
-            <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&h=300&fit=crop" alt="Electrical components" />
+            <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&h=300&fit=crop" alt="Electrical components" loading="lazy" decoding="async" />
           </div>
         </section>
 

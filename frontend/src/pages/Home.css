@@ -20,10 +20,9 @@
   align-items: center;
   padding: 96px 20px 72px;
   background:
-    linear-gradient(135deg, rgba(12, 19, 34, 0.96), rgba(34, 48, 87, 0.9)),
-    url('https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&h=900&fit=crop');
-  background-size: cover;
-  background-position: center;
+    radial-gradient(circle at top right, rgba(97, 145, 255, 0.16), transparent 26%),
+    radial-gradient(circle at bottom left, rgba(255, 193, 92, 0.14), transparent 24%),
+    linear-gradient(135deg, rgba(12, 19, 34, 0.96), rgba(34, 48, 87, 0.9));
   color: #fff;
 }
 

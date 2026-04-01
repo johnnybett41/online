@@ -1,0 +1,17 @@
+{
+  "name": "ElectroHub",
+  "short_name": "ElectroHub",
+  "description": "Electrical devices shopping app for online and offline browsing.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fbff",
+  "theme_color": "#10213d",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

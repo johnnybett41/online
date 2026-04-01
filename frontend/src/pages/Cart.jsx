@@ -14,10 +14,35 @@ import {
 } from 'lucide-react';
 import './PurchaseFlow.css';
 
+const getCartCacheKey = (userId) => `electrohub_cart_cache_${userId}`;
+
+const loadCartCache = (userId) => {
+  try {
+    const raw = localStorage.getItem(getCartCacheKey(userId));
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+};
+
+const saveCartCache = (userId, items) => {
+  try {
+    localStorage.setItem(getCartCacheKey(userId), JSON.stringify(items));
+  } catch (error) {
+    console.warn('Unable to save cart cache:', error);
+  }
+};
+
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
+  const [usingCachedCart, setUsingCachedCart] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -30,8 +55,15 @@ const Cart = () => {
       try {
         const res = await axios.get('/cart');
         setCartItems(res.data);
+        saveCartCache(user.id, res.data);
+        setUsingCachedCart(false);
       } catch (error) {
         console.error('Failed to load cart:', error);
+        const cachedCart = loadCartCache(user.id);
+        if (cachedCart.length > 0) {
+          setCartItems(cachedCart);
+          setUsingCachedCart(true);
+        }
       } finally {
         setLoading(false);
       }
@@ -43,14 +75,19 @@ const Cart = () => {
   const updateQuantity = async (id, quantity) => {
     const nextQuantity = Math.max(1, quantity);
     setUpdatingId(id);
+    const updatedItems = cartItems.map((item) => (item.id === id ? { ...item, quantity: nextQuantity } : item));
 
     try {
       await axios.put(`/cart/${id}`, { quantity: nextQuantity });
-      setCartItems((current) =>
-        current.map((item) => (item.id === id ? { ...item, quantity: nextQuantity } : item))
-      );
+      setCartItems(updatedItems);
+      saveCartCache(user.id, updatedItems);
     } catch (error) {
-      alert('Failed to update cart');
+      if (!navigator.onLine) {
+        setCartItems(updatedItems);
+        saveCartCache(user.id, updatedItems);
+      } else {
+        alert('Failed to update cart');
+      }
     } finally {
       setUpdatingId(null);
     }
@@ -58,12 +95,19 @@ const Cart = () => {
 
   const removeItem = async (id) => {
     setUpdatingId(id);
+    const updatedItems = cartItems.filter((item) => item.id !== id);
 
     try {
       await axios.delete(`/cart/${id}`);
-      setCartItems((current) => current.filter((item) => item.id !== id));
+      setCartItems(updatedItems);
+      saveCartCache(user.id, updatedItems);
     } catch (error) {
-      alert('Failed to remove item');
+      if (!navigator.onLine) {
+        setCartItems(updatedItems);
+        saveCartCache(user.id, updatedItems);
+      } else {
+        alert('Failed to remove item');
+      }
     } finally {
       setUpdatingId(null);
     }
@@ -100,6 +144,7 @@ const Cart = () => {
           <p>
             Adjust quantities, remove items, and continue to payment with a more polished flow.
           </p>
+          {usingCachedCart && <p className="offline-note">You&apos;re viewing a saved cart because the network is unavailable.</p>}
         </div>
         <div className="purchase-hero__badges">
           <span><ShieldCheck size={16} /> Secure checkout</span>
@@ -133,7 +178,7 @@ const Cart = () => {
               {cartItems.map((item) => (
                 <div key={item.id} className="cart-item">
                   <div className="cart-item__image">
-                    <img src={item.image} alt={item.name} />
+                    <img src={item.image} alt={item.name} loading="lazy" decoding="async" />
                   </div>
 
                   <div className="cart-item__details">

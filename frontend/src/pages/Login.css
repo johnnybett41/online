@@ -219,6 +219,16 @@
   font-size: 0.95rem;
 }
 
+.offline-note {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #eef4ff;
+  color: #27406b;
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
 .auth-kicker {
   margin: 0 0 10px;
   color: #27406b;

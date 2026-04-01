@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Heart, ShoppingCart, Star, ArrowLeft } from 'lucide-react';
+import { loadCatalogCache, loadCachedProductById, saveCatalogCache } from '../utils/catalogCache';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -11,6 +12,7 @@ const ProductDetail = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [usingCachedData, setUsingCachedData] = useState(false);
   const { user } = useAuth();
   const stockCount = Number(product?.stock_quantity || 0);
   const isSoldOut = stockCount <= 0;
@@ -43,8 +45,22 @@ const ProductDetail = () => {
         .filter(p => p.category === res.data.category && p.id !== res.data.id)
         .slice(0, 4);
       setRelatedProducts(related);
+      saveCatalogCache(allProductsRes.data);
+      setUsingCachedData(false);
     } catch (error) {
       console.error('Error fetching product:', error);
+      const cachedProduct = loadCachedProductById(id);
+      const cachedProducts = loadCatalogCache();
+
+      if (cachedProduct) {
+        setProduct(cachedProduct);
+        setRelatedProducts(
+          cachedProducts
+            .filter((p) => p.category === cachedProduct.category && p.id !== cachedProduct.id)
+            .slice(0, 4)
+        );
+        setUsingCachedData(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -117,6 +133,7 @@ const ProductDetail = () => {
   if (loading) {
     return (
       <div className="product-detail-container">
+        {usingCachedData && <div className="offline-note">Offline mode: showing cached product data.</div>}
         <div className="loading">Loading product...</div>
       </div>
     );
@@ -143,7 +160,7 @@ const ProductDetail = () => {
       <div className="product-detail">
         <div className="product-gallery">
           <div className="main-image">
-            <img src={product.image} alt={product.name} onError={handleImageError} />
+            <img src={product.image} alt={product.name} onError={handleImageError} decoding="async" />
           </div>
         </div>
 
@@ -212,7 +229,7 @@ const ProductDetail = () => {
                 to={`/product/${relatedProduct.id}`}
                 className="related-card"
               >
-                <img src={relatedProduct.image} alt={relatedProduct.name} onError={handleImageError} />
+                <img src={relatedProduct.image} alt={relatedProduct.name} onError={handleImageError} loading="lazy" decoding="async" />
                 <h4>{relatedProduct.name}</h4>
                 <p>KES {relatedProduct.price}</p>
               </Link>

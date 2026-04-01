@@ -24,6 +24,7 @@ import Terms from './pages/Terms';
 import ForgotPassword from './pages/ForgotPassword';
 import About from './pages/About';
 import Wishlist from './pages/Wishlist';
+import ConnectionStatus from './components/ConnectionStatus';
 import './App.css';
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
       <AuthProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <div className="App">
+          <ConnectionStatus />
           <Navbar />
           <main className="main-content">
             <Routes>

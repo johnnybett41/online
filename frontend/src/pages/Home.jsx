@@ -12,10 +12,12 @@ import {
   Clock3,
   AlertTriangle,
 } from 'lucide-react';
+import { loadCatalogCache, saveCatalogCache } from '../utils/catalogCache';
 import './Home.css';
 
 const Home = () => {
   const [catalog, setCatalog] = useState([]);
+  const [usingCachedCatalog, setUsingCachedCatalog] = useState(false);
 
   useEffect(() => {
     fetchCatalog();
@@ -25,8 +27,15 @@ const Home = () => {
     try {
       const res = await axios.get('/products');
       setCatalog(res.data);
+      saveCatalogCache(res.data);
+      setUsingCachedCatalog(false);
     } catch (error) {
       console.error('Error fetching products:', error);
+      const cachedCatalog = loadCatalogCache();
+      if (cachedCatalog.length > 0) {
+        setCatalog(cachedCatalog);
+        setUsingCachedCatalog(true);
+      }
     }
   };
 
@@ -166,9 +175,10 @@ const Home = () => {
               <img
                 src={
                   spotlightProduct?.image ||
-                  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop'
+                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="%2312213d"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23ffffff" font-family="Arial, sans-serif" font-size="28">ElectroHub</text></svg>'
                 }
                 alt={spotlightProduct?.name || 'Electrical product'}
+                decoding="async"
               />
             </div>
           </div>
@@ -176,7 +186,7 @@ const Home = () => {
           <div className="hero-mini-grid">
             {featuredProducts.slice(1, 4).map((product) => (
               <div key={product.id} className="hero-mini-card">
-                <img src={product.image} alt={product.name} />
+                <img src={product.image} alt={product.name} loading="lazy" decoding="async" />
                 <div>
                   <h4>{product.name}</h4>
                   <p>KES {product.price}</p>
@@ -220,6 +230,7 @@ const Home = () => {
             <p>
               The homepage now leads with category-first discovery, cleaner imagery, and stronger visual hierarchy.
             </p>
+            {usingCachedCatalog && <p className="offline-note">Showing your last saved catalog because the network is unavailable.</p>}
           </div>
           <div className="trust-pills">
             <span>Responsive layout</span>

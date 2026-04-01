@@ -42,6 +42,29 @@
   padding: 0 clamp(12px, 3vw, 28px);
 }
 
+.connection-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #fff4de 0%, #ffe8bb 100%);
+  color: #7a4b00;
+  border-bottom: 1px solid rgba(122, 75, 0, 0.12);
+  font-weight: 700;
+  text-align: center;
+}
+
+.offline-note {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #eef4ff;
+  color: #27406b;
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
 @media (min-width: 1280px) {
   .main-content {
     padding-inline: clamp(20px, 4vw, 48px);
@@ -51,5 +74,10 @@
 @media (max-width: 768px) {
   .main-content {
     padding-inline: 12px;
+  }
+
+  .connection-banner {
+    padding-inline: 12px;
+    font-size: 0.92rem;
   }
 }

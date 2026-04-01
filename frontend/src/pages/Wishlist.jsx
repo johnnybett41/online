@@ -94,7 +94,7 @@ const Wishlist = () => {
           {wishlist.map(product => (
             <div key={product.id} className="wishlist-item">
               <div className="product-image">
-                <img src={product.image} alt={product.name} />
+                <img src={product.image} alt={product.name} loading="lazy" decoding="async" />
               </div>
               <div className="product-info">
                 <h3>{product.name}</h3>

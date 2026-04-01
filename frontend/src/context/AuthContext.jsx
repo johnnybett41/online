@@ -6,13 +6,21 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      return null;
+    }
+  });
   const [token, setToken] = useState(localStorage.getItem('token'));
 
   const persistSession = (session) => {
     setToken(session.token);
     setUser(session.user);
     localStorage.setItem('token', session.token);
+    localStorage.setItem('user', JSON.stringify(session.user));
     axios.defaults.headers.common['Authorization'] = `Bearer ${session.token}`;
   };
 
@@ -45,6 +53,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     delete axios.defaults.headers.common['Authorization'];
   };
 
