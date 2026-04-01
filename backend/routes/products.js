@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Get all products
 router.get('/', (req, res) => {
-  db.all(`SELECT * FROM products`, [], (err, rows) => {
+  db.all(`SELECT * FROM products WHERE is_active = 1 ORDER BY id`, [], (err, rows) => {
     if (err) {
       return res.status(500).json({ message: 'Database error' });
     }
@@ -29,7 +29,7 @@ router.get('/:id', (req, res) => {
 // Add product (admin only, but for simplicity)
 router.post('/', (req, res) => {
   const { name, description, price, image, category } = req.body;
-  db.run(`INSERT INTO products (name, description, price, image, category) VALUES (?, ?, ?, ?, ?)`,
+  db.run(`INSERT INTO products (name, description, price, image, category, is_active) VALUES (?, ?, ?, ?, ?, 1)`,
     [name, description, price, image, category], function(err) {
     if (err) {
       return res.status(500).json({ message: 'Database error' });
