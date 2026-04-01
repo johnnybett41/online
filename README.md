@@ -100,6 +100,8 @@ online/
 
    The app will run on <http://localhost:5173>
 
+   If you want to open it on your phone or another device on the same Wi-Fi network, use your computer's LAN IP address instead of `localhost`, for example `http://192.168.1.20:5173`.
+
 ## API Endpoints
 
 ### Authentication
@@ -218,3 +220,7 @@ You still need to add your M-Pesa credentials in the backend service environment
 - `MPESA_BASE_URL`
 
 The frontend automatically receives the backend URL through `VITE_API_URL`.
+
+### Public URL
+
+After the Render deploy finishes, use the Render frontend service URL as your shared public link. That single URL will work on phone, laptop, and desktop because the app is responsive and the static site is configured to rewrite SPA routes back to `index.html`.
