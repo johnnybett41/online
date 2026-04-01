@@ -23,31 +23,31 @@ const Home = () => {
   const categories = [
     {
       name: 'Lighting',
-      icon: '💡',
+      icon: 'LGT',
       description: 'LED bulbs and sensor lighting for everyday spaces',
       link: `/products?category=${encodeURIComponent('Lighting')}`,
     },
     {
       name: 'Switches & Sockets',
-      icon: '🔌',
+      icon: 'SOK',
       description: 'Wall switches, sockets, plates, and waterproof fittings',
       link: `/products?category=${encodeURIComponent('Switches & Sockets')}`,
     },
     {
       name: 'Adaptors & Extensions',
-      icon: '🧩',
+      icon: 'EXT',
       description: 'Extension sockets and adaptor solutions for flexible power',
       link: `/products?category=${encodeURIComponent('Adaptors & Extensions')}`,
     },
     {
       name: 'Protection Devices',
-      icon: '🛡️',
+      icon: 'PRT',
       description: 'MCBs, guards, timers, and load protection gear',
       link: `/products?category=${encodeURIComponent('Protection Devices')}`,
     },
     {
       name: 'Accessories',
-      icon: '🧰',
+      icon: 'ACC',
       description: 'Insulation tape and practical finishing accessories',
       link: `/products?category=${encodeURIComponent('Accessories')}`,
     },
@@ -96,7 +96,10 @@ const Home = () => {
           </div>
         </div>
         <div className="hero-image">
-          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop" alt="Electrical products" />
+          <img
+            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop"
+            alt="Electrical products"
+          />
         </div>
       </section>
 

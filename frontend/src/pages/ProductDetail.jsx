@@ -22,7 +22,6 @@ const ProductDetail = () => {
       const res = await axios.get(`/products/${id}`);
       setProduct(res.data);
 
-      // Fetch related products from same category
       const allProductsRes = await axios.get('/products');
       const related = allProductsRes.data
         .filter(p => p.category === res.data.category && p.id !== res.data.id)
@@ -124,7 +123,7 @@ const ProductDetail = () => {
                 <Star key={i} size={16} fill="#ffd700" color="#ffd700" />
               ))}
             </div>
-            <span>(4.5) • 120 reviews</span>
+            <span>4.5 out of 5 | 120 reviews</span>
           </div>
 
           <div className="product-price">

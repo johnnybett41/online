@@ -86,9 +86,9 @@ const Footer = () => {
           <div className="payment-methods">
             <span>Accepted Payments:</span>
             <div className="payment-icons">
-              <span className="payment-icon">💳</span>
-              <span className="payment-icon">💰</span>
-              <span className="payment-icon">📱</span>
+              <span className="payment-icon">Card</span>
+              <span className="payment-icon">Cash</span>
+              <span className="payment-icon">M-Pesa</span>
             </div>
           </div>
           <div className="copyright">
@@ -96,8 +96,8 @@ const Footer = () => {
           </div>
           <div className="certifications">
             <span>Certified:</span>
-            <span className="cert-icon">🔒</span>
-            <span className="cert-icon">✓</span>
+            <span className="cert-icon">Secure</span>
+            <span className="cert-icon">Verified</span>
           </div>
         </div>
       </div>

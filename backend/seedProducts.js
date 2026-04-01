@@ -1,4 +1,4 @@
-const PRODUCTS_CATALOG_VERSION = 2;
+const PRODUCTS_CATALOG_VERSION = 3;
 
 const products = [
   {
@@ -30,13 +30,6 @@ const products = [
     category: 'Lighting',
   },
   {
-    name: 'Insulation Tape 20 Yard - Black',
-    description: 'Durable black insulation tape for cable finishing and repairs.',
-    price: 150,
-    image: 'https://www.tronic.co.ke/cdn/shop/products/IT02BK_2476795c-6585-4d6b-8d43-f40c06ee8549_75x75_crop_center.jpg?v=1756396877',
-    category: 'Accessories',
-  },
-  {
     name: 'Grey - Single Blanking Plate - Screwless Design',
     description: 'Screwless blanking plate for a clean finish on unused wall openings.',
     price: 195,
@@ -58,6 +51,13 @@ const products = [
     category: 'Switches & Sockets',
   },
   {
+    name: 'Waterproof Switch - 1 Gang 2 Way',
+    description: 'IP66-rated waterproof 2-way switch for wet and outdoor areas.',
+    price: 1120,
+    image: 'https://www.tronic.co.ke/cdn/shop/files/TP5112-WP_75x75_crop_center.jpg?v=1756398465',
+    category: 'Switches & Sockets',
+  },
+  {
     name: 'Grey Double Socket with Neon Light Indicator - 2 Gang, 13A',
     description: 'Grey twin socket with neon indicators and a screwless finish.',
     price: 750,
@@ -69,13 +69,6 @@ const products = [
     description: 'Premium gold twin switched socket with neon indicators.',
     price: 750,
     image: 'https://www.tronic.co.ke/cdn/shop/files/17_5e41eb81-3730-41ab-82d0-9a2957aea053_75x75_crop_center.png?v=1756398878',
-    category: 'Switches & Sockets',
-  },
-  {
-    name: 'Waterproof Switch - 1 Gang 2 Way',
-    description: 'IP66-rated waterproof 2-way switch for wet and outdoor areas.',
-    price: 1120,
-    image: 'https://www.tronic.co.ke/cdn/shop/files/TP5112-WP_75x75_crop_center.jpg?v=1756398465',
     category: 'Switches & Sockets',
   },
   {
@@ -109,15 +102,22 @@ const products = [
   {
     name: '4-Way Extension Socket with Switches & Neon',
     description: '4-way extension with switches, neon indicators, and a power button.',
-    price: 1200,
+    price: 1695,
     image: 'https://www.tronic.co.ke/cdn/shop/files/EC7694-BS_1_75x75_crop_center.jpg?v=1756396358',
     category: 'Adaptors & Extensions',
   },
   {
     name: '4-Way Extension Socket with Neon & Safety Shutters',
     description: '4-way socket with neon lights and safety shutters for added protection.',
-    price: 951,
+    price: 1350,
     image: 'https://www.tronic.co.ke/cdn/shop/files/EC7674-BS_1_75x75_crop_center.jpg?v=1754857686',
+    category: 'Adaptors & Extensions',
+  },
+  {
+    name: '4-Way Extension Socket - 13A, 3M Cable',
+    description: 'Four-way extension socket with a 3-meter cable for flexible placement.',
+    price: 1850,
+    image: 'https://www.tronic.co.ke/cdn/shop/files/EC7204_75x75_crop_center.jpg?v=1756396151',
     category: 'Adaptors & Extensions',
   },
   {
@@ -128,10 +128,17 @@ const products = [
     category: 'Adaptors & Extensions',
   },
   {
-    name: '4-Way Extension Socket with Individual Switches - 10A, 2500W',
-    description: 'High-capacity four-way extension with individual switches and 2500W rating.',
-    price: 1600,
-    image: 'https://www.tronic.co.ke/cdn/shop/files/EC7664-BS_1_75x75_crop_center.jpg?v=1756396195',
+    name: '4-Way Extension Socket with USB & Type-C Ports - 13A, 3-Meter Cable',
+    description: 'Modern extension socket with USB and Type-C ports for charging devices.',
+    price: 2840,
+    image: 'https://www.tronic.co.ke/cdn/shop/files/EC7304-UB_75x75_crop_center.jpg?v=1756396160',
+    category: 'Adaptors & Extensions',
+  },
+  {
+    name: '5-Way Extension Socket with Power Button - 13A, 3-Meter Cable',
+    description: 'Five-way extension socket with a master power button and 3-meter cable.',
+    price: 1975,
+    image: 'https://www.tronic.co.ke/cdn/shop/files/EC7205_75x75_crop_center.jpg?v=1756396161',
     category: 'Adaptors & Extensions',
   },
   {
@@ -146,20 +153,6 @@ const products = [
     description: 'Heavy-duty 45A double pole switch with neon indicator and black finish.',
     price: 750,
     image: 'https://www.tronic.co.ke/cdn/shop/files/TD-5145-BK_75x75_crop_center.jpg?v=1754857522',
-    category: 'Protection Devices',
-  },
-  {
-    name: 'Refrigerator Guard',
-    description: 'Voltage protection for refrigerators and other sensitive appliances.',
-    price: 1050,
-    image: 'https://www.tronic.co.ke/cdn/shop/files/VP-HG13-BS_75x75_crop_center.jpg?v=1756396778',
-    category: 'Protection Devices',
-  },
-  {
-    name: 'Power Guard Voltage Protector 13A White',
-    description: '13A voltage protector designed to help safeguard home appliances.',
-    price: 1050,
-    image: 'https://www.tronic.co.ke/cdn/shop/files/VP-HG13-BS_75x75_crop_center.jpg?v=1756396778',
     category: 'Protection Devices',
   },
   {
@@ -189,6 +182,27 @@ const products = [
     price: 210,
     image: 'https://www.tronic.co.ke/cdn/shop/files/MC-1040-6K_75x75_crop_center.jpg?v=1756397379',
     category: 'Protection Devices',
+  },
+  {
+    name: 'Power Guard Voltage Protector 13A White',
+    description: '13A voltage protector designed to help safeguard home appliances.',
+    price: 1050,
+    image: 'https://www.tronic.co.ke/cdn/shop/files/VP-HG13-BS_75x75_crop_center.jpg?v=1756396778',
+    category: 'Protection Devices',
+  },
+  {
+    name: 'Refrigerator Guard',
+    description: 'Voltage protection for refrigerators and other sensitive appliances.',
+    price: 1050,
+    image: 'https://www.tronic.co.ke/cdn/shop/files/VP-HG13-BS_75x75_crop_center.jpg?v=1756396778',
+    category: 'Protection Devices',
+  },
+  {
+    name: 'Insulation Tape 20 Yard - Black',
+    description: 'Durable black insulation tape for cable finishing and repairs.',
+    price: 150,
+    image: 'https://www.tronic.co.ke/cdn/shop/products/IT02BK_2476795c-6585-4d6b-8d43-f40c06ee8549_75x75_crop_center.jpg?v=1756396877',
+    category: 'Accessories',
   },
 ];
 
