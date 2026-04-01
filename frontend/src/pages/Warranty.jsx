@@ -4,15 +4,16 @@ const Warranty = () => {
   return (
     <div className="warranty-container">
       <div className="warranty-header">
-        <h1>Product Warranty</h1>
-        <p>Information about our warranty coverage and terms.</p>
+        <span className="page-kicker">Warranty</span>
+        <h1>Simple 3-day warranty support.</h1>
+        <p>We back products with a short, clear warranty window so you can report issues fast.</p>
       </div>
 
       <div className="warranty-content">
         <div className="warranty-info">
           <div className="warranty-period">
             <h3>Warranty Period</h3>
-            <p>All our products come with a <strong>2-month warranty</strong> from the date of purchase, covering manufacturing defects and workmanship issues.</p>
+            <p>All our products come with a <strong>3-day warranty</strong> from the date of purchase for manufacturing defects and workmanship issues.</p>
           </div>
 
           <div className="warranty-coverage">
@@ -39,7 +40,7 @@ const Warranty = () => {
           <div className="warranty-process">
             <h3>How to Claim Warranty</h3>
             <ol>
-              <li>Contact our customer service within the warranty period</li>
+              <li>Contact our customer service within 3 days of purchase</li>
               <li>Provide proof of purchase and describe the issue</li>
               <li>We'll arrange for inspection or repair</li>
               <li>If repair is not possible, we'll provide a replacement or refund</li>

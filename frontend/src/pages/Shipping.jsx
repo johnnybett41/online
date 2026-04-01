@@ -4,39 +4,49 @@ const Shipping = () => {
   return (
     <div className="shipping-container">
       <div className="shipping-header">
-        <h1>Shipping Information</h1>
-        <p>Learn about our shipping policies and delivery options.</p>
+        <span className="page-kicker">Shipping & delivery</span>
+        <h1>Fast, simple delivery information.</h1>
+        <p>Clear shipping windows, fair fees, and real support for customers across Kenya.</p>
       </div>
 
       <div className="shipping-content">
-        <div className="shipping-info">
+        <div className="shipping-grid">
           <div className="info-section">
             <h3>Delivery Location</h3>
-            <p>We deliver to locations across Kenya, with our primary hub in Kericho.</p>
+            <p>We deliver across Kenya with dispatch arranged from our Kericho base.</p>
             <p><strong>Main Location:</strong> Kericho, Kenya</p>
           </div>
 
           <div className="info-section">
-            <h3>Shipping Methods</h3>
+            <h3>Processing Time</h3>
+            <p>Orders are prepared after payment confirmation and stock verification.</p>
+            <p>Most in-stock items leave our store within 24 hours on working days.</p>
+          </div>
+
+          <div className="info-section">
+            <h3>Delivery Options</h3>
             <ul>
-              <li><strong>Standard Delivery:</strong> 3-5 business days - Free for orders over KES 5,000</li>
-              <li><strong>Express Delivery:</strong> 1-2 business days - KES 500 additional fee</li>
-              <li><strong>Same Day Delivery:</strong> Available in Kericho area - KES 1,000 fee</li>
+              <li><strong>Standard Delivery:</strong> 3-5 business days</li>
+              <li><strong>Express Delivery:</strong> 1-2 business days</li>
+              <li><strong>Kericho Local Delivery:</strong> Same or next day where available</li>
             </ul>
           </div>
 
           <div className="info-section">
             <h3>Shipping Costs</h3>
             <ul>
-              <li>Orders under KES 2,000: KES 300</li>
-              <li>Orders KES 2,000 - KES 5,000: KES 150</li>
-              <li>Orders over KES 5,000: Free shipping</li>
+              <li>Small orders: from KES 300</li>
+              <li>Mid-size orders: from KES 150</li>
+              <li>Large orders: discounted or free shipping when available</li>
             </ul>
           </div>
 
-          <div className="info-section">
-            <h3>International Shipping</h3>
-            <p>We currently offer shipping within Kenya only. International orders are not available at this time.</p>
+          <div className="info-section wide">
+            <h3>Delivery Notes</h3>
+            <p>
+              Please make sure your phone number and location details are correct so our team can confirm
+              dispatch and delivery faster.
+            </p>
           </div>
         </div>
       </div>

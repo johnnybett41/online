@@ -4,45 +4,51 @@ const Returns = () => {
   return (
     <div className="returns-container">
       <div className="returns-header">
-        <h1>Returns & Exchanges</h1>
-        <p>Our policy for returning or exchanging products.</p>
+        <span className="page-kicker">Returns & exchange</span>
+        <h1>Simple return and exchange support.</h1>
+        <p>We keep the process short and clear so you know what to do when something is not right.</p>
       </div>
 
       <div className="returns-content">
-        <div className="policy-section">
-          <h3>Return Policy</h3>
-          <p>We want you to be completely satisfied with your purchase. If you're not happy with your order, you can return it within 30 days of delivery for a full refund or exchange.</p>
-        </div>
+        <div className="policy-grid">
+          <div className="policy-section featured">
+            <h3>Return Window</h3>
+            <p>Contact us within 3 days of delivery if you need a return or exchange request.</p>
+          </div>
 
-        <div className="policy-section">
-          <h3>Eligibility for Returns</h3>
-          <ul>
-            <li>Items must be in their original condition and packaging</li>
-            <li>Return request must be made within 30 days of delivery</li>
-            <li>Items must not have been used or installed</li>
-            <li>Original receipt or proof of purchase required</li>
-          </ul>
-        </div>
+          <div className="policy-section">
+            <h3>Eligible Items</h3>
+            <ul>
+              <li>Unused items in original packaging</li>
+              <li>Items with proof of purchase</li>
+              <li>Products that were delivered incorrectly</li>
+            </ul>
+          </div>
 
-        <div className="policy-section">
-          <h3>How to Return an Item</h3>
-          <ol>
-            <li>Contact our customer service team</li>
-            <li>Provide your order number and reason for return</li>
-            <li>Package the item securely in its original packaging</li>
-            <li>Ship the item back to our warehouse in Kericho</li>
-            <li>Once received, we'll process your refund or exchange within 5-7 business days</li>
-          </ol>
-        </div>
+          <div className="policy-section">
+            <h3>How to Return</h3>
+            <ol>
+              <li>Contact our team with your order number</li>
+              <li>Explain the issue and attach photos if needed</li>
+              <li>Wait for confirmation before sending the item back</li>
+              <li>Drop off or ship the item to our Kericho address</li>
+            </ol>
+          </div>
 
-        <div className="policy-section">
-          <h3>Exchanges</h3>
-          <p>If you need to exchange an item for a different size, color, or model, please contact us within 30 days of delivery. We'll arrange for the exchange at no additional cost.</p>
-        </div>
+          <div className="policy-section">
+            <h3>Exchanges</h3>
+            <p>
+              If you want a different item or model, we will help arrange an exchange once the original item is received
+              and inspected.
+            </p>
+          </div>
 
-        <div className="policy-section">
-          <h3>Refunds</h3>
-          <p>Refunds will be processed to the original payment method within 5-7 business days after we receive and inspect the returned item.</p>
+          <div className="policy-section wide">
+            <h3>Refunds</h3>
+            <p>
+              Approved refunds are processed back to the original payment method after inspection and confirmation.
+            </p>
+          </div>
         </div>
 
         <div className="contact-info">
