@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useDemoMode } from '../context/DemoModeContext';
 import { Heart, ShoppingCart, Star, ArrowLeft } from 'lucide-react';
 import { loadCatalogCache, loadCachedProductById, saveCatalogCache } from '../utils/catalogCache';
+import { addCartItem } from '../utils/cartActions';
+import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -14,13 +17,14 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [usingCachedData, setUsingCachedData] = useState(false);
   const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const stockCount = Number(product?.stock_quantity || 0);
   const isSoldOut = stockCount <= 0;
   const isLowStock = stockCount > 0 && stockCount <= 5;
 
   useEffect(() => {
     fetchProduct();
-  }, [id]);
+  }, [id, isDemoMode]);
 
   useEffect(() => {
     if (!product) {
@@ -36,6 +40,24 @@ const ProductDetail = () => {
   }, [product, stockCount]);
 
   const fetchProduct = async () => {
+    if (isDemoMode) {
+      const cachedProduct = loadCachedProductById(id);
+      const cachedProducts = loadCatalogCache();
+
+      if (cachedProduct) {
+        setProduct(cachedProduct);
+        setRelatedProducts(
+          cachedProducts
+            .filter((p) => p.category === cachedProduct.category && p.id !== cachedProduct.id)
+            .slice(0, 4)
+        );
+      }
+
+      setUsingCachedData(true);
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await axios.get(`/products/${id}`);
       setProduct(res.data);
@@ -59,8 +81,8 @@ const ProductDetail = () => {
             .filter((p) => p.category === cachedProduct.category && p.id !== cachedProduct.id)
             .slice(0, 4)
         );
-        setUsingCachedData(true);
       }
+      setUsingCachedData(true);
     } finally {
       setLoading(false);
     }
@@ -83,11 +105,22 @@ const ProductDetail = () => {
     }
 
     try {
-      await axios.post('/cart', {
-        user_id: user.id,
-        product_id: product.id,
-        quantity: quantity
+      const result = await addCartItem({
+        userId: user.id,
+        product,
+        quantity,
+        allowNetwork: !isDemoMode,
       });
+
+      if (result.pending || result.queued) {
+        alert(
+          isDemoMode
+            ? 'Added to cart in demo mode. It will sync when you leave demo mode.'
+            : 'Added to cart. It will sync when you are back online.'
+        );
+        return;
+      }
+
       alert('Added to cart!');
     } catch (error) {
       alert('Failed to add to cart');
@@ -100,8 +133,7 @@ const ProductDetail = () => {
       return;
     }
 
-    const wishlistKey = `wishlist_${user.id}`;
-    const currentWishlist = JSON.parse(localStorage.getItem(wishlistKey) || '[]');
+    const currentWishlist = loadWishlistCache(user.id);
     const isInWishlist = currentWishlist.some(item => item.id === product.id);
 
     if (isInWishlist) {
@@ -110,7 +142,7 @@ const ProductDetail = () => {
     }
 
     const updatedWishlist = [...currentWishlist, product];
-    localStorage.setItem(wishlistKey, JSON.stringify(updatedWishlist));
+    saveWishlistCache(user.id, updatedWishlist);
     alert('Added to wishlist!');
   };
 
@@ -133,7 +165,13 @@ const ProductDetail = () => {
   if (loading) {
     return (
       <div className="product-detail-container">
-        {usingCachedData && <div className="offline-note">Offline mode: showing cached product data.</div>}
+        {usingCachedData && (
+          <div className="offline-note">
+            {isDemoMode
+              ? 'Demo mode is on. Showing cached product data only.'
+              : 'Offline mode: showing cached product data.'}
+          </div>
+        )}
         <div className="loading">Loading product...</div>
       </div>
     );
@@ -142,6 +180,13 @@ const ProductDetail = () => {
   if (!product) {
     return (
       <div className="product-detail-container">
+        {usingCachedData && (
+          <div className="offline-note">
+            {isDemoMode
+              ? 'Demo mode is on. This product was not found in saved data.'
+              : 'Offline mode: this product was not found in saved data.'}
+          </div>
+        )}
         <div className="error">Product not found</div>
         <Link to="/products" className="back-btn">
           <ArrowLeft size={20} />
@@ -153,6 +198,13 @@ const ProductDetail = () => {
 
   return (
     <div className="product-detail-container">
+      {usingCachedData && (
+        <div className="offline-note">
+          {isDemoMode
+            ? 'Demo mode is on. Showing cached product data only.'
+            : 'Offline mode: showing cached product data.'}
+        </div>
+      )}
       <div className="breadcrumb">
         <Link to="/">Home</Link> / <Link to="/products">Products</Link> / {product.name}
       </div>

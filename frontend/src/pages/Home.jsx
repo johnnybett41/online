@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import { useDemoMode } from '../context/DemoModeContext';
 import {
   Shield,
   Truck,
@@ -13,17 +15,28 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { loadCatalogCache, saveCatalogCache } from '../utils/catalogCache';
+import { addCartItem } from '../utils/cartActions';
+import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import './Home.css';
 
 const Home = () => {
   const [catalog, setCatalog] = useState([]);
   const [usingCachedCatalog, setUsingCachedCatalog] = useState(false);
+  const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
 
   useEffect(() => {
     fetchCatalog();
-  }, []);
+  }, [isDemoMode]);
 
   const fetchCatalog = async () => {
+    if (isDemoMode) {
+      const cachedCatalog = loadCatalogCache();
+      setCatalog(cachedCatalog);
+      setUsingCachedCatalog(true);
+      return;
+    }
+
     try {
       const res = await axios.get('/products');
       setCatalog(res.data);
@@ -34,9 +47,57 @@ const Home = () => {
       const cachedCatalog = loadCatalogCache();
       if (cachedCatalog.length > 0) {
         setCatalog(cachedCatalog);
-        setUsingCachedCatalog(true);
       }
+      setUsingCachedCatalog(true);
     }
+  };
+
+  const addToCart = async (product) => {
+    if (!user) {
+      alert('Please login to add to cart');
+      return;
+    }
+
+    try {
+      const result = await addCartItem({
+        userId: user.id,
+        product,
+        quantity: 1,
+        allowNetwork: !isDemoMode,
+      });
+
+      if (result.pending || result.queued) {
+        alert(
+          isDemoMode
+            ? 'Added to cart in demo mode. It will sync when you leave demo mode.'
+            : 'Added to cart. It will sync when you are back online.'
+        );
+        return;
+      }
+
+      alert('Added to cart!');
+    } catch (error) {
+      alert('Failed to add to cart');
+    }
+  };
+
+  const addToWishlist = (product) => {
+    if (!user) {
+      alert('Please login to add to wishlist');
+      return;
+    }
+
+    const currentWishlist = loadWishlistCache(user.id);
+    const isInWishlist = currentWishlist.some((item) => item.id === product.id);
+
+    if (isInWishlist) {
+      alert('Already in wishlist!');
+      return;
+    }
+
+    const updatedWishlist = [...currentWishlist, product];
+    saveWishlistCache(user.id, updatedWishlist);
+    alert('Added to wishlist!');
   };
 
   const featuredProducts = catalog.slice(0, 6);
@@ -230,7 +291,13 @@ const Home = () => {
             <p>
               The homepage now leads with category-first discovery, cleaner imagery, and stronger visual hierarchy.
             </p>
-            {usingCachedCatalog && <p className="offline-note">Showing your last saved catalog because the network is unavailable.</p>}
+            {usingCachedCatalog && (
+              <p className="offline-note">
+                {isDemoMode
+                  ? 'Demo mode is on. You are browsing your saved catalog only.'
+                  : 'Showing your last saved catalog because the network is unavailable.'}
+              </p>
+            )}
           </div>
           <div className="trust-pills">
             <span>Responsive layout</span>
@@ -300,7 +367,11 @@ const Home = () => {
               <div key={product.id} className="product-card">
                 <div className="product-image">
                   <img src={product.image} alt={product.name} />
-                  <button className="wishlist-btn" aria-label={`Save ${product.name}`}>
+                  <button
+                    className="wishlist-btn"
+                    aria-label={`Save ${product.name}`}
+                    onClick={() => addToWishlist(product)}
+                  >
                     <Heart size={20} />
                   </button>
                 </div>
@@ -314,7 +385,7 @@ const Home = () => {
                       <Link to={`/product/${product.id}`} className="view-btn">
                         View
                       </Link>
-                      <button className="add-to-cart-btn">
+                      <button className="add-to-cart-btn" onClick={() => addToCart(product)}>
                         <ShoppingBag size={16} />
                         Add
                       </button>

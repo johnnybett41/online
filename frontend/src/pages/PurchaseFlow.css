@@ -173,6 +173,12 @@
   color: #23416f;
 }
 
+.purchase-button.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .purchase-button:hover {
   transform: translateY(-1px);
 }
@@ -424,6 +430,13 @@
 .status-pending_payment {
   background: #fff6df;
   color: #9c6a00;
+}
+
+.status-pending-sync {
+  display: inline-flex;
+  margin-top: 8px;
+  background: #eef4ff;
+  color: #27406b;
 }
 
 .status-paid {

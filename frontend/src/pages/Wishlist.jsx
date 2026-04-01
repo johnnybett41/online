@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { useDemoMode } from '../context/DemoModeContext';
+import { addCartItem } from '../utils/cartActions';
+import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import './Wishlist.css';
 
 const Wishlist = () => {
   const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [usingCachedWishlist, setUsingCachedWishlist] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -15,14 +19,13 @@ const Wishlist = () => {
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, isDemoMode]);
 
   const fetchWishlist = async () => {
     try {
-      // For now, we'll use localStorage to store wishlist
-      // In a real app, this would be stored in the backend
-      const storedWishlist = JSON.parse(localStorage.getItem(`wishlist_${user.id}`) || '[]');
+      const storedWishlist = loadWishlistCache(user.id);
       setWishlist(storedWishlist);
+      setUsingCachedWishlist(isDemoMode || !navigator.onLine);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
     } finally {
@@ -35,19 +38,30 @@ const Wishlist = () => {
 
     const updatedWishlist = wishlist.filter(item => item.id !== productId);
     setWishlist(updatedWishlist);
-    localStorage.setItem(`wishlist_${user.id}`, JSON.stringify(updatedWishlist));
+    saveWishlistCache(user.id, updatedWishlist);
   };
 
   const addToCart = async (product) => {
     if (!user) return;
 
     try {
-      await axios.post('/cart', {
-        user_id: user.id,
-        product_id: product.id,
-        quantity: 1
+      const result = await addCartItem({
+        userId: user.id,
+        product,
+        quantity: 1,
+        allowNetwork: !isDemoMode,
       });
-      alert('Added to cart!');
+
+      if (result.pending || result.queued) {
+        alert(
+          isDemoMode
+            ? 'Added to cart in demo mode. It will sync when you leave demo mode.'
+            : 'Added to cart. It will sync when you are back online.'
+        );
+      } else {
+        alert('Added to cart!');
+      }
+
       removeFromWishlist(product.id);
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -79,6 +93,13 @@ const Wishlist = () => {
       <div className="wishlist-header">
         <h1>My Wishlist</h1>
         <p>{wishlist.length} {wishlist.length === 1 ? 'item' : 'items'} in your wishlist</p>
+        {usingCachedWishlist && (
+          <p className="offline-note">
+            {isDemoMode
+              ? 'Demo mode is on. Your wishlist is being served from saved data.'
+              : 'You are viewing a saved wishlist because the network is unavailable.'}
+          </p>
+        )}
       </div>
 
       {wishlist.length === 0 ? (

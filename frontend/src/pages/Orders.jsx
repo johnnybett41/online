@@ -2,13 +2,17 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useDemoMode } from '../context/DemoModeContext';
+import { loadOrderCache, saveOrderCache } from '../utils/orderCache';
 import { ArrowRight, FileText, Package, ShieldCheck, ShoppingBag } from 'lucide-react';
 import './PurchaseFlow.css';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [usingCachedOrders, setUsingCachedOrders] = useState(false);
   const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -17,18 +21,31 @@ const Orders = () => {
         return;
       }
 
+      if (isDemoMode) {
+        const cachedOrders = loadOrderCache(user.id);
+        setOrders(cachedOrders);
+        setUsingCachedOrders(true);
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await axios.get('/orders');
         setOrders(res.data);
+        saveOrderCache(user.id, res.data);
+        setUsingCachedOrders(false);
       } catch (error) {
         console.error('Failed to load orders:', error);
+        const cachedOrders = loadOrderCache(user.id);
+        setOrders(cachedOrders);
+        setUsingCachedOrders(true);
       } finally {
         setLoading(false);
       }
     };
 
     fetchOrders();
-  }, [user]);
+  }, [user, isDemoMode]);
 
   if (!user) {
     return (
@@ -56,6 +73,13 @@ const Orders = () => {
           <p>
             Keep an eye on payment status, total spend, and recent orders without the clutter.
           </p>
+          {usingCachedOrders && (
+            <p className="offline-note">
+              {isDemoMode
+                ? 'Demo mode is on. Your order history is being shown from saved data only.'
+                : 'You are seeing saved order history because the network is unavailable.'}
+            </p>
+          )}
         </div>
         <div className="purchase-hero__badges">
           <span><ShieldCheck size={16} /> Secure records</span>

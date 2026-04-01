@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useDemoMode } from '../context/DemoModeContext';
+import { loadCartCache, saveCartCache } from '../utils/cartCache';
+import { removeCartItem, updateCartItem } from '../utils/cartActions';
 import {
   ArrowRight,
   Minus,
@@ -14,40 +17,25 @@ import {
 } from 'lucide-react';
 import './PurchaseFlow.css';
 
-const getCartCacheKey = (userId) => `electrohub_cart_cache_${userId}`;
-
-const loadCartCache = (userId) => {
-  try {
-    const raw = localStorage.getItem(getCartCacheKey(userId));
-    if (!raw) {
-      return [];
-    }
-
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    return [];
-  }
-};
-
-const saveCartCache = (userId, items) => {
-  try {
-    localStorage.setItem(getCartCacheKey(userId), JSON.stringify(items));
-  } catch (error) {
-    console.warn('Unable to save cart cache:', error);
-  }
-};
-
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
   const [usingCachedCart, setUsingCachedCart] = useState(false);
   const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
 
   useEffect(() => {
     const fetchCart = async () => {
       if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      if (isDemoMode) {
+        const cachedCart = loadCartCache(user.id);
+        setCartItems(cachedCart);
+        setUsingCachedCart(true);
         setLoading(false);
         return;
       }
@@ -62,58 +50,83 @@ const Cart = () => {
         const cachedCart = loadCartCache(user.id);
         if (cachedCart.length > 0) {
           setCartItems(cachedCart);
-          setUsingCachedCart(true);
         }
+        setUsingCachedCart(true);
       } finally {
         setLoading(false);
       }
     };
 
     fetchCart();
-  }, [user]);
+  }, [user, isDemoMode]);
 
   const updateQuantity = async (id, quantity) => {
+    if (!user) {
+      return;
+    }
+
+    const item = cartItems.find((entry) => entry.id === id);
+    if (!item) {
+      return;
+    }
+
     const nextQuantity = Math.max(1, quantity);
     setUpdatingId(id);
-    const updatedItems = cartItems.map((item) => (item.id === id ? { ...item, quantity: nextQuantity } : item));
 
     try {
-      await axios.put(`/cart/${id}`, { quantity: nextQuantity });
-      setCartItems(updatedItems);
-      saveCartCache(user.id, updatedItems);
+      const result = await updateCartItem({
+        userId: user.id,
+        item,
+        quantity: nextQuantity,
+        allowNetwork: !isDemoMode,
+      });
+      setCartItems(loadCartCache(user.id));
+      setUsingCachedCart(isDemoMode || !navigator.onLine || Boolean(result?.queued));
     } catch (error) {
-      if (!navigator.onLine) {
-        setCartItems(updatedItems);
-        saveCartCache(user.id, updatedItems);
-      } else {
-        alert('Failed to update cart');
-      }
+      alert('Failed to update cart');
     } finally {
       setUpdatingId(null);
     }
   };
 
   const removeItem = async (id) => {
+    if (!user) {
+      return;
+    }
+
+    const item = cartItems.find((entry) => entry.id === id);
+    if (!item) {
+      return;
+    }
+
     setUpdatingId(id);
-    const updatedItems = cartItems.filter((item) => item.id !== id);
 
     try {
-      await axios.delete(`/cart/${id}`);
-      setCartItems(updatedItems);
-      saveCartCache(user.id, updatedItems);
+      const result = await removeCartItem({
+        userId: user.id,
+        item,
+        allowNetwork: !isDemoMode,
+      });
+      setCartItems(loadCartCache(user.id));
+      setUsingCachedCart(isDemoMode || !navigator.onLine || Boolean(result?.queued));
     } catch (error) {
-      if (!navigator.onLine) {
-        setCartItems(updatedItems);
-        saveCartCache(user.id, updatedItems);
-      } else {
-        alert('Failed to remove item');
-      }
+      alert('Failed to remove item');
     } finally {
       setUpdatingId(null);
     }
   };
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const checkoutBlocked = isDemoMode || !navigator.onLine;
+
+  const handleCheckoutClick = (event) => {
+    if (!checkoutBlocked) {
+      return;
+    }
+
+    event.preventDefault();
+    alert('Checkout requires an internet connection. Turn off demo mode and reconnect to continue.');
+  };
 
   if (!user) {
     return (
@@ -144,7 +157,13 @@ const Cart = () => {
           <p>
             Adjust quantities, remove items, and continue to payment with a more polished flow.
           </p>
-          {usingCachedCart && <p className="offline-note">You&apos;re viewing a saved cart because the network is unavailable.</p>}
+          {usingCachedCart && (
+            <p className="offline-note">
+              {isDemoMode
+                ? 'Demo mode is on, so this cart is using saved data only.'
+                : 'You are viewing a saved cart because the network is unavailable.'}
+            </p>
+          )}
         </div>
         <div className="purchase-hero__badges">
           <span><ShieldCheck size={16} /> Secure checkout</span>
@@ -185,6 +204,7 @@ const Cart = () => {
                     <p className="item-category">{item.category}</p>
                     <h3>{item.name}</h3>
                     <p className="item-price">KES {item.price}</p>
+                    {item.pendingSync && <span className="status-pill status-pending-sync">Pending sync</span>}
                   </div>
 
                   <div className="cart-item__controls">
@@ -248,7 +268,12 @@ const Cart = () => {
               <strong>Secure payment flow</strong>
             </div>
 
-            <Link to="/checkout" className="purchase-button primary full-width">
+            <Link
+              to="/checkout"
+              className={`purchase-button primary full-width ${checkoutBlocked ? 'is-disabled' : ''}`}
+              onClick={handleCheckoutClick}
+              aria-disabled={checkoutBlocked}
+            >
               Proceed to Checkout <ArrowRight size={16} />
             </Link>
           </aside>

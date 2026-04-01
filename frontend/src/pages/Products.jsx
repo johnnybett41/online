@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useDemoMode } from '../context/DemoModeContext';
 import { Heart, Filter, Grid, List } from 'lucide-react';
 import { loadCatalogCache, saveCatalogCache } from '../utils/catalogCache';
+import { addCartItem } from '../utils/cartActions';
+import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import './Products.css';
 
 const CATEGORY_ORDER = [
@@ -54,6 +57,7 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [usingCachedCatalog, setUsingCachedCatalog] = useState(false);
   const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   const categoryQuery = searchParams.get('category') || 'all';
@@ -70,7 +74,7 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [isDemoMode]);
 
   useEffect(() => {
     setSelectedCategory(categoryQuery);
@@ -81,6 +85,16 @@ const Products = () => {
   }, [products, selectedCategory, priceRange, sortBy, searchQuery]);
 
   const fetchProducts = async () => {
+    if (isDemoMode) {
+      const cachedProducts = loadCatalogCache();
+      setProducts(cachedProducts);
+      const uniqueCategories = [...new Set(cachedProducts.map((p) => p.category))];
+      setCategories(sortCategories(uniqueCategories));
+      setUsingCachedCatalog(true);
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await axios.get('/products');
       setProducts(res.data);
@@ -95,8 +109,8 @@ const Products = () => {
         setProducts(cachedProducts);
         const uniqueCategories = [...new Set(cachedProducts.map((p) => p.category))];
         setCategories(sortCategories(uniqueCategories));
-        setUsingCachedCatalog(true);
       }
+      setUsingCachedCatalog(true);
     } finally {
       setLoading(false);
     }
@@ -143,17 +157,29 @@ const Products = () => {
     setFilteredProducts(filtered);
   };
 
-  const addToCart = async (productId) => {
+  const addToCart = async (product) => {
     if (!user) {
       alert('Please login to add to cart');
       return;
     }
+
     try {
-      await axios.post('/cart', {
-        user_id: user.id,
-        product_id: productId,
-        quantity: 1
+      const result = await addCartItem({
+        userId: user.id,
+        product,
+        quantity: 1,
+        allowNetwork: !isDemoMode,
       });
+
+      if (result.pending || result.queued) {
+        alert(
+          isDemoMode
+            ? 'Added to cart in demo mode. It will sync when you leave demo mode.'
+            : 'Added to cart. It will sync when you are back online.'
+        );
+        return;
+      }
+
       alert('Added to cart!');
     } catch (error) {
       alert('Failed to add to cart');
@@ -166,8 +192,7 @@ const Products = () => {
       return;
     }
 
-    const wishlistKey = `wishlist_${user.id}`;
-    const currentWishlist = JSON.parse(localStorage.getItem(wishlistKey) || '[]');
+    const currentWishlist = loadWishlistCache(user.id);
     const isInWishlist = currentWishlist.some(item => item.id === product.id);
 
     if (isInWishlist) {
@@ -176,7 +201,7 @@ const Products = () => {
     }
 
     const updatedWishlist = [...currentWishlist, product];
-    localStorage.setItem(wishlistKey, JSON.stringify(updatedWishlist));
+    saveWishlistCache(user.id, updatedWishlist);
     alert('Added to wishlist!');
   };
 
@@ -204,7 +229,13 @@ const Products = () => {
       <div className="products-header">
         <h1>Our Products</h1>
         <p>Discover our wide range of electrical products</p>
-        {usingCachedCatalog && <p className="offline-note">You&apos;re seeing cached product data because the network is unavailable.</p>}
+        {usingCachedCatalog && (
+          <p className="offline-note">
+            {isDemoMode
+              ? 'Demo mode is on, so product browsing is using saved catalog data only.'
+              : 'You are seeing cached product data because the network is unavailable.'}
+          </p>
+        )}
       </div>
 
       <div className="stock-overview">
@@ -355,7 +386,7 @@ const Products = () => {
                 <button
                   className="add-to-cart-btn"
                   disabled={getStockCount(product) <= 0}
-                  onClick={() => addToCart(product.id)}
+                  onClick={() => addToCart(product)}
                 >
                   {getStockCount(product) <= 0 ? 'Sold Out' : 'Add to Cart'}
                 </button>
