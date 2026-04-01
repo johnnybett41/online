@@ -30,6 +30,39 @@
   line-height: 1.7;
 }
 
+.stock-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stock-stat {
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f7ff 100%);
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  box-shadow: 0 14px 30px rgba(12, 20, 35, 0.06);
+}
+
+.stock-value {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: #10213d;
+  line-height: 1;
+}
+
+.stock-label {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #5d6b82;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
 .products-controls {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -189,6 +222,30 @@
   background: linear-gradient(180deg, #eff4fb, #dfe8f6);
 }
 
+.stock-badge {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.82);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 22px rgba(12, 20, 35, 0.15);
+}
+
+.stock-badge.low-stock {
+  background: rgba(245, 158, 11, 0.92);
+}
+
+.stock-badge.sold-out {
+  background: rgba(239, 68, 68, 0.92);
+}
+
 .product-image img {
   width: 100%;
   height: 100%;
@@ -256,6 +313,23 @@
   margin-bottom: 16px;
 }
 
+.product-stock {
+  margin: -6px 0 16px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0f766e;
+}
+
+.product-stock.low-stock {
+  color: #d97706;
+}
+
+.product-stock.sold-out {
+  color: #dc2626;
+}
+
 .product-actions {
   display: flex;
   gap: 10px;
@@ -278,6 +352,13 @@
 .add-to-cart-btn {
   background: linear-gradient(135deg, #10213d 0%, #27406b 100%);
   color: white;
+}
+
+.add-to-cart-btn:disabled {
+  cursor: not-allowed;
+  background: #94a3b8;
+  box-shadow: none;
+  transform: none;
 }
 
 .add-to-cart-btn:hover {
@@ -350,6 +431,10 @@
 }
 
 @media (max-width: 1100px) {
+  .stock-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .products-controls {
     grid-template-columns: 1fr;
   }
@@ -370,6 +455,10 @@
 @media (max-width: 768px) {
   .products-container {
     padding-top: 22px;
+  }
+
+  .stock-overview {
+    grid-template-columns: 1fr;
   }
 
   .products-header {

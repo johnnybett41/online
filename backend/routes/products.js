@@ -28,9 +28,14 @@ router.get('/:id', (req, res) => {
 
 // Add product (admin only, but for simplicity)
 router.post('/', (req, res) => {
-  const { name, description, price, image, category } = req.body;
-  db.run(`INSERT INTO products (name, description, price, image, category, is_active) VALUES (?, ?, ?, ?, ?, 1)`,
-    [name, description, price, image, category], function(err) {
+  const { name, description, price, image, category, stock_quantity } = req.body;
+  const parsedStockQuantity = Number.parseInt(stock_quantity, 10);
+  const safeStockQuantity = Number.isFinite(parsedStockQuantity) && parsedStockQuantity >= 0
+    ? parsedStockQuantity
+    : 0;
+
+  db.run(`INSERT INTO products (name, description, price, image, category, stock_quantity, is_active) VALUES (?, ?, ?, ?, ?, ?, 1)`,
+    [name, description, price, image, category, safeStockQuantity], function(err) {
     if (err) {
       return res.status(500).json({ message: 'Database error' });
     }

@@ -12,10 +12,26 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const { user } = useAuth();
+  const stockCount = Number(product?.stock_quantity || 0);
+  const isSoldOut = stockCount <= 0;
+  const isLowStock = stockCount > 0 && stockCount <= 5;
 
   useEffect(() => {
     fetchProduct();
   }, [id]);
+
+  useEffect(() => {
+    if (!product) {
+      return;
+    }
+
+    if (stockCount <= 0) {
+      setQuantity(0);
+      return;
+    }
+
+    setQuantity((currentQuantity) => Math.min(Math.max(currentQuantity, 1), stockCount));
+  }, [product, stockCount]);
 
   const fetchProduct = async () => {
     try {
@@ -39,6 +55,17 @@ const ProductDetail = () => {
       alert('Please login to add to cart');
       return;
     }
+
+    if (!product || isSoldOut) {
+      alert('This product is sold out');
+      return;
+    }
+
+    if (quantity > stockCount) {
+      alert(`Only ${stockCount} left in stock`);
+      return;
+    }
+
     try {
       await axios.post('/cart', {
         user_id: user.id,
@@ -72,7 +99,14 @@ const ProductDetail = () => {
   };
 
   const updateQuantity = (change) => {
-    setQuantity(prev => Math.max(1, prev + change));
+    if (isSoldOut) {
+      return;
+    }
+
+    setQuantity((prev) => {
+      const nextQuantity = prev + change;
+      return Math.min(Math.max(1, nextQuantity), stockCount);
+    });
   };
 
   const handleImageError = (event) => {
@@ -116,6 +150,9 @@ const ProductDetail = () => {
         <div className="product-info">
           <h1>{product.name}</h1>
           <p className="product-category">{product.category}</p>
+          <div className={`stock-banner ${isSoldOut ? 'sold-out' : isLowStock ? 'low-stock' : ''}`}>
+            {isSoldOut ? 'Sold out' : `${stockCount} left in store`}
+          </div>
 
           <div className="product-rating">
             <div className="stars">
@@ -137,14 +174,14 @@ const ProductDetail = () => {
 
           <div className="product-actions">
             <div className="quantity-selector">
-              <button onClick={() => updateQuantity(-1)}>-</button>
-              <span>{quantity}</span>
-              <button onClick={() => updateQuantity(1)}>+</button>
+              <button onClick={() => updateQuantity(-1)} disabled={isSoldOut || quantity <= 1}>-</button>
+              <span>{isSoldOut ? 0 : quantity}</span>
+              <button onClick={() => updateQuantity(1)} disabled={isSoldOut || quantity >= stockCount}>+</button>
             </div>
 
-            <button className="add-to-cart-btn" onClick={addToCart}>
+            <button className="add-to-cart-btn" onClick={addToCart} disabled={isSoldOut}>
               <ShoppingCart size={20} />
-              Add to Cart
+              {isSoldOut ? 'Sold Out' : 'Add to Cart'}
             </button>
 
             <button className="wishlist-btn" onClick={addToWishlist}>

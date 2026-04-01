@@ -26,6 +26,22 @@ const sortCategories = (items) =>
     return aIndex - bIndex;
   });
 
+const getStockCount = (product) => Number(product.stock_quantity || 0);
+
+const getStockLabel = (product) => {
+  const stockCount = getStockCount(product);
+
+  if (stockCount <= 0) {
+    return 'Sold out';
+  }
+
+  if (stockCount <= 5) {
+    return `Only ${stockCount} left`;
+  }
+
+  return `${stockCount} in stock`;
+};
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -39,6 +55,12 @@ const Products = () => {
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   const categoryQuery = searchParams.get('category') || 'all';
+  const totalRemainingStock = products.reduce((sum, product) => sum + Math.max(0, getStockCount(product)), 0);
+  const lowStockCount = products.filter((product) => {
+    const stockCount = getStockCount(product);
+    return stockCount > 0 && stockCount <= 5;
+  }).length;
+  const soldOutCount = products.filter((product) => getStockCount(product) <= 0).length;
 
   useEffect(() => {
     fetchProducts();
@@ -169,6 +191,21 @@ const Products = () => {
         <p>Discover our wide range of electrical products</p>
       </div>
 
+      <div className="stock-overview">
+        <div className="stock-stat">
+          <span className="stock-value">{totalRemainingStock}</span>
+          <span className="stock-label">Items left in store</span>
+        </div>
+        <div className="stock-stat">
+          <span className="stock-value">{lowStockCount}</span>
+          <span className="stock-label">Low-stock products</span>
+        </div>
+        <div className="stock-stat">
+          <span className="stock-value">{soldOutCount}</span>
+          <span className="stock-label">Sold out</span>
+        </div>
+      </div>
+
       <div className="products-controls">
         <div className="filters-section">
           <button className="filter-toggle">
@@ -241,6 +278,7 @@ const Products = () => {
 
       <div className="products-info">
         <p>{filteredProducts.length} products found</p>
+        <p>{filteredProducts.reduce((sum, product) => sum + Math.max(0, getStockCount(product)), 0)} items currently visible</p>
         {searchQuery && <p>Search results for: "{searchQuery}"</p>}
       </div>
 
@@ -249,6 +287,9 @@ const Products = () => {
           <div key={product.id} className="product-card">
             <div className="product-image">
               <img src={product.image} alt={product.name} onError={handleImageError} />
+              <span className={`stock-badge ${getStockCount(product) <= 0 ? 'sold-out' : getStockCount(product) <= 5 ? 'low-stock' : ''}`}>
+                {getStockLabel(product)}
+              </span>
               <button
                 className="wishlist-btn"
                 onClick={() => addToWishlist(product)}
@@ -261,12 +302,16 @@ const Products = () => {
               <p className="product-description">{product.description}</p>
               <p className="product-category">{product.category}</p>
               <p className="product-price">KES {product.price}</p>
+              <p className={`product-stock ${getStockCount(product) <= 0 ? 'sold-out' : getStockCount(product) <= 5 ? 'low-stock' : ''}`}>
+                {getStockLabel(product)}
+              </p>
               <div className="product-actions">
                 <button
                   className="add-to-cart-btn"
+                  disabled={getStockCount(product) <= 0}
                   onClick={() => addToCart(product.id)}
                 >
-                  Add to Cart
+                  {getStockCount(product) <= 0 ? 'Sold Out' : 'Add to Cart'}
                 </button>
                 <Link to={`/product/${product.id}`} className="view-details-btn">
                   View Details

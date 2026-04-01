@@ -1,6 +1,6 @@
-const PRODUCTS_CATALOG_VERSION = 3;
+const PRODUCTS_CATALOG_VERSION = 4;
 
-const products = [
+const rawProducts = [
   {
     name: 'Bulb LED 7 Watts B22 (Pin)',
     description: 'Energy-saving 7W LED bulb with B22 base for everyday lighting.',
@@ -206,6 +206,19 @@ const products = [
   },
 ];
 
+const STOCK_LEVELS = [
+  24, 18, 14, 9,
+  16, 20, 15, 8, 13, 11,
+  19, 16, 14, 12, 10, 9, 11, 8, 7, 6, 5,
+  15, 13, 18, 17, 16, 12, 10,
+  32,
+];
+
+const products = rawProducts.map((product, index) => ({
+  ...product,
+  stock_quantity: STOCK_LEVELS[index] ?? 12,
+}));
+
 function run(db, sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function onRun(err) {
@@ -278,6 +291,11 @@ async function ensureSchema(db) {
     await run(db, 'ALTER TABLE products ADD COLUMN is_active INTEGER NOT NULL DEFAULT 0');
   }
 
+  const hasStockQuantity = productColumns.some((column) => column.name === 'stock_quantity');
+  if (!hasStockQuantity) {
+    await run(db, 'ALTER TABLE products ADD COLUMN stock_quantity INTEGER NOT NULL DEFAULT 0');
+  }
+
   await run(
     db,
     `CREATE TABLE IF NOT EXISTS cart (
@@ -298,6 +316,7 @@ async function ensureSchema(db) {
       user_id INTEGER NOT NULL,
       total REAL NOT NULL DEFAULT 0,
       status TEXT NOT NULL DEFAULT 'pending_payment',
+      stock_deducted_at DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )`
@@ -315,6 +334,7 @@ async function ensureSchema(db) {
   await addOrderColumnIfMissing('mpesa_receipt_number', 'mpesa_receipt_number TEXT');
   await addOrderColumnIfMissing('mpesa_phone_number', 'mpesa_phone_number TEXT');
   await addOrderColumnIfMissing('mpesa_paid_at', 'mpesa_paid_at DATETIME');
+  await addOrderColumnIfMissing('stock_deducted_at', 'stock_deducted_at DATETIME');
 
   await run(
     db,
@@ -352,19 +372,22 @@ async function seedProductsIfNeeded(db) {
       await run(
         db,
         `UPDATE products
-         SET description = ?, price = ?, image = ?, category = ?, is_active = 1
+         SET description = ?, price = ?, image = ?, category = ?, stock_quantity = ?, is_active = 1
          WHERE id = ?`,
-        [product.description, product.price, product.image, product.category, existing.id]
+        [product.description, product.price, product.image, product.category, product.stock_quantity, existing.id]
       );
       if (!existing.is_active) {
+        changed = true;
+      }
+      if (existing.stock_quantity !== product.stock_quantity) {
         changed = true;
       }
     } else {
       await run(
         db,
-        `INSERT INTO products (name, description, price, image, category, is_active)
-         VALUES (?, ?, ?, ?, ?, 1)`,
-        [product.name, product.description, product.price, product.image, product.category]
+        `INSERT INTO products (name, description, price, image, category, stock_quantity, is_active)
+         VALUES (?, ?, ?, ?, ?, ?, 1)`,
+        [product.name, product.description, product.price, product.image, product.category, product.stock_quantity]
       );
       changed = true;
     }
