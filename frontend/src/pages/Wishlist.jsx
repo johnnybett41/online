@@ -5,6 +5,7 @@ import { useDemoMode } from '../context/DemoModeContext';
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import { useToast } from '../components/Toast';
+import { Heart, ShoppingBag, ShieldCheck, Truck } from 'lucide-react';
 import './Wishlist.css';
 
 const Wishlist = () => {
@@ -80,7 +81,11 @@ const Wishlist = () => {
     return (
       <div className="wishlist-container">
         <div className="login-prompt">
+          <div className="login-prompt__icon">
+            <Heart size={36} />
+          </div>
           <h2>Please log in to view your wishlist</h2>
+          <p>Sign in to save products, compare them later, and move favourites to cart when you are ready.</p>
           <Link to="/login" className="login-btn">Login</Link>
         </div>
       </div>
@@ -110,10 +115,18 @@ const Wishlist = () => {
       </div>
 
       {wishlist.length === 0 ? (
-        <div className="empty-wishlist">
+        <div className="empty-wishlist empty-wishlist--hero">
           <div className="empty-content">
+            <div className="empty-wishlist__icon">
+              <ShoppingBag size={40} />
+            </div>
             <h2>Your wishlist is empty</h2>
             <p>Start adding items you love to your wishlist!</p>
+            <div className="wishlist-badges">
+              <span><ShieldCheck size={14} /> Warranty included</span>
+              <span><Truck size={14} /> Fast delivery</span>
+              <span><Heart size={14} /> Save your favourites</span>
+            </div>
             <Link to="/products" className="shop-btn">Browse Products</Link>
           </div>
         </div>

@@ -159,6 +159,7 @@ body {
 @media (max-width: 768px) {
   .main-content {
     padding-inline: 12px;
+    padding-bottom: 104px;
   }
 
   .connection-banner {

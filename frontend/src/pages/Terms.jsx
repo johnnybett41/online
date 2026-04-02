@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { BadgeCheck, ShieldCheck, ShoppingBag } from 'lucide-react';
 import './PolicyPage.css';
 
 const Terms = () => {
@@ -8,6 +9,11 @@ const Terms = () => {
         <span className="page-kicker">Terms of Service</span>
         <h1>Simple terms for using ElectroHub.</h1>
         <p>These terms cover shopping, account use, and what to expect from our store and support team.</p>
+        <div className="policy-hero-badges">
+          <span><ShieldCheck size={16} /> Safe shopping</span>
+          <span><ShoppingBag size={16} /> Clear order flow</span>
+          <span><BadgeCheck size={16} /> Helpful support</span>
+        </div>
       </header>
 
       <section className="policy-page-content">

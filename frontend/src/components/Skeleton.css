@@ -1,0 +1,33 @@
+.skeleton,
+.skeleton-line {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #e8eef7 0%, #f6f9ff 50%, #e8eef7 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.35s linear infinite;
+}
+
+.skeleton {
+  border-radius: 18px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 999px;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .skeleton-line {
+    animation: none;
+  }
+}

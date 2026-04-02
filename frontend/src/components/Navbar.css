@@ -130,6 +130,12 @@
   background: rgba(102, 126, 234, 0.1);
 }
 
+.nav-icon-link.active {
+  color: #27406b;
+  background: rgba(102, 126, 234, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
 .icon-label {
   font-size: 0.72rem;
   font-weight: 700;
@@ -281,6 +287,12 @@
 .mobile-nav-links button:hover {
   background: var(--secondary-bg);
   color: #667eea;
+}
+
+.mobile-nav-links a.active {
+  background: rgba(102, 126, 234, 0.12);
+  color: #27406b;
+  font-weight: 800;
 }
 
 .theme-toggle-btn {

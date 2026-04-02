@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
+import Skeleton, { SkeletonLine } from '../components/Skeleton';
 import {
   ArrowRight,
   CheckCircle2,
@@ -103,10 +104,17 @@ const Checkout = () => {
   if (!user) {
     return (
       <div className="purchase-shell">
-        <div className="purchase-empty-state">
-          <Lock size={44} />
+        <div className="purchase-empty-state purchase-card purchase-empty-state--hero">
+          <div className="empty-state-icon">
+            <Lock size={44} />
+          </div>
           <h2>Please sign in to checkout</h2>
           <p>Secure checkout and M-Pesa payment are available once you're logged in.</p>
+          <div className="empty-state-badges">
+            <span><CreditCard size={14} /> M-Pesa ready</span>
+            <span><Lock size={14} /> Secure payment</span>
+            <span><CheckCircle2 size={14} /> Fast order review</span>
+          </div>
           <div className="empty-actions">
             <Link to="/login" className="purchase-button primary">
               Go to Login <ArrowRight size={16} />
@@ -138,12 +146,41 @@ const Checkout = () => {
       </section>
 
       {loading ? (
-        <div className="purchase-loading">Loading checkout...</div>
+        <div className="purchase-loading purchase-card purchase-loading--skeleton">
+          <div className="checkout-loading-grid">
+            <div className="checkout-loading-panel">
+              <SkeletonLine className="loading-kicker" />
+              <Skeleton className="loading-title" />
+              <SkeletonLine className="loading-text" />
+              <div className="checkout-loading-list">
+                <SkeletonLine className="checkout-loading-line" />
+                <SkeletonLine className="checkout-loading-line" />
+                <SkeletonLine className="checkout-loading-line short" />
+              </div>
+            </div>
+            <div className="checkout-loading-panel">
+              <SkeletonLine className="loading-kicker" />
+              <Skeleton className="loading-title loading-title--small" />
+              <div className="checkout-loading-metrics">
+                <Skeleton className="checkout-loading-metric" />
+                <Skeleton className="checkout-loading-metric" />
+              </div>
+              <Skeleton className="checkout-loading-button" />
+            </div>
+          </div>
+        </div>
       ) : cartItems.length === 0 ? (
-        <div className="purchase-empty-state purchase-card">
-          <LayoutList size={44} />
+        <div className="purchase-empty-state purchase-card purchase-empty-state--hero">
+          <div className="empty-state-icon">
+            <LayoutList size={44} />
+          </div>
           <h2>No items in checkout</h2>
           <p>Add products to your cart before checking out.</p>
+          <div className="empty-state-badges">
+            <span><ShoppingBag size={14} /> Browse products</span>
+            <span><CreditCard size={14} /> Pay securely</span>
+            <span><CheckCircle2 size={14} /> Review before payment</span>
+          </div>
           <div className="empty-actions">
             <Link to="/products" className="purchase-button primary">
               Browse Products <ArrowRight size={16} />

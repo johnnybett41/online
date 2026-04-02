@@ -3,11 +3,12 @@ import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useDemoMode } from '../context/DemoModeContext';
-import { Heart, Filter, Grid, List } from 'lucide-react';
+import { Heart, Filter, Grid, List, ShieldCheck, Truck, BadgeCheck, Search } from 'lucide-react';
 import { loadCatalogCache, saveCatalogCache } from '../utils/catalogCache';
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import { useToast } from '../components/Toast';
+import Skeleton, { SkeletonLine } from '../components/Skeleton';
 import './Products.css';
 
 const CATEGORY_ORDER = [
@@ -63,6 +64,7 @@ const Products = () => {
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   const categoryQuery = searchParams.get('category') || 'all';
+  const categoryChips = ['all', ...categories];
   const totalRemainingStock = products.reduce((sum, product) => sum + Math.max(0, getStockCount(product)), 0);
   const lowStockCount = products.filter((product) => {
     const stockCount = getStockCount(product);
@@ -219,10 +221,54 @@ const Products = () => {
     setSortBy('name');
   };
 
+  const quickTrustBadges = [
+    { icon: <ShieldCheck size={16} />, label: 'Warranty included' },
+    { icon: <Truck size={16} />, label: 'Fast delivery' },
+    { icon: <BadgeCheck size={16} />, label: 'Safe electrical products' },
+  ];
+
   if (loading) {
     return (
-      <div className="products-container">
-        <div className="loading">Loading products...</div>
+      <div className="products-container products-loading-shell">
+        <div className="products-header products-header--loading">
+          <SkeletonLine className="loading-kicker" />
+          <Skeleton className="loading-title" />
+          <SkeletonLine className="loading-text" />
+          <div className="loading-badge-row">
+            {quickTrustBadges.map((badge) => (
+              <Skeleton key={badge.label} className="loading-badge" />
+            ))}
+          </div>
+        </div>
+
+        <div className="stock-overview">
+          {[1, 2, 3].map((item) => (
+            <Skeleton key={item} className="stock-stat skeleton-card" />
+          ))}
+        </div>
+
+        <div className="loading-chip-row">
+          {['All', 'Lighting', 'Safety', 'Accessories'].map((chip) => (
+            <SkeletonLine key={chip} className="loading-chip" />
+          ))}
+        </div>
+
+        <div className="products-grid loading-grid">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div key={index} className="loading-product-card">
+              <Skeleton className="loading-image" />
+              <div className="loading-product-body">
+                <SkeletonLine className="loading-line short" />
+                <SkeletonLine className="loading-line" />
+                <SkeletonLine className="loading-line long" />
+                <div className="loading-actions">
+                  <SkeletonLine className="loading-button" />
+                  <SkeletonLine className="loading-button" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -232,6 +278,14 @@ const Products = () => {
       <div className="products-header">
         <h1>Our Products</h1>
         <p>Discover our wide range of electrical products</p>
+        <div className="trust-badges">
+          {quickTrustBadges.map((badge) => (
+            <span key={badge.label} className="trust-badge">
+              {badge.icon}
+              {badge.label}
+            </span>
+          ))}
+        </div>
         {usingCachedCatalog && (
           <p className="offline-note">
             {isDemoMode
@@ -239,6 +293,24 @@ const Products = () => {
               : 'You are seeing cached product data because the network is unavailable.'}
           </p>
         )}
+      </div>
+
+      <div className="category-chips" aria-label="Quick category filters">
+        {categoryChips.map((category) => {
+          const label = category === 'all' ? 'All' : category;
+          const isActive = selectedCategory === category;
+
+          return (
+            <button
+              key={category}
+              type="button"
+              className={`category-chip ${isActive ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="stock-overview">
@@ -404,8 +476,16 @@ const Products = () => {
 
       {filteredProducts.length === 0 && (
         <div className="no-products">
+          <div className="no-products__icon">
+            <Search size={34} />
+          </div>
           <h3>No products found</h3>
-          <p>Try adjusting your filters or search terms</p>
+          <p>Try adjusting your filters or search terms.</p>
+          <div className="no-products__chips">
+            <span>Lighting</span>
+            <span>Safety</span>
+            <span>Accessories</span>
+          </div>
           <button onClick={clearFilters}>Clear Filters</button>
         </div>
       )}

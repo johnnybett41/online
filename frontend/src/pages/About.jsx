@@ -1,3 +1,4 @@
+import { BadgeCheck, Globe2, HeartHandshake, MapPin, ShieldCheck, Sparkles } from 'lucide-react';
 import './About.css';
 
 const About = () => {
@@ -5,8 +6,52 @@ const About = () => {
     <div className="about-container">
       <div className="about-hero">
         <div className="hero-content">
+          <span className="hero-kicker">Built for safer homes</span>
           <h1>About ElectroHub</h1>
           <p>Your trusted partner for electrical solutions in Kenya</p>
+          <div className="hero-badges">
+            <span><ShieldCheck size={16} /> Safe electrical products</span>
+            <span><Sparkles size={16} /> Modern shopping experience</span>
+            <span><Globe2 size={16} /> Kenya-focused support</span>
+          </div>
+        </div>
+        <div className="hero-highlight">
+          <div className="hero-highlight__card">
+            <span>Trusted since</span>
+            <strong>2024</strong>
+          </div>
+          <div className="hero-highlight__card">
+            <span>Product range</span>
+            <strong>1000+</strong>
+          </div>
+          <div className="hero-highlight__card">
+            <span>Support style</span>
+            <strong>Fast & human</strong>
+          </div>
+        </div>
+      </div>
+
+      <div className="about-stats">
+        <div className="about-stat">
+          <BadgeCheck size={18} />
+          <div>
+            <strong>Quality first</strong>
+            <span>Reliable parts and fittings that feel built to last.</span>
+          </div>
+        </div>
+        <div className="about-stat">
+          <HeartHandshake size={18} />
+          <div>
+            <strong>Friendly guidance</strong>
+            <span>We help customers choose products with confidence.</span>
+          </div>
+        </div>
+        <div className="about-stat">
+          <MapPin size={18} />
+          <div>
+            <strong>Kericho based</strong>
+            <span>Local support with a clean, responsive online storefront.</span>
+          </div>
         </div>
       </div>
 
@@ -86,6 +131,7 @@ const About = () => {
 
         <section className="contact-section">
           <h2>Get In Touch</h2>
+          <p className="contact-section__text">Reach out by phone, email, or in person if you need product advice or after-sale support.</p>
           <div className="contact-info">
             <div className="contact-item">
               <h3>Visit Us</h3>

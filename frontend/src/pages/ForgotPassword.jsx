@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight, KeyRound, MailCheck } from 'lucide-react';
 import './PolicyPage.css';
 
 const ForgotPassword = () => {
@@ -17,48 +18,34 @@ const ForgotPassword = () => {
         <span className="page-kicker">Account Help</span>
         <h1>Reset your password.</h1>
         <p>Enter your email address and we'll help you continue back to your account.</p>
+        <div className="policy-hero-badges">
+          <span><KeyRound size={16} /> Secure reset</span>
+          <span><MailCheck size={16} /> Email instructions</span>
+        </div>
       </header>
 
       <section className="policy-page-content">
-        <article className="policy-card">
-          <form onSubmit={handleSubmit}>
-            <label htmlFor="reset-email" style={{ display: 'block', marginBottom: '8px', fontWeight: 700, color: '#10213d' }}>
-              Email address
-            </label>
-            <input
-              id="reset-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                borderRadius: '14px',
-                border: '1px solid #d6deeb',
-                marginBottom: '14px',
-                fontSize: '1rem',
-              }}
-            />
-            <button
-              type="submit"
-              style={{
-                background: 'linear-gradient(135deg, #10213d 0%, #27406b 100%)',
-                color: '#fff',
-                border: 'none',
-                padding: '13px 22px',
-                borderRadius: '14px',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                fontWeight: 800,
-              }}
-            >
-              Send reset link
+        <article className="policy-card policy-card--form">
+          <form className="policy-form" onSubmit={handleSubmit}>
+            <div className="policy-field">
+              <label htmlFor="reset-email">Email address</label>
+              <input
+                id="reset-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                required
+              />
+            </div>
+
+            <button type="submit" className="policy-button">
+              Send reset link <ArrowRight size={16} />
             </button>
           </form>
 
           {sent && (
-            <p className="policy-note">
+            <p className="policy-note policy-note--success">
               If an account exists for {email}, a reset link would be sent there.
             </p>
           )}

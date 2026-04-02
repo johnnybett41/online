@@ -7,6 +7,7 @@ import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CartQueueSync from './components/CartQueueSync';
+import MobileBottomNav from './components/MobileBottomNav';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -69,6 +70,7 @@ function App() {
                   </Routes>
                 </main>
                 <Footer />
+                <MobileBottomNav />
               </div>
             </Router>
           </ToastProvider>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Search, ShoppingCart, User, Menu, X, Heart, Sun, Moon } from 'lucide-react';
@@ -10,6 +10,7 @@ import './Navbar.css';
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
+  const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,6 +26,14 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const isActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
   return (
@@ -65,12 +74,12 @@ const Navbar = () => {
             {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
           </button>
 
-          <Link to="/wishlist" className="nav-icon-link">
+          <Link to="/wishlist" className={`nav-icon-link ${isActive('/wishlist') ? 'active' : ''}`}>
             <Heart size={24} />
             <span className="icon-label">Wishlist</span>
           </Link>
 
-          <Link to="/cart" className="nav-icon-link">
+          <Link to="/cart" className={`nav-icon-link ${isActive('/cart') ? 'active' : ''}`}>
             <ShoppingCart size={24} />
             <span className="icon-label">Cart</span>
           </Link>
@@ -123,11 +132,11 @@ const Navbar = () => {
             <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
 
-          <Link to="/products" onClick={() => setIsMenuOpen(false)}>Products</Link>
-          <Link to="/blog" onClick={() => setIsMenuOpen(false)}>Blog</Link>
-          <Link to="/about" onClick={() => setIsMenuOpen(false)}>About</Link>
-          <Link to="/wishlist" onClick={() => setIsMenuOpen(false)}>Wishlist</Link>
-          <Link to="/cart" onClick={() => setIsMenuOpen(false)}>Cart</Link>
+          <Link to="/products" className={isActive('/products') ? 'active' : ''} onClick={() => setIsMenuOpen(false)}>Products</Link>
+          <Link to="/blog" className={isActive('/blog') ? 'active' : ''} onClick={() => setIsMenuOpen(false)}>Blog</Link>
+          <Link to="/about" className={isActive('/about') ? 'active' : ''} onClick={() => setIsMenuOpen(false)}>About</Link>
+          <Link to="/wishlist" className={isActive('/wishlist') ? 'active' : ''} onClick={() => setIsMenuOpen(false)}>Wishlist</Link>
+          <Link to="/cart" className={isActive('/cart') ? 'active' : ''} onClick={() => setIsMenuOpen(false)}>Cart</Link>
 
           {user ? (
             <>

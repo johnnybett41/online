@@ -3,11 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useDemoMode } from '../context/DemoModeContext';
-import { Heart, ShoppingCart, Star, ArrowLeft } from 'lucide-react';
+import { Heart, ShoppingCart, Star, ArrowLeft, ShieldCheck, Truck, BadgeCheck } from 'lucide-react';
 import { loadCatalogCache, loadCachedProductById, saveCatalogCache } from '../utils/catalogCache';
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import { useToast } from '../components/Toast';
+import Skeleton, { SkeletonLine } from '../components/Skeleton';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -23,6 +24,11 @@ const ProductDetail = () => {
   const stockCount = Number(product?.stock_quantity || 0);
   const isSoldOut = stockCount <= 0;
   const isLowStock = stockCount > 0 && stockCount <= 5;
+  const trustBadges = [
+    { icon: <ShieldCheck size={16} />, label: 'Warranty included' },
+    { icon: <Truck size={16} />, label: 'Fast delivery' },
+    { icon: <BadgeCheck size={16} />, label: 'Safe electrical products' },
+  ];
 
   useEffect(() => {
     fetchProduct();
@@ -167,7 +173,7 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="product-detail-container">
+      <div className="product-detail-container product-detail-loading">
         {usingCachedData && (
           <div className="offline-note">
             {isDemoMode
@@ -175,7 +181,37 @@ const ProductDetail = () => {
               : 'Offline mode: showing cached product data.'}
           </div>
         )}
-        <div className="loading">Loading product...</div>
+        <div className="breadcrumb-skeleton-row">
+          <SkeletonLine className="breadcrumb-skeleton" />
+        </div>
+        <div className="product-detail">
+          <div className="product-gallery">
+            <Skeleton className="main-image skeleton-product-image" />
+          </div>
+          <div className="product-info">
+            <SkeletonLine className="detail-loading-kicker" />
+            <Skeleton className="detail-loading-title" />
+            <SkeletonLine className="detail-loading-chip" />
+            <div className="product-rating">
+              <SkeletonLine className="detail-loading-rating" />
+            </div>
+            <Skeleton className="detail-loading-price" />
+            <div className="product-trust-badges">
+              {trustBadges.map((badge) => (
+                <Skeleton key={badge.label} className="detail-loading-badge" />
+              ))}
+            </div>
+            <Skeleton className="detail-loading-copy" />
+            <Skeleton className="detail-loading-copy" />
+            <Skeleton className="detail-loading-copy short" />
+            <div className="product-actions">
+              <Skeleton className="detail-loading-quantity" />
+              <Skeleton className="detail-loading-action" />
+              <Skeleton className="detail-loading-action" />
+            </div>
+            <Skeleton className="detail-loading-features" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -224,6 +260,15 @@ const ProductDetail = () => {
           <p className="product-category">{product.category}</p>
           <div className={`stock-banner ${isSoldOut ? 'sold-out' : isLowStock ? 'low-stock' : ''}`}>
             {isSoldOut ? 'Sold out' : `${stockCount} left in store`}
+          </div>
+
+          <div className="product-trust-badges">
+            {trustBadges.map((badge) => (
+              <span key={badge.label} className="product-trust-badge">
+                {badge.icon}
+                {badge.label}
+              </span>
+            ))}
           </div>
 
           <div className="product-rating">

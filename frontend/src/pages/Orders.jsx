@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDemoMode } from '../context/DemoModeContext';
 import { loadOrderCache, saveOrderCache } from '../utils/orderCache';
 import { ArrowRight, FileText, Package, ShieldCheck, ShoppingBag } from 'lucide-react';
+import Skeleton, { SkeletonLine } from '../components/Skeleton';
 import './PurchaseFlow.css';
 
 const Orders = () => {
@@ -50,10 +51,17 @@ const Orders = () => {
   if (!user) {
     return (
       <div className="purchase-shell">
-        <div className="purchase-empty-state">
-          <FileText size={44} />
+        <div className="purchase-empty-state purchase-card purchase-empty-state--hero">
+          <div className="empty-state-icon">
+            <FileText size={44} />
+          </div>
           <h2>Please sign in to view your orders</h2>
           <p>Your order history and payment status will appear here after login.</p>
+          <div className="empty-state-badges">
+            <span><ShieldCheck size={14} /> Secure records</span>
+            <span><Package size={14} /> Purchase history</span>
+            <span><ShoppingBag size={14} /> Smart re-ordering</span>
+          </div>
           <div className="empty-actions">
             <Link to="/login" className="purchase-button primary">
               Go to Login <ArrowRight size={16} />
@@ -89,12 +97,41 @@ const Orders = () => {
       </section>
 
       {loading ? (
-        <div className="purchase-loading">Loading orders...</div>
+        <div className="purchase-loading purchase-card purchase-loading--skeleton">
+          <div className="checkout-loading-grid">
+            <div className="checkout-loading-panel">
+              <SkeletonLine className="loading-kicker" />
+              <Skeleton className="loading-title" />
+              <SkeletonLine className="loading-text" />
+              <div className="checkout-loading-list">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <SkeletonLine key={index} className="checkout-loading-line" />
+                ))}
+              </div>
+            </div>
+            <div className="checkout-loading-panel">
+              <SkeletonLine className="loading-kicker" />
+              <Skeleton className="loading-title loading-title--small" />
+              <div className="checkout-loading-metrics">
+                <Skeleton className="checkout-loading-metric" />
+                <Skeleton className="checkout-loading-metric" />
+              </div>
+              <Skeleton className="checkout-loading-button" />
+            </div>
+          </div>
+        </div>
       ) : orders.length === 0 ? (
-        <div className="purchase-empty-state purchase-card">
-          <Package size={44} />
+        <div className="purchase-empty-state purchase-card purchase-empty-state--hero">
+          <div className="empty-state-icon">
+            <Package size={44} />
+          </div>
           <h2>No orders yet</h2>
           <p>When you complete a checkout, your orders will show up here.</p>
+          <div className="empty-state-badges">
+            <span><ShieldCheck size={14} /> Secure records</span>
+            <span><ShoppingBag size={14} /> Start shopping</span>
+            <span><FileText size={14} /> Track status easily</span>
+          </div>
           <div className="empty-actions">
             <Link to="/products" className="purchase-button primary">
               Browse Products <ArrowRight size={16} />

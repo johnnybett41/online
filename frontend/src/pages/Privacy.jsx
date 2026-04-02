@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { BadgeCheck, Eye, ShieldCheck } from 'lucide-react';
 import './PolicyPage.css';
 
 const Privacy = () => {
@@ -8,6 +9,11 @@ const Privacy = () => {
         <span className="page-kicker">Privacy Policy</span>
         <h1>How we handle your information.</h1>
         <p>A short summary of the information we collect, how we use it, and how to contact us with questions.</p>
+        <div className="policy-hero-badges">
+          <span><ShieldCheck size={16} /> Secure data handling</span>
+          <span><Eye size={16} /> Transparent usage</span>
+          <span><BadgeCheck size={16} /> Support when needed</span>
+        </div>
       </header>
 
       <section className="policy-page-content">

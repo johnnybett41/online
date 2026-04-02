@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { BadgeCheck, HelpCircle, Truck } from 'lucide-react';
 import './PolicyPage.css';
 
 const FAQ = () => {
@@ -31,6 +32,11 @@ const FAQ = () => {
         <span className="page-kicker">FAQ</span>
         <h1>Answers to the most common questions.</h1>
         <p>Quick help for ordering, shipping, returns, warranty, and technical support.</p>
+        <div className="policy-hero-badges">
+          <span><HelpCircle size={16} /> Quick answers</span>
+          <span><Truck size={16} /> Shipping clarity</span>
+          <span><BadgeCheck size={16} /> Warranty guidance</span>
+        </div>
       </header>
 
       <section className="policy-page-content">

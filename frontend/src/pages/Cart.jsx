@@ -135,10 +135,17 @@ const Cart = () => {
   if (!user) {
     return (
       <div className="purchase-shell">
-        <div className="purchase-empty-state">
-          <ShoppingCart size={44} />
+        <div className="purchase-empty-state purchase-card purchase-empty-state--hero">
+          <div className="empty-state-icon">
+            <ShoppingCart size={44} />
+          </div>
           <h2>Please sign in to view your cart</h2>
           <p>Once you log in, your selected items will appear here with a cleaner checkout flow.</p>
+          <div className="empty-state-badges">
+            <span><ShieldCheck size={14} /> Secure checkout</span>
+            <span><Truck size={14} /> Fast delivery</span>
+            <span><ShoppingBag size={14} /> Save items for later</span>
+          </div>
           <div className="empty-actions">
             <Link to="/login" className="purchase-button primary">
               Go to Login <ArrowRight size={16} />
@@ -179,10 +186,17 @@ const Cart = () => {
       {loading ? (
         <div className="purchase-loading">Loading your cart...</div>
       ) : cartItems.length === 0 ? (
-        <div className="purchase-empty-state purchase-card">
-          <ShoppingCart size={44} />
+        <div className="purchase-empty-state purchase-card purchase-empty-state--hero">
+          <div className="empty-state-icon">
+            <ShoppingCart size={44} />
+          </div>
           <h2>Your cart is empty</h2>
           <p>Browse the catalog and add products to get started.</p>
+          <div className="empty-state-badges">
+            <span><ShieldCheck size={14} /> Safe electrical products</span>
+            <span><Truck size={14} /> Delivery made simple</span>
+            <span><ShoppingBag size={14} /> 1000 products available</span>
+          </div>
           <div className="empty-actions">
             <Link to="/products" className="purchase-button primary">
               Browse Products <ArrowRight size={16} />
