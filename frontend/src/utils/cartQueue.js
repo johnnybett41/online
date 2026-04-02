@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { loadCartCache, saveCartCache } from './cartCache';
 
 const CART_QUEUE_PREFIX = 'electrohub_cart_queue_v1';
 

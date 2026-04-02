@@ -115,7 +115,12 @@ const GoogleSignInButton = ({ mode = 'signin', onSuccess, onError }) => {
   }, [clientId, text]);
 
   if (!clientId) {
-    return <div className="google-auth google-auth--missing">Google sign-in is not configured yet.</div>;
+    return (
+      <div className="google-auth google-auth--missing">
+        Google sign-in is not configured yet. Add <code>VITE_GOOGLE_CLIENT_ID</code> to the
+        frontend environment and <code>GOOGLE_CLIENT_ID</code> to the backend environment.
+      </div>
+    );
   }
 
   if (!isOnline) {

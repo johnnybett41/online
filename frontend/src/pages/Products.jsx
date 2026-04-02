@@ -7,6 +7,7 @@ import { Heart, Filter, Grid, List } from 'lucide-react';
 import { loadCatalogCache, saveCatalogCache } from '../utils/catalogCache';
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
+import { useToast } from '../components/Toast';
 import './Products.css';
 
 const CATEGORY_ORDER = [
@@ -58,6 +59,7 @@ const Products = () => {
   const [usingCachedCatalog, setUsingCachedCatalog] = useState(false);
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const { showToast } = useToast();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   const categoryQuery = searchParams.get('category') || 'all';
@@ -159,7 +161,7 @@ const Products = () => {
 
   const addToCart = async (product) => {
     if (!user) {
-      alert('Please login to add to cart');
+      showToast('Please login to add to cart.', 'info');
       return;
     }
 
@@ -172,23 +174,24 @@ const Products = () => {
       });
 
       if (result.pending || result.queued) {
-        alert(
+        showToast(
           isDemoMode
             ? 'Added to cart in demo mode. It will sync when you leave demo mode.'
-            : 'Added to cart. It will sync when you are back online.'
+            : 'Added to cart. It will sync when you are back online.',
+          'info'
         );
         return;
       }
 
-      alert('Added to cart!');
+      showToast('Added to cart!', 'success');
     } catch (error) {
-      alert('Failed to add to cart');
+      showToast('Failed to add to cart.', 'error');
     }
   };
 
   const addToWishlist = (product) => {
     if (!user) {
-      alert('Please login to add to wishlist');
+      showToast('Please login to add to wishlist.', 'info');
       return;
     }
 
@@ -196,13 +199,13 @@ const Products = () => {
     const isInWishlist = currentWishlist.some(item => item.id === product.id);
 
     if (isInWishlist) {
-      alert('Already in wishlist!');
+      showToast('Already in wishlist!', 'info');
       return;
     }
 
     const updatedWishlist = [...currentWishlist, product];
     saveWishlistCache(user.id, updatedWishlist);
-    alert('Added to wishlist!');
+    showToast('Added to wishlist!', 'success');
   };
 
   const handleImageError = (event) => {

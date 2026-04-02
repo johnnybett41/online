@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDemoMode } from '../context/DemoModeContext';
 import { loadCartCache, saveCartCache } from '../utils/cartCache';
 import { removeCartItem, updateCartItem } from '../utils/cartActions';
+import { useToast } from '../components/Toast';
 import {
   ArrowRight,
   Minus,
@@ -24,6 +25,7 @@ const Cart = () => {
   const [usingCachedCart, setUsingCachedCart] = useState(false);
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -82,8 +84,9 @@ const Cart = () => {
       });
       setCartItems(loadCartCache(user.id));
       setUsingCachedCart(isDemoMode || !navigator.onLine || Boolean(result?.queued));
+      showToast('Cart updated.', 'success');
     } catch (error) {
-      alert('Failed to update cart');
+      showToast('Failed to update cart.', 'error');
     } finally {
       setUpdatingId(null);
     }
@@ -109,8 +112,9 @@ const Cart = () => {
       });
       setCartItems(loadCartCache(user.id));
       setUsingCachedCart(isDemoMode || !navigator.onLine || Boolean(result?.queued));
+      showToast('Item removed from cart.', 'info');
     } catch (error) {
-      alert('Failed to remove item');
+      showToast('Failed to remove item.', 'error');
     } finally {
       setUpdatingId(null);
     }
@@ -125,7 +129,7 @@ const Cart = () => {
     }
 
     event.preventDefault();
-    alert('Checkout requires an internet connection. Turn off demo mode and reconnect to continue.');
+    showToast('Checkout requires an internet connection. Turn off demo mode and reconnect to continue.', 'info');
   };
 
   if (!user) {

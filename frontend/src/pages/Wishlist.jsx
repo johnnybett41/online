@@ -4,11 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { useDemoMode } from '../context/DemoModeContext';
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
+import { useToast } from '../components/Toast';
 import './Wishlist.css';
 
 const Wishlist = () => {
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const { showToast } = useToast();
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [usingCachedWishlist, setUsingCachedWishlist] = useState(false);
@@ -33,12 +35,15 @@ const Wishlist = () => {
     }
   };
 
-  const removeFromWishlist = (productId) => {
+  const removeFromWishlist = (productId, silent = false) => {
     if (!user) return;
 
     const updatedWishlist = wishlist.filter(item => item.id !== productId);
     setWishlist(updatedWishlist);
     saveWishlistCache(user.id, updatedWishlist);
+    if (!silent) {
+      showToast('Removed from wishlist.', 'info');
+    }
   };
 
   const addToCart = async (product) => {
@@ -53,19 +58,21 @@ const Wishlist = () => {
       });
 
       if (result.pending || result.queued) {
-        alert(
+        showToast(
           isDemoMode
             ? 'Added to cart in demo mode. It will sync when you leave demo mode.'
-            : 'Added to cart. It will sync when you are back online.'
+            : 'Added to cart. It will sync when you are back online.',
+          'info'
         );
       } else {
-        alert('Added to cart!');
+        showToast('Added to cart!', 'success');
       }
 
-      removeFromWishlist(product.id);
+      removeFromWishlist(product.id, true);
+      showToast('Moved to cart and removed from wishlist.', 'success');
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert('Error adding to cart');
+      showToast('Error adding to cart.', 'error');
     }
   };
 

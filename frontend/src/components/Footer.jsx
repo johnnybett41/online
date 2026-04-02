@@ -1,15 +1,35 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
+import api from '../api';
+import { useToast } from './Toast';
 import './Footer.css';
 
 const Footer = () => {
-  const [email, setEmail] = useState('johnbett414@gmail.com');
+  const [email, setEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState('idle');
+  const { showToast } = useToast();
+  const whatsappUrl = 'https://wa.me/254111487078';
+  const tiktokUrl = 'https://www.tiktok.com/@technocrat41';
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
-    alert(`Thank you for subscribing! We'll send updates to ${email}`);
-    setEmail('');
+    const subscriberEmail = email.trim().toLowerCase();
+    setNewsletterStatus('loading');
+
+    try {
+      const response = await api.post('/newsletter/subscribe', { email: subscriberEmail });
+      showToast(response.data?.message || 'Subscription successful.', 'success');
+      setEmail('');
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        'We could not complete the subscription right now. Please try again.';
+
+      showToast(message, 'error');
+    } finally {
+      setNewsletterStatus('idle');
+    }
   };
 
   return (
@@ -19,9 +39,32 @@ const Footer = () => {
           <h3>ElectroHub</h3>
           <p>Your trusted partner for electrical solutions. Quality products, expert service, and innovative technology for all your electrical needs.</p>
           <div className="social-links">
-            <a href="#" className="social-link"><Facebook size={20} /></a>
-            <a href="#" className="social-link"><Twitter size={20} /></a>
-            <a href="#" className="social-link"><Instagram size={20} /></a>
+            <a
+              href={whatsappUrl}
+              className="social-link whatsapp"
+              aria-label="Chat with us on WhatsApp"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <img
+                src="https://cdn.simpleicons.org/whatsapp/25D366"
+                alt=""
+                aria-hidden="true"
+              />
+            </a>
+            <a
+              href={tiktokUrl}
+              className="social-link tiktok"
+              aria-label="Visit our TikTok profile"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <img
+                src="https://cdn.simpleicons.org/tiktok/FFFFFF"
+                alt=""
+                aria-hidden="true"
+              />
+            </a>
           </div>
         </div>
 
@@ -75,8 +118,11 @@ const Footer = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={newsletterStatus === 'loading'}
               />
-              <button type="submit">Subscribe</button>
+              <button type="submit" disabled={newsletterStatus === 'loading'}>
+                {newsletterStatus === 'loading' ? 'Subscribing...' : 'Subscribe'}
+              </button>
             </form>
           </div>
         </div>

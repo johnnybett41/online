@@ -7,6 +7,7 @@ import { Heart, ShoppingCart, Star, ArrowLeft } from 'lucide-react';
 import { loadCatalogCache, loadCachedProductById, saveCatalogCache } from '../utils/catalogCache';
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
+import { useToast } from '../components/Toast';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -18,6 +19,7 @@ const ProductDetail = () => {
   const [usingCachedData, setUsingCachedData] = useState(false);
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const { showToast } = useToast();
   const stockCount = Number(product?.stock_quantity || 0);
   const isSoldOut = stockCount <= 0;
   const isLowStock = stockCount > 0 && stockCount <= 5;
@@ -90,17 +92,17 @@ const ProductDetail = () => {
 
   const addToCart = async () => {
     if (!user) {
-      alert('Please login to add to cart');
+      showToast('Please login to add to cart.', 'info');
       return;
     }
 
     if (!product || isSoldOut) {
-      alert('This product is sold out');
+      showToast('This product is sold out.', 'error');
       return;
     }
 
     if (quantity > stockCount) {
-      alert(`Only ${stockCount} left in stock`);
+      showToast(`Only ${stockCount} left in stock.`, 'info');
       return;
     }
 
@@ -113,23 +115,24 @@ const ProductDetail = () => {
       });
 
       if (result.pending || result.queued) {
-        alert(
+        showToast(
           isDemoMode
             ? 'Added to cart in demo mode. It will sync when you leave demo mode.'
-            : 'Added to cart. It will sync when you are back online.'
+            : 'Added to cart. It will sync when you are back online.',
+          'info'
         );
         return;
       }
 
-      alert('Added to cart!');
+      showToast('Added to cart!', 'success');
     } catch (error) {
-      alert('Failed to add to cart');
+      showToast('Failed to add to cart.', 'error');
     }
   };
 
   const addToWishlist = () => {
     if (!user) {
-      alert('Please login to add to wishlist');
+      showToast('Please login to add to wishlist.', 'info');
       return;
     }
 
@@ -137,13 +140,13 @@ const ProductDetail = () => {
     const isInWishlist = currentWishlist.some(item => item.id === product.id);
 
     if (isInWishlist) {
-      alert('Already in wishlist!');
+      showToast('Already in wishlist!', 'info');
       return;
     }
 
     const updatedWishlist = [...currentWishlist, product];
     saveWishlistCache(user.id, updatedWishlist);
-    alert('Added to wishlist!');
+    showToast('Added to wishlist!', 'success');
   };
 
   const updateQuantity = (change) => {

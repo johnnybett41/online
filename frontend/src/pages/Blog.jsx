@@ -12,7 +12,8 @@ const Blog = () => {
       image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop',
       category: 'Technology',
       date: '2024-03-30',
-      readTime: '5 min read'
+      readTime: '5 min read',
+      url: 'https://www.energy.gov/eere/buildings/articles/smart-electrical-panel-based-home-energy-management-system'
     },
     {
       id: 2,
@@ -21,7 +22,8 @@ const Blog = () => {
       image: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&h=400&fit=crop',
       category: 'Solar',
       date: '2024-03-28',
-      readTime: '7 min read'
+      readTime: '7 min read',
+      url: 'https://www.nrel.gov/research/re-solar'
     },
     {
       id: 3,
@@ -30,7 +32,8 @@ const Blog = () => {
       image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&h=400&fit=crop',
       category: 'Safety',
       date: '2024-03-25',
-      readTime: '6 min read'
+      readTime: '6 min read',
+      url: 'https://www.esfi.org/ground-fault-circuit-interrupters-gfci/'
     },
     {
       id: 4,
@@ -39,7 +42,8 @@ const Blog = () => {
       image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop',
       category: 'Lighting',
       date: '2024-03-22',
-      readTime: '4 min read'
+      readTime: '4 min read',
+      url: 'https://www.energystar.gov/products/learn-about-led-lighting'
     }
   ];
 
@@ -76,13 +80,24 @@ const Blog = () => {
               <span className="category-tag">{post.category}</span>
             </div>
             <div className="blog-content">
-              <h3>{post.title}</h3>
+              <h3>
+                <a href={post.url} target="_blank" rel="noreferrer noopener">
+                  {post.title}
+                </a>
+              </h3>
               <p>{post.excerpt}</p>
               <div className="blog-meta">
                 <span className="date">{post.date}</span>
                 <span className="read-time">{post.readTime}</span>
               </div>
-              <button className="read-more-btn">Read More</button>
+              <a
+                className="read-more-btn"
+                href={post.url}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                Read More
+              </a>
             </div>
           </article>
         ))}

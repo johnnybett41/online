@@ -1,39 +1,91 @@
 /* CSS Variables for Light Theme */
 :root {
-  --bg-color: #ffffff;
-  --text-color: #1a1a1a;
-  --secondary-bg: #f8f9fa;
-  --border-color: #e1e5e9;
-  --accent-color: #667eea;
-  --accent-hover: #5a67d8;
+  --bg-color: #f6f9ff;
+  --text-color: #10213d;
+  --secondary-bg: #eef4fb;
+  --border-color: #d9e3f0;
+  --accent-color: #27406b;
+  --accent-hover: #10213d;
   --card-bg: #ffffff;
-  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow: rgba(12, 20, 35, 0.12);
   --navbar-bg: #ffffff;
-  --navbar-shadow: rgba(0, 0, 0, 0.1);
+  --navbar-shadow: rgba(12, 20, 35, 0.12);
 }
 
 /* CSS Variables for Dark Theme */
 [data-theme="dark"] {
-  --bg-color: #1a1a1a;
+  --bg-color: #0f172a;
   --text-color: #ffffff;
-  --secondary-bg: #2d2d2d;
-  --border-color: #404040;
+  --secondary-bg: #1e293b;
+  --border-color: #334155;
   --accent-color: #667eea;
   --accent-hover: #5a67d8;
-  --card-bg: #2d2d2d;
+  --card-bg: #111827;
   --shadow: rgba(0, 0, 0, 0.3);
-  --navbar-bg: #2d2d2d;
+  --navbar-bg: #111827;
   --navbar-shadow: rgba(0, 0, 0, 0.3);
 }
 
+[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at top left, rgba(102, 126, 234, 0.14), transparent 26%),
+    radial-gradient(circle at top right, rgba(249, 178, 51, 0.08), transparent 24%),
+    linear-gradient(180deg, #0b1220 0%, #111827 100%);
+  color: var(--text-color);
+}
+
+[data-theme="dark"] .App {
+  background:
+    radial-gradient(circle at 14% 16%, rgba(102, 126, 234, 0.12), transparent 18%),
+    radial-gradient(circle at 84% 8%, rgba(249, 178, 51, 0.1), transparent 20%),
+    linear-gradient(180deg, rgba(17, 24, 39, 0.96), rgba(15, 23, 42, 0.98));
+}
+
+[data-theme="dark"] .App::before {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0)),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08), transparent 35%);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(102, 126, 234, 0.14), transparent 28%),
+    radial-gradient(circle at top right, rgba(249, 178, 51, 0.12), transparent 24%),
+    linear-gradient(180deg, #fbfdff 0%, #f1f5fb 100%);
+  color: var(--text-color);
+}
+
 .App {
+  position: relative;
   min-height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-color);
+  background:
+    radial-gradient(circle at 14% 16%, rgba(102, 126, 234, 0.08), transparent 18%),
+    radial-gradient(circle at 84% 8%, rgba(249, 178, 51, 0.08), transparent 20%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(246, 249, 255, 0.92));
   color: var(--text-color);
   transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: clip;
+}
+
+.App::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.45), transparent 35%);
+  z-index: -1;
 }
 
 .main-content {
@@ -90,10 +142,12 @@
   margin-top: 12px;
   padding: 10px 14px;
   border-radius: 14px;
-  background: #eef4ff;
-  color: #27406b;
+  background: linear-gradient(135deg, #eef4ff 0%, #dde9ff 100%);
+  color: #10213d;
+  border: 1px solid rgba(39, 64, 107, 0.12);
   font-size: 0.94rem;
   line-height: 1.5;
+  box-shadow: 0 10px 24px rgba(12, 20, 35, 0.06);
 }
 
 @media (min-width: 1280px) {

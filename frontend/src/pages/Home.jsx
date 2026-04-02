@@ -17,13 +17,18 @@ import {
 import { loadCatalogCache, saveCatalogCache } from '../utils/catalogCache';
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
+import { useToast } from '../components/Toast';
 import './Home.css';
+
+const FALLBACK_PRODUCT_IMAGE =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="%2312213d"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23ffffff" font-family="Arial, sans-serif" font-size="28">ElectroHub</text></svg>';
 
 const Home = () => {
   const [catalog, setCatalog] = useState([]);
   const [usingCachedCatalog, setUsingCachedCatalog] = useState(false);
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const { showToast } = useToast();
 
   useEffect(() => {
     fetchCatalog();
@@ -54,7 +59,7 @@ const Home = () => {
 
   const addToCart = async (product) => {
     if (!user) {
-      alert('Please login to add to cart');
+      showToast('Please login to add to cart.', 'info');
       return;
     }
 
@@ -67,23 +72,24 @@ const Home = () => {
       });
 
       if (result.pending || result.queued) {
-        alert(
+        showToast(
           isDemoMode
             ? 'Added to cart in demo mode. It will sync when you leave demo mode.'
-            : 'Added to cart. It will sync when you are back online.'
+            : 'Added to cart. It will sync when you are back online.',
+          'info'
         );
         return;
       }
 
-      alert('Added to cart!');
+      showToast('Added to cart!', 'success');
     } catch (error) {
-      alert('Failed to add to cart');
+      showToast('Failed to add to cart.', 'error');
     }
   };
 
   const addToWishlist = (product) => {
     if (!user) {
-      alert('Please login to add to wishlist');
+      showToast('Please login to add to wishlist.', 'info');
       return;
     }
 
@@ -91,13 +97,13 @@ const Home = () => {
     const isInWishlist = currentWishlist.some((item) => item.id === product.id);
 
     if (isInWishlist) {
-      alert('Already in wishlist!');
+      showToast('Already in wishlist!', 'info');
       return;
     }
 
     const updatedWishlist = [...currentWishlist, product];
     saveWishlistCache(user.id, updatedWishlist);
-    alert('Added to wishlist!');
+    showToast('Added to wishlist!', 'success');
   };
 
   const featuredProducts = catalog.slice(0, 6);
@@ -142,6 +148,17 @@ const Home = () => {
       tone: 'amber',
     },
   ];
+
+  const categoryShowcases = categories.map((category, index) => {
+    const matches = catalog.filter((product) => product.category === category.name);
+    const highlight = matches[index % matches.length] || matches[0] || spotlightProduct;
+
+    return {
+      ...category,
+      highlight,
+      itemCount: matches.length,
+    };
+  });
 
   const features = [
     {
@@ -226,21 +243,57 @@ const Home = () => {
         <div className="hero-visual">
           <div className="hero-visual-card hero-visual-main">
             <div className="hero-visual-copy">
-              <span>Featured pick</span>
-              <h3>{spotlightProduct?.name || 'Curated electrical essentials'}</h3>
-              <p>
-                {spotlightProduct?.category || 'Lighting'} | KES {spotlightProduct?.price || '---'}
-              </p>
+              <div className="hero-visual-copy-top">
+                <span>Featured pick</span>
+                <strong>Bright, safe and ready to install</strong>
+              </div>
+              <div>
+                <h3>{spotlightProduct?.name || 'Curated electrical essentials'}</h3>
+                <p>
+                  {spotlightProduct?.category || 'Lighting'} | KES {spotlightProduct?.price || '---'}
+                </p>
+              </div>
+              <div className="hero-spec-strip">
+                <div>
+                  <strong>{catalog.length || 0}+</strong>
+                  <span>products</span>
+                </div>
+                <div>
+                  <strong>{categoryCount || 0}</strong>
+                  <span>categories</span>
+                </div>
+                <div>
+                  <strong>3D</strong>
+                  <span>showcase</span>
+                </div>
+              </div>
             </div>
             <div className="hero-visual-image">
-              <img
-                src={
-                  spotlightProduct?.image ||
-                  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="%2312213d"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23ffffff" font-family="Arial, sans-serif" font-size="28">ElectroHub</text></svg>'
-                }
-                alt={spotlightProduct?.name || 'Electrical product'}
-                decoding="async"
-              />
+              <div className="hero-image-frame">
+                <img
+                  src={spotlightProduct?.image || FALLBACK_PRODUCT_IMAGE}
+                  alt={spotlightProduct?.name || 'Electrical product'}
+                  decoding="async"
+                />
+                <div className="hero-image-overlay">
+                  <span className="hero-image-chip">Live stock</span>
+                  <span className="hero-image-chip bright">Premium finish</span>
+                </div>
+              </div>
+            </div>
+            <div className="hero-floating-card hero-floating-card-top">
+              <Shield size={18} />
+              <div>
+                <strong>Safer choices</strong>
+                <span>Protection devices and neat fittings</span>
+              </div>
+            </div>
+            <div className="hero-floating-card hero-floating-card-bottom">
+              <Truck size={18} />
+              <div>
+                <strong>Quick dispatch</strong>
+                <span>Products ready for fast delivery</span>
+              </div>
             </div>
           </div>
 
@@ -334,14 +387,30 @@ const Home = () => {
             </Link>
           </div>
           <div className="categories-grid">
-            {categories.map((category) => (
+            {categoryShowcases.map((category) => (
               <Link key={category.name} to={category.link} className={`category-card tone-${category.tone}`}>
+                <div className="category-banner">
+                  <img
+                    src={category.highlight?.image || FALLBACK_PRODUCT_IMAGE}
+                    alt={category.highlight?.name || category.name}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div className="category-banner-overlay">
+                    <span>{category.itemCount || 0} items</span>
+                    <strong>{category.highlight?.name || category.name}</strong>
+                  </div>
+                </div>
                 <div className="category-topline">
                   <span>{category.icon}</span>
                   <ArrowRight size={18} />
                 </div>
                 <h3>{category.name}</h3>
                 <p>{category.description}</p>
+                <div className="category-highlight-line">
+                  <strong>{category.highlight?.name || 'Featured device'}</strong>
+                  <span>KES {category.highlight?.price || '---'}</span>
+                </div>
                 <div className="category-link">
                   Explore category <ArrowRight size={16} />
                 </div>

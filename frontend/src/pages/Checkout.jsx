@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/Toast';
 import {
   ArrowRight,
   CheckCircle2,
@@ -21,6 +22,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const { user } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const Checkout = () => {
       const res = await axios.post('/orders', { total });
       setOrderId(res.data.orderId);
     } catch (error) {
-      alert('Failed to create order');
+      showToast(error.response?.data?.message || 'Failed to create order.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -59,7 +61,7 @@ const Checkout = () => {
 
   const handlePayment = async () => {
     if (!phoneNumber || !orderId) {
-      alert('Please enter phone number and create order first');
+      showToast('Please enter a phone number and create the order first.', 'info');
       return;
     }
 
@@ -92,7 +94,7 @@ const Checkout = () => {
         setTimeout(() => clearInterval(interval), 120000);
       }
     } catch (error) {
-      alert('Payment initiation failed');
+      showToast(error.response?.data?.message || 'Payment initiation failed.', 'error');
     } finally {
       setSubmitting(false);
     }

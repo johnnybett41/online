@@ -4,6 +4,8 @@ import './Contact.css';
 
 const Contact = () => {
   const [openFaq, setOpenFaq] = useState(0);
+  const whatsappUrl = 'https://wa.me/254111487078';
+  const tiktokUrl = 'https://www.tiktok.com/@technocrat41';
 
   const faqs = [
     {
@@ -71,6 +73,41 @@ const Contact = () => {
               <strong>Kericho, Kenya</strong>
             </div>
           </div>
+
+          <div className="social-mini-card">
+            <span className="social-mini-kicker">Social communication</span>
+            <p>Tap a logo to reach us on WhatsApp or TikTok.</p>
+            <div className="social-mini-links">
+              <a
+                href={whatsappUrl}
+                className="social-mini-link whatsapp"
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label="Chat with us on WhatsApp"
+              >
+                <img
+                  src="https://cdn.simpleicons.org/whatsapp/25D366"
+                  alt=""
+                  aria-hidden="true"
+                />
+                <span>WhatsApp</span>
+              </a>
+              <a
+                href={tiktokUrl}
+                className="social-mini-link tiktok"
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label="Visit our TikTok profile"
+              >
+                <img
+                  src="https://cdn.simpleicons.org/tiktok/FFFFFF"
+                  alt=""
+                  aria-hidden="true"
+                />
+                <span>TikTok</span>
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -109,6 +146,7 @@ const Contact = () => {
               <p>Kericho, Kenya</p>
             </div>
           </div>
+
         </div>
 
         <div className="contact-form-panel">
