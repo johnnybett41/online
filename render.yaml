@@ -9,17 +9,13 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: DATABASE_PATH
-        value: /opt/render/project/src/data/database.db
+        value: ./database.db
       - key: GOOGLE_CLIENT_ID
         value: 636383910379-pbd733qol3g7j3uvd9um27lb1ap7t1p0.apps.googleusercontent.com
       - key: NEWSLETTER_NOTIFICATION_EMAIL
         value: johnbett414@gmail.com
       - key: ADMIN_EMAILS
         value: johnbett356@gmail.com
-    disk:
-      name: data
-      mountPath: /opt/render/project/src/data
-      sizeGB: 1
   - type: web
     name: online-frontend
     runtime: static

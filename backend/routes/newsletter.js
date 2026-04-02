@@ -70,6 +70,8 @@ router.post('/subscribe', async (req, res) => {
       });
     }
 
+    let notificationSent = true;
+
     try {
       await sendEmail({
         to: notificationEmail,
@@ -83,12 +85,14 @@ router.post('/subscribe', async (req, res) => {
         `,
       });
     } catch (emailError) {
-      await run(`DELETE FROM newsletter_subscribers WHERE id = ?`, [insertResult.lastID]).catch(() => {});
-      throw emailError;
+      notificationSent = false;
+      console.warn('Newsletter email notification could not be sent:', emailError.message);
     }
 
     return res.status(201).json({
-      message: 'Subscription successful. You will receive a confirmation soon.',
+      message: notificationSent
+        ? 'Subscription successful. You will receive a confirmation soon.'
+        : 'Subscription successful. Email notification is unavailable on this deployment.',
       subscribed: true,
     });
   } catch (error) {
@@ -100,9 +104,7 @@ router.post('/subscribe', async (req, res) => {
     }
 
     return res.status(500).json({
-      message: error.message === 'SMTP is not configured'
-        ? 'Newsletter subscription is saved, but email notification is not configured yet.'
-        : 'Failed to subscribe to newsletter',
+      message: 'Failed to subscribe to newsletter',
     });
   }
 });
