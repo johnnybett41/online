@@ -1,10 +1,10 @@
-databases:
-  - name: technocratkip41-online-db
-    databaseName: online_db
-    user: online_user
-    plan: free
-
 services:
+  - type: pgsql
+    name: technocratkip41-online-db
+    plan: free
+    ipAllowList: [] # only accessible from other services in this project
+
+  - type: web
   - type: web
     name: technocratkip41-online-backend
     runtime: node
@@ -15,8 +15,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
+        fromService:
           name: technocratkip41-online-db
+          type: pgsql
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
