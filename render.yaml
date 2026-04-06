@@ -5,7 +5,6 @@ services:
     ipAllowList: [] # only accessible from other services in this project
 
   - type: web
-  - type: web
     name: technocratkip41-online-backend
     runtime: node
     rootDir: backend
@@ -39,6 +38,7 @@ services:
         sync: false
       - key: MAIL_FROM_NAME
         value: ElectroHub
+
   - type: web
     name: technocratkip41-online-frontend
     runtime: static
