@@ -2,8 +2,6 @@ services:
   - type: pgsql
     name: technocratkip41-online-db
     plan: free
-    databaseName: online_db
-    user: online_user
 
   - type: web
     name: technocratkip41-online-backend
@@ -15,8 +13,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
+        fromService:
           name: technocratkip41-online-db
+          type: pgsql
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
