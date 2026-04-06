@@ -9,8 +9,8 @@ function updateOrderPaymentRequest(orderId, checkoutRequestId, phoneNumber) {
   return new Promise((resolve, reject) => {
     db.run(
       `UPDATE orders
-       SET mpesa_checkout_request_id = ?, mpesa_phone_number = ?, status = 'payment_initiated'
-       WHERE id = ?`,
+       SET mpesa_checkout_request_id = $1, mpesa_phone_number = $2, status = 'payment_initiated'
+       WHERE id = $3`,
       [checkoutRequestId, phoneNumber, orderId],
       function (err) {
         if (err) {
@@ -29,11 +29,11 @@ function markOrderPaid({ orderId, checkoutRequestId, receiptNumber, phoneNumber 
     db.run(
       `UPDATE orders
        SET status = 'paid',
-           mpesa_checkout_request_id = COALESCE(mpesa_checkout_request_id, ?),
-           mpesa_receipt_number = COALESCE(?, mpesa_receipt_number),
-           mpesa_phone_number = COALESCE(?, mpesa_phone_number),
+           mpesa_checkout_request_id = COALESCE(mpesa_checkout_request_id, $1),
+           mpesa_receipt_number = COALESCE($2, mpesa_receipt_number),
+           mpesa_phone_number = COALESCE($3, mpesa_phone_number),
            mpesa_paid_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
+       WHERE id = $4`,
       params,
       function (err) {
         if (err) {
@@ -49,7 +49,7 @@ function markOrderPaid({ orderId, checkoutRequestId, receiptNumber, phoneNumber 
 function getOrderIdByCheckoutRequestId(checkoutRequestId) {
   return new Promise((resolve, reject) => {
     db.get(
-      `SELECT id FROM orders WHERE mpesa_checkout_request_id = ? LIMIT 1`,
+      `SELECT id FROM orders WHERE mpesa_checkout_request_id = $1 LIMIT 1`,
       [checkoutRequestId],
       (err, row) => {
         if (err) {

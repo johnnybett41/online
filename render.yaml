@@ -6,16 +6,32 @@ services:
     buildCommand: npm install
     startCommand: npm start
     envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: online-db
+          property: connectionString
       - key: JWT_SECRET
         generateValue: true
-      - key: DATABASE_PATH
-        value: ./database.db
       - key: GOOGLE_CLIENT_ID
         value: 636383910379-pbd733qol3g7j3uvd9um27lb1ap7t1p0.apps.googleusercontent.com
       - key: NEWSLETTER_NOTIFICATION_EMAIL
         value: johnbett414@gmail.com
       - key: ADMIN_EMAILS
         value: johnbett356@gmail.com
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: ElectroHub
   - type: web
     name: online-frontend
     runtime: static
@@ -33,7 +49,10 @@ services:
           type: web
           envVarKey: RENDER_EXTERNAL_URL
       - key: VITE_GOOGLE_CLIENT_ID
-        fromService:
-          name: online-backend
-          type: web
-          envVarKey: GOOGLE_CLIENT_ID
+        value: 636383910379-pbd733qol3g7j3uvd9um27lb1ap7t1p0.apps.googleusercontent.com
+
+databases:
+  - name: online-db
+    databaseName: online_db
+    user: online_user
+    region: oregon

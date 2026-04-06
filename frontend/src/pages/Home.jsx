@@ -18,6 +18,7 @@ import { loadCatalogCache, saveCatalogCache } from '../utils/catalogCache';
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import { useToast } from '../components/Toast';
+import NewsletterSection from '../components/NewsletterSection';
 import './Home.css';
 
 const FALLBACK_PRODUCT_IMAGE =
@@ -466,6 +467,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <NewsletterSection mode="fullPage" />
 
       <section className="cta-section">
         <div className="section-container">

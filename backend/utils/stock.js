@@ -42,7 +42,7 @@ async function getProductStock(db, productId) {
     db,
     `SELECT id, name, stock_quantity, is_active
      FROM products
-     WHERE id = ?`,
+     WHERE id = $1`,
     [productId]
   );
 }
@@ -67,7 +67,7 @@ async function validateProductStock(db, productId, quantity) {
 }
 
 async function deductStockForItems(db, items) {
-  await run(db, 'BEGIN IMMEDIATE TRANSACTION');
+  await run(db, 'BEGIN');
 
   try {
     for (const item of items) {
@@ -75,7 +75,7 @@ async function deductStockForItems(db, items) {
         db,
         `SELECT id, name, stock_quantity
          FROM products
-         WHERE id = ?`,
+         WHERE id = $1`,
         [item.product_id]
       );
 
@@ -97,8 +97,8 @@ async function deductStockForItems(db, items) {
       await run(
         db,
         `UPDATE products
-         SET stock_quantity = stock_quantity - ?
-         WHERE id = ?`,
+         SET stock_quantity = stock_quantity - $1
+         WHERE id = $2`,
         [item.quantity, item.product_id]
       );
     }

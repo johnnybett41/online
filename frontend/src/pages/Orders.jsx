@@ -6,6 +6,7 @@ import { useDemoMode } from '../context/DemoModeContext';
 import { loadOrderCache, saveOrderCache } from '../utils/orderCache';
 import { ArrowRight, FileText, Package, ShieldCheck, ShoppingBag } from 'lucide-react';
 import Skeleton, { SkeletonLine } from '../components/Skeleton';
+import DeliveryTracking from '../components/DeliveryTracking';
 import './PurchaseFlow.css';
 
 const Orders = () => {
@@ -168,6 +169,12 @@ const Orders = () => {
                     <strong>{order.id}</strong>
                   </div>
                 </div>
+
+                {order.delivery_address && (
+                  <div className="order-card__tracking">
+                    <DeliveryTracking order={order} />
+                  </div>
+                )}
 
                 <div className="order-card__footer">
                   <span>Ready for review in your purchase timeline</span>

@@ -46,7 +46,7 @@ router.get('/', authenticateToken, (req, res) => {
     `SELECT cart.*, products.name, products.price, products.image, products.stock_quantity
      FROM cart
      JOIN products ON cart.product_id = products.id
-     WHERE cart.user_id = ?`,
+     WHERE cart.user_id = $1`,
     [req.user.id],
     (err, rows) => {
       if (err) {
@@ -71,7 +71,8 @@ router.post('/', authenticateToken, async (req, res) => {
   try {
     await validateProductStock(db, parsedProductId, parsedQuantity);
     await run(
-      `INSERT OR REPLACE INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)`,
+      `INSERT INTO cart (user_id, product_id, quantity) VALUES ($1, $2, $3)
+       ON CONFLICT(user_id, product_id) DO UPDATE SET quantity = $3`,
       [req.user.id, parsedProductId, parsedQuantity]
     );
     return res.status(201).json({ message: 'Added to cart' });
@@ -93,7 +94,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const cartItem = await get(
       `SELECT cart.product_id
        FROM cart
-       WHERE cart.id = ? AND cart.user_id = ?`,
+       WHERE cart.id = $1 AND cart.user_id = $2`,
       [req.params.id, req.user.id]
     );
 
@@ -104,8 +105,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
     await validateProductStock(db, cartItem.product_id, parsedQuantity);
     await run(
       `UPDATE cart
-       SET quantity = ?
-       WHERE id = ? AND user_id = ?`,
+       SET quantity = $1
+       WHERE id = $2 AND user_id = $3`,
       [parsedQuantity, req.params.id, req.user.id]
     );
 
@@ -118,7 +119,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 // Remove from cart
 router.delete('/:id', authenticateToken, (req, res) => {
   db.run(
-    `DELETE FROM cart WHERE id = ? AND user_id = ?`,
+    `DELETE FROM cart WHERE id = $1 AND user_id = $2`,
     [req.params.id, req.user.id],
     function onDelete(err) {
       if (err) {

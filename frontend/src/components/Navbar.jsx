@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Search, ShoppingCart, User, Menu, X, Heart, Sun, Moon } from 'lucide-react';
+import NotificationCenter from './NotificationCenter';
 import logoLight from '../assets/electrohub-mark.svg';
 import logoDark from '../assets/electrohub-mark-dark.svg';
 import './Navbar.css';
@@ -73,6 +74,8 @@ const Navbar = () => {
           >
             {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
           </button>
+
+          <NotificationCenter />
 
           <Link to="/wishlist" className={`nav-icon-link ${isActive('/wishlist') ? 'active' : ''}`}>
             <Heart size={24} />

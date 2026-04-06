@@ -4,20 +4,19 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
 import Skeleton, { SkeletonLine } from '../components/Skeleton';
+import DeliveryCheckout from '../components/DeliveryCheckout';
 import {
   ArrowRight,
   CheckCircle2,
   CreditCard,
   LayoutList,
   Lock,
-  PhoneCall,
   ShoppingBag,
 } from 'lucide-react';
 import './PurchaseFlow.css';
 
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [orderId, setOrderId] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,54 +47,27 @@ const Checkout = () => {
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const handleCreateOrder = async () => {
+  const handleDeliveryCheckout = async (deliveryData) => {
     setSubmitting(true);
     try {
-      const res = await axios.post('/orders', { total });
+      const res = await axios.post('/orders/delivery/checkout', deliveryData);
       setOrderId(res.data.orderId);
-    } catch (error) {
-      showToast(error.response?.data?.message || 'Failed to create order.', 'error');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handlePayment = async () => {
-    if (!phoneNumber || !orderId) {
-      showToast('Please enter a phone number and create the order first.', 'info');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const res = await axios.post('/mpesa/pay', {
-        phoneNumber,
-        amount: total,
-        orderId,
+      setPaymentStatus({
+        status: res.data.status,
+        message: res.data.payment_method === 'mpesa' 
+          ? 'Order created! Preparing M-Pesa payment...'
+          : 'Order confirmed! We will contact you to confirm delivery.',
       });
 
-      if (res.data.success) {
-        setPaymentStatus('Payment initiated. Please check your phone and complete the payment.');
-
-        const checkStatus = async () => {
-          try {
-            const statusRes = await axios.get(`/mpesa/status/${res.data.checkoutRequestId}`);
-            if (statusRes.data.ResponseCode === '0' && statusRes.data.ResultCode === '0') {
-              setPaymentStatus('Payment successful! Order confirmed.');
-              setTimeout(() => navigate('/orders'), 1800);
-            } else if (statusRes.data.ResponseCode === '0' && statusRes.data.ResultCode !== '0') {
-              setPaymentStatus('Payment failed. Please try again.');
-            }
-          } catch (error) {
-            // Continue polling
-          }
-        };
-
-        const interval = setInterval(checkStatus, 5000);
-        setTimeout(() => clearInterval(interval), 120000);
+      // If cash on delivery, redirect to orders after 2 seconds
+      if (res.data.payment_method === 'cash_on_delivery') {
+        setTimeout(() => navigate('/orders'), 2000);
+      } else {
+        // If M-Pesa, stay on this page for payment confirmation
+        setTimeout(() => navigate('/orders'), 3000);
       }
     } catch (error) {
-      showToast(error.response?.data?.message || 'Payment initiation failed.', 'error');
+      showToast(error.response?.data?.message || 'Failed to place order.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -211,50 +183,20 @@ const Checkout = () => {
 
           <aside className="purchase-card summary-card">
             <div className="card-heading">
-              <h2>Payment details</h2>
-              <p>Set up your order and pay safely with M-Pesa.</p>
+              <h2>Delivery & Payment</h2>
+              <p>Complete your order with delivery and payment options.</p>
             </div>
 
-            <div className="summary-metrics">
-              <div>
-                <span>Order total</span>
-                <strong>KES {total.toFixed(2)}</strong>
-              </div>
-              <div>
-                <span>Status</span>
-                <strong>{orderId ? 'Ready to pay' : 'Create order'}</strong>
-              </div>
-            </div>
-
-            {!orderId ? (
-              <button type="button" className="purchase-button primary full-width" onClick={handleCreateOrder} disabled={submitting}>
-                {submitting ? 'Creating Order...' : 'Create Order'}
-              </button>
-            ) : (
-              <>
-                <div className="purchase-field">
-                  <PhoneCall size={18} className="purchase-field__icon" />
-                  <input
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder=" "
-                    required
-                  />
-                  <label>M-Pesa phone number</label>
-                </div>
-
-                <button type="button" className="purchase-button primary full-width" onClick={handlePayment} disabled={submitting}>
-                  {submitting ? 'Processing...' : 'Pay with M-Pesa'}
-                  {!submitting && <ArrowRight size={16} />}
-                </button>
-              </>
-            )}
+            <DeliveryCheckout 
+              cartTotal={total}
+              loading={submitting}
+              onSubmit={handleDeliveryCheckout}
+            />
 
             {paymentStatus && (
-              <div className="status-banner">
+              <div className="status-banner" style={{ marginTop: '20px' }}>
                 <CheckCircle2 size={18} />
-                <span>{paymentStatus}</span>
+                <span>{paymentStatus.message}</span>
               </div>
             )}
           </aside>

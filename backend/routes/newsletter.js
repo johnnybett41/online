@@ -6,9 +6,9 @@ const router = express.Router();
 
 const NEWSLETTER_TABLE_SQL = `
   CREATE TABLE IF NOT EXISTS newsletter_subscribers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     email TEXT NOT NULL UNIQUE,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
 `;
 
@@ -59,7 +59,7 @@ router.post('/subscribe', async (req, res) => {
     await ensureNewsletterTable();
 
     const insertResult = await run(
-      `INSERT OR IGNORE INTO newsletter_subscribers (email) VALUES (?)`,
+      `INSERT INTO newsletter_subscribers (email) VALUES ($1) ON CONFLICT DO NOTHING`,
       [email]
     );
 
@@ -96,7 +96,7 @@ router.post('/subscribe', async (req, res) => {
       subscribed: true,
     });
   } catch (error) {
-    if (error.code === 'SQLITE_CONSTRAINT') {
+    if (error.code === '23505') { // PostgreSQL unique_violation
       return res.json({
         message: 'You are already subscribed.',
         subscribed: false,

@@ -46,7 +46,7 @@ const ensureUniqueUsername = async (baseUsername) => {
   let candidate = baseUsername;
   let suffix = 0;
 
-  while (await dbGet('SELECT id FROM users WHERE username = ?', [candidate])) {
+  while (await dbGet('SELECT id FROM users WHERE username = $1', [candidate])) {
     suffix += 1;
     candidate = `${baseUsername}${suffix}`;
   }
@@ -100,31 +100,31 @@ router.post('/register', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    db.run(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`,
+    db.run(`INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email`,
       [username, email, hashedPassword], function(err) {
       if (err) {
         console.error('Database error:', err);
-        if (err.message.includes('UNIQUE constraint failed')) {
-          if (err.message.includes('username')) {
+        if (err.code === '23505') { // PostgreSQL unique_violation code
+          if (err.constraint?.includes('username')) {
             return res.status(400).json({ message: 'Username already exists' });
-          } else if (err.message.includes('email')) {
+          } else if (err.constraint?.includes('email')) {
             return res.status(400).json({ message: 'Email already exists' });
           }
+          return res.status(400).json({ message: 'This record already exists' });
         }
         return res.status(500).json({ message: 'Registration failed. Please try again.' });
       }
 
-      // Get the created user
-      db.get(`SELECT id, username, email FROM users WHERE id = ?`, [this.lastID], (err, user) => {
-        if (err) {
-          console.error('Error fetching created user:', err);
-          return res.status(500).json({ message: 'User created but failed to retrieve data' });
-        }
+      // User was created successfully with RETURNING clause
+      const user = this.rows?.[0];
+      if (user) {
         res.status(201).json({
           message: 'User created successfully',
           user: user
         });
-      });
+      } else {
+        res.status(500).json({ message: 'User created but failed to retrieve data' });
+      }
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -137,7 +137,7 @@ router.post('/login', (req, res) => {
   const { email, password } = req.body;
   console.log('Login attempt:', email);
 
-  db.get(`SELECT * FROM users WHERE email = ?`, [email], async (err, user) => {
+  db.get(`SELECT * FROM users WHERE email = $1`, [email], async (err, user) => {
     console.log('Database query result:', err, user);
     if (err || !user) {
       return res.status(400).json({ message: 'Invalid credentials' });
@@ -169,7 +169,7 @@ router.post('/google', async (req, res) => {
       return res.status(400).json({ message: 'Google account email is missing' });
     }
 
-    let user = await dbGet('SELECT id, username, email FROM users WHERE email = ?', [email]);
+    let user = await dbGet('SELECT id, username, email FROM users WHERE email = $1', [email]);
 
     if (!user) {
       const nameSource = googleProfile.name || email.split('@')[0] || 'Google User';
@@ -178,11 +178,11 @@ router.post('/google', async (req, res) => {
       const randomPassword = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
 
       const insertResult = await dbRun(
-        'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+        'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email',
         [username, email, randomPassword]
       );
 
-      user = await dbGet('SELECT id, username, email FROM users WHERE id = ?', [insertResult.lastID]);
+      user = insertResult.rows?.[0] || { id: insertResult.lastID, username, email };
     }
 
     return res.json(signSession(user));

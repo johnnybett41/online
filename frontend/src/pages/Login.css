@@ -43,6 +43,7 @@
   box-shadow: 0 28px 80px rgba(13, 24, 41, 0.14);
   border: 1px solid rgba(15, 23, 42, 0.06);
   background: rgba(255, 255, 255, 0.75);
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
 }
 
@@ -387,6 +388,33 @@
   transform: none;
 }
 
+.demo-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid #3a70ff;
+  border-radius: 18px;
+  background: transparent;
+  color: #3a70ff;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.demo-mode-btn:hover {
+  background: rgba(58, 112, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.demo-mode-btn:active {
+  transform: translateY(0);
+}
+
 .auth-footer {
   display: flex;
   justify-content: center;
@@ -412,7 +440,7 @@
   }
 
   .auth-hero {
-    min-height: auto;
+    /* min-height: auto; */
   }
 }
 

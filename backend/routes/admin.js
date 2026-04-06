@@ -67,7 +67,7 @@ router.patch('/products/:id/stock', async (req, res) => {
   }
 
   try {
-    const product = await get(`SELECT id FROM products WHERE id = ?`, [productId]);
+    const product = await get(`SELECT id FROM products WHERE id = $1`, [productId]);
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
@@ -75,8 +75,8 @@ router.patch('/products/:id/stock', async (req, res) => {
 
     await run(
       `UPDATE products
-       SET stock_quantity = ?
-       WHERE id = ?`,
+       SET stock_quantity = $1
+       WHERE id = $2`,
       [stockQuantity, productId]
     );
 
@@ -99,7 +99,7 @@ router.post('/products/:id/restock', async (req, res) => {
   }
 
   try {
-    const product = await get(`SELECT id FROM products WHERE id = ?`, [productId]);
+    const product = await get(`SELECT id FROM products WHERE id = $1`, [productId]);
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
@@ -107,12 +107,12 @@ router.post('/products/:id/restock', async (req, res) => {
 
     await run(
       `UPDATE products
-       SET stock_quantity = stock_quantity + ?
-       WHERE id = ?`,
+       SET stock_quantity = stock_quantity + $1
+       WHERE id = $2`,
       [quantity, productId]
     );
 
-    const updated = await get(`SELECT stock_quantity FROM products WHERE id = ?`, [productId]);
+    const updated = await get(`SELECT stock_quantity FROM products WHERE id = $1`, [productId]);
     return res.json({
       message: 'Stock increased',
       stock_quantity: updated?.stock_quantity ?? quantity,

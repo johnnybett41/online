@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Get all products
 router.get('/', (req, res) => {
-  db.all(`SELECT * FROM products WHERE is_active = 1 ORDER BY id`, [], (err, rows) => {
+  db.all(`SELECT * FROM products WHERE is_active = true ORDER BY id`, [], (err, rows) => {
     if (err) {
       return res.status(500).json({ message: 'Database error' });
     }
@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
 
 // Get product by id
 router.get('/:id', (req, res) => {
-  db.get(`SELECT * FROM products WHERE id = ?`, [req.params.id], (err, row) => {
+  db.get(`SELECT * FROM products WHERE id = $1`, [req.params.id], (err, row) => {
     if (err) {
       return res.status(500).json({ message: 'Database error' });
     }
@@ -34,7 +34,7 @@ router.post('/', (req, res) => {
     ? parsedStockQuantity
     : 0;
 
-  db.run(`INSERT INTO products (name, description, price, image, category, stock_quantity, is_active) VALUES (?, ?, ?, ?, ?, ?, 1)`,
+  db.run(`INSERT INTO products (name, description, price, image, category, stock_quantity, is_active) VALUES ($1, $2, $3, $4, $5, $6, true) RETURNING id`,
     [name, description, price, image, category, safeStockQuantity], function(err) {
     if (err) {
       return res.status(500).json({ message: 'Database error' });

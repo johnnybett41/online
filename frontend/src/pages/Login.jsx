@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, LockKeyhole, Mail, ShieldCheck, Sparkles, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useDemoMode } from '../context/DemoModeContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 import logoLight from '../assets/electrohub-mark.svg';
 import logoDark from '../assets/electrohub-mark-dark.svg';
@@ -15,6 +16,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login, googleLogin } = useAuth();
   const { isDarkMode } = useTheme();
+  const { enableDemoMode } = useDemoMode();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -30,6 +32,11 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDemoMode = () => {
+    enableDemoMode();
+    navigate('/');
   };
 
   return (
@@ -112,6 +119,16 @@ const Login = () => {
           <div className="auth-divider">
             <span>or use email</span>
           </div>
+
+          <button 
+            type="button"
+            onClick={handleDemoMode}
+            className="demo-mode-btn"
+            title="Experience the full platform with demo data"
+          >
+            <Zap size={18} />
+            Quick Browse (Demo Mode)
+          </button>
 
           <form className="auth-form" onSubmit={handleSubmit} autoComplete="on">
             {error && <div className="auth-error">{error}</div>}
