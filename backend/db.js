@@ -14,6 +14,13 @@ const poolConfig = process.env.DATABASE_URL ? {
   database: process.env.DB_NAME || 'online_db',
 };
 
+console.log('Database configuration:', {
+  hasDatabaseUrl: !!process.env.DATABASE_URL,
+  databaseUrlLength: process.env.DATABASE_URL ? process.env.DATABASE_URL.length : 0,
+  usingConnectionString: !!process.env.DATABASE_URL,
+  poolConfigKeys: Object.keys(poolConfig)
+});
+
 const pool = new Pool(poolConfig);
 
 pool.on('error', (err) => {

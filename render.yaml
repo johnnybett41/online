@@ -1,3 +1,9 @@
+databases:
+  - name: technocratkip41-online-db
+    databaseName: online_db
+    user: online_user
+    plan: free
+
 services:
   - type: web
     name: technocratkip41-online-backend
