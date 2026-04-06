@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: online-backend
+    name: technocratkip41-online-backend
     runtime: node
     rootDir: backend
     buildCommand: npm install
@@ -10,7 +10,7 @@ services:
         value: production
       - key: DATABASE_URL
         fromDatabase:
-          name: online-db
+          name: technocratkip41-online-db
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
@@ -33,7 +33,7 @@ services:
       - key: MAIL_FROM_NAME
         value: ElectroHub
   - type: web
-    name: online-frontend
+    name: technocratkip41-online-frontend
     runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
@@ -45,7 +45,7 @@ services:
     envVars:
       - key: VITE_API_URL
         fromService:
-          name: online-backend
+          name: technocratkip41-online-backend
           type: web
           envVarKey: RENDER_EXTERNAL_URL
       - key: VITE_GOOGLE_CLIENT_ID
