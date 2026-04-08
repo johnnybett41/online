@@ -25,6 +25,10 @@ export const ToastProvider = ({ children }) => {
   const [toast, setToast] = useState(null);
 
   const showToast = (message, type = 'info') => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('app:notify', { detail: { message, type } }));
+    }
+
     setToast({
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       message,

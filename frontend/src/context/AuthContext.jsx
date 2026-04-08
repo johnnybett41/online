@@ -31,8 +31,8 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  const login = async (email, password) => {
-    const res = await axios.post('/auth/login', { email, password });
+  const login = async (email, password, options = {}) => {
+    const res = await axios.post('/auth/login', { email, password, ...options });
     persistSession(res.data);
   };
 

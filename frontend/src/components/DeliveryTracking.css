@@ -25,6 +25,31 @@
   flex: 1;
 }
 
+.tracking-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.tracking-refresh:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.tracking-refresh:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
 .delivery-header-content h4 {
   margin: 0 0 8px;
   font-size: 16px;
@@ -206,6 +231,26 @@
 .payment-info svg {
   color: #2ecc71;
   flex-shrink: 0;
+}
+
+.tracking-updated {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.spinning {
+  animation: tracking-spin 0.8s linear infinite;
+}
+
+@keyframes tracking-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .info-label {

@@ -1,8 +1,11 @@
-services:
-  - type: pgsql
-    name: technocratkip41-online-db
+databases:
+  - name: technocratkip41-online-db
     plan: free
+    databaseName: online_db
+    region: oregon
+    ipAllowList: []
 
+services:
   - type: web
     name: technocratkip41-online-backend
     runtime: node
@@ -13,9 +16,8 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromService:
+        fromDatabase:
           name: technocratkip41-online-db
-          type: pgsql
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
@@ -56,9 +58,3 @@ services:
           envVarKey: RENDER_EXTERNAL_URL
       - key: VITE_GOOGLE_CLIENT_ID
         value: 636383910379-pbd733qol3g7j3uvd9um27lb1ap7t1p0.apps.googleusercontent.com
-
-databases:
-  - name: online-db
-    databaseName: online_db
-    user: online_user
-    region: oregon

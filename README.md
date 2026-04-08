@@ -1,6 +1,6 @@
 # Electrical Devices E-commerce Website
 
-A full-stack e-commerce website for electrical devices built with React (frontend), Node.js/Express (backend), and SQLite (database).
+A full-stack e-commerce website for electrical devices built with React (frontend), Node.js/Express (backend), and PostgreSQL (database).
 
 ## Features
 
@@ -64,19 +64,15 @@ online/
    npm install
    ```
 
-3. Seed the database with sample products:
-
-   ```bash
-   npm run seed
-   ```
-
-4. Start the backend server:
+3. Start the backend server:
 
    ```bash
    npm run dev
    ```
 
    The server will run on <http://localhost:5000>
+
+   On first launch, the backend creates the schema and seeds the product catalog automatically if it is empty.
 
 ### Frontend
 
@@ -130,7 +126,7 @@ online/
 
 ## Database Schema
 
-The SQLite database includes the following tables:
+The PostgreSQL database includes the following tables:
 
 - users (id, username, email, password)
 - products (id, name, description, price, image, category)
@@ -141,8 +137,8 @@ The SQLite database includes the following tables:
 ## Technologies Used
 
 - **Frontend:** React, React Router, Axios, Vite
-- **Backend:** Node.js, Express.js, SQLite3, bcryptjs, jsonwebtoken
-- **Database:** SQLite
+- **Backend:** Node.js, Express.js, bcryptjs, jsonwebtoken, pg
+- **Database:** PostgreSQL
 
 ## M-Pesa Integration
 
@@ -167,7 +163,7 @@ MPESA_SHORTCODE=your-shortcode
 MPESA_PASSKEY=your-passkey
 MPESA_BASE_URL=https://sandbox.safaricom.co.ke
 BASE_URL=http://localhost:5000
-DATABASE_PATH=./database.db
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/online_db
 ```
 
 For production Daraja credentials, change:
@@ -204,12 +200,12 @@ If you are deploying to Render:
 
 ## Deploying To Render
 
-This repo includes a `render.yaml` blueprint for two services:
+This repo includes a `render.yaml` blueprint for one database and two services:
 
 - `online-backend` as a Node web service
 - `online-frontend` as a static site
 
-Render also mounts a persistent disk for the SQLite database, and the backend seeds products automatically on startup if the catalog is empty, so the catalog survives restarts.
+Render provisions a managed PostgreSQL database for the backend, and the backend seeds products automatically on startup if the catalog is empty, so the catalog survives restarts.
 
 You still need to add your M-Pesa credentials in the backend service environment variables on Render:
 

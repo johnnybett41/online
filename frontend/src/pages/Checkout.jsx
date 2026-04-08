@@ -17,8 +17,8 @@ import './PurchaseFlow.css';
 
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
-  const [orderId, setOrderId] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
+  const [lastOrderId, setLastOrderId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const { user } = useAuth();
@@ -51,20 +51,21 @@ const Checkout = () => {
     setSubmitting(true);
     try {
       const res = await axios.post('/orders/delivery/checkout', deliveryData);
-      setOrderId(res.data.orderId);
+      setLastOrderId(res.data.orderId);
       setPaymentStatus({
         status: res.data.status,
         message: res.data.payment_method === 'mpesa' 
           ? 'Order created! Preparing M-Pesa payment...'
           : 'Order confirmed! We will contact you to confirm delivery.',
       });
+      showToast('Your order was placed successfully.', 'success');
 
       // If cash on delivery, redirect to orders after 2 seconds
       if (res.data.payment_method === 'cash_on_delivery') {
-        setTimeout(() => navigate('/orders'), 2000);
+        setTimeout(() => navigate(`/orders?order=${res.data.orderId}`), 2500);
       } else {
         // If M-Pesa, stay on this page for payment confirmation
-        setTimeout(() => navigate('/orders'), 3000);
+        setTimeout(() => navigate(`/orders?order=${res.data.orderId}`), 3500);
       }
     } catch (error) {
       showToast(error.response?.data?.message || 'Failed to place order.', 'error');
@@ -197,6 +198,11 @@ const Checkout = () => {
               <div className="status-banner" style={{ marginTop: '20px' }}>
                 <CheckCircle2 size={18} />
                 <span>{paymentStatus.message}</span>
+                {lastOrderId && (
+                  <Link to={`/orders?order=${lastOrderId}`} className="purchase-button secondary" style={{ marginLeft: 'auto' }}>
+                    Track delivery
+                  </Link>
+                )}
               </div>
             )}
           </aside>

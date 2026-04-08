@@ -1,16 +1,82 @@
-import { Package, Truck, Home, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import axios from 'axios';
+import { Package, Truck, Home, CheckCircle, Clock, AlertCircle, RefreshCcw } from 'lucide-react';
+import { useToast } from './Toast';
 import './DeliveryTracking.css';
 
+const REFRESH_INTERVAL = 15000;
+
 const DeliveryTracking = ({ order }) => {
-  if (!order.delivery_address) {
-    return null;
-  }
+  const [liveOrder, setLiveOrder] = useState(order);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const { showToast } = useToast();
+  const lastStatusRef = useRef(order.status);
+  const activeOrder = liveOrder || order;
+
+  useEffect(() => {
+    setLiveOrder(order);
+    lastStatusRef.current = order.status;
+  }, [order]);
+
+  const getOrderDetails = async (signal) => {
+    if (!order?.id) {
+      return;
+    }
+
+    setIsRefreshing(true);
+
+    try {
+      const response = await axios.get(`/orders/${order.id}`, { signal });
+      const nextOrder = response.data;
+
+      setLiveOrder(nextOrder);
+      setLastUpdated(new Date());
+
+      if (lastStatusRef.current && nextOrder.status !== lastStatusRef.current) {
+        showToast(`Order #${order.id} status updated to ${getStatusText(nextOrder.status)}.`, 'info');
+      }
+
+      lastStatusRef.current = nextOrder.status;
+    } catch (error) {
+      if (error.name !== 'CanceledError' && error.name !== 'AbortError') {
+        console.error('Failed to refresh delivery tracking:', error);
+      }
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    getOrderDetails(controller.signal);
+
+    const status = order?.status || liveOrder?.status;
+    const shouldPoll = !['delivered', 'failed'].includes(status);
+
+    if (!shouldPoll) {
+      return () => controller.abort();
+    }
+
+    const intervalId = window.setInterval(() => {
+      getOrderDetails(controller.signal);
+    }, REFRESH_INTERVAL);
+
+    return () => {
+      controller.abort();
+      window.clearInterval(intervalId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order?.id, activeOrder.status]);
 
   const getStatusIcon = (status) => {
     switch (status) {
       case 'pending_payment':
+      case 'payment_initiated':
+      case 'pending_confirmation':
         return <Clock size={20} />;
       case 'paid':
+      case 'processing':
         return <Package size={20} />;
       case 'shipped':
         return <Truck size={20} />;
@@ -26,7 +92,10 @@ const DeliveryTracking = ({ order }) => {
   const getStatusText = (status) => {
     const statusMap = {
       pending_payment: 'Awaiting Payment',
-      paid: 'Processing',
+      payment_initiated: 'Payment Started',
+      pending_confirmation: 'Awaiting Confirmation',
+      processing: 'Processing',
+      paid: 'Paid',
       shipped: 'In Transit',
       delivered: 'Delivered',
       failed: 'Payment Failed',
@@ -37,8 +106,11 @@ const DeliveryTracking = ({ order }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending_payment':
+      case 'payment_initiated':
+      case 'pending_confirmation':
         return 'pending';
       case 'paid':
+      case 'processing':
         return 'processing';
       case 'shipped':
         return 'shipping';
@@ -51,8 +123,18 @@ const DeliveryTracking = ({ order }) => {
     }
   };
 
-  const statusSteps = ['pending_payment', 'paid', 'shipped', 'delivered'];
-  const currentStepIndex = statusSteps.indexOf(order.status);
+  const statusSteps = useMemo(
+    () => ['pending_payment', 'payment_initiated', 'paid', 'shipped', 'delivered'],
+    []
+  );
+  const currentStepIndex = Math.max(
+    0,
+    statusSteps.indexOf(activeOrder.status)
+  );
+
+  if (!activeOrder.delivery_address) {
+    return null;
+  }
 
   return (
     <div className="delivery-tracking">
@@ -60,11 +142,22 @@ const DeliveryTracking = ({ order }) => {
         <Truck size={24} className="delivery-icon" />
         <div className="delivery-header-content">
           <h4>Delivery Details</h4>
-          <p className={`status-badge status-${getStatusColor(order.status)}`}>
-            {getStatusIcon(order.status)}
-            {getStatusText(order.status)}
+          <p className={`status-badge status-${getStatusColor(activeOrder.status)}`}>
+            {getStatusIcon(activeOrder.status)}
+            {getStatusText(activeOrder.status)}
           </p>
         </div>
+
+        <button
+          type="button"
+          className="tracking-refresh"
+          onClick={() => getOrderDetails()}
+          disabled={isRefreshing}
+          aria-label="Refresh delivery status"
+        >
+          <RefreshCcw size={16} className={isRefreshing ? 'spinning' : ''} />
+          <span>{isRefreshing ? 'Refreshing' : 'Live'}</span>
+        </button>
       </div>
 
       <div className="delivery-timeline">
@@ -84,12 +177,8 @@ const DeliveryTracking = ({ order }) => {
                 <Circle size={24} />
               )}
             </div>
-            <div className="timeline-label">
-              {getStatusText(step).split(' ')[0]}
-            </div>
-            {index < statusSteps.length - 1 && (
-              <div className="timeline-connector" />
-            )}
+            <div className="timeline-label">{getStatusText(step).split(' ')[0]}</div>
+            {index < statusSteps.length - 1 && <div className="timeline-connector" />}
           </div>
         ))}
       </div>
@@ -98,41 +187,47 @@ const DeliveryTracking = ({ order }) => {
         <Home size={18} />
         <div className="address-content">
           <p className="address-label">Delivery Address</p>
-          <p className="address-text">{order.delivery_address}</p>
-          {order.delivery_method && (
+          <p className="address-text">{activeOrder.delivery_address}</p>
+          {activeOrder.delivery_method && (
             <p className="delivery-method">
-              Method: <strong>{order.delivery_method}</strong>
+              Method: <strong>{activeOrder.delivery_method}</strong>
             </p>
           )}
-          {order.delivery_cost && (
+          {activeOrder.delivery_cost !== undefined && activeOrder.delivery_cost !== null && (
             <p className="delivery-cost">
-              Cost: <strong>KES {order.delivery_cost.toFixed(2)}</strong>
+              Cost: <strong>KES {Number(activeOrder.delivery_cost).toFixed(2)}</strong>
             </p>
           )}
-          {order.estimated_delivery_date && (
+          {activeOrder.estimated_delivery_date && (
             <p className="estimated-date">
-              Est. Delivery: <strong>{new Date(order.estimated_delivery_date).toLocaleDateString()}</strong>
+              Est. Delivery:{' '}
+              <strong>{new Date(activeOrder.estimated_delivery_date).toLocaleDateString()}</strong>
             </p>
           )}
         </div>
       </div>
 
-      {order.mpesa_paid_at && (
+      {activeOrder.mpesa_paid_at && (
         <div className="payment-info">
           <CheckCircle size={18} />
           <div>
             <p className="info-label">Payment Confirmed</p>
             <p className="info-text">
-              {order.mpesa_receipt_number && `Receipt: ${order.mpesa_receipt_number}`}
+              {activeOrder.mpesa_receipt_number && `Receipt: ${activeOrder.mpesa_receipt_number}`}
             </p>
           </div>
         </div>
+      )}
+
+      {lastUpdated && (
+        <p className="tracking-updated">
+          Last updated {lastUpdated.toLocaleTimeString()}
+        </p>
       )}
     </div>
   );
 };
 
-// Helper component
 const Circle = ({ size = 24, ...props }) => (
   <div
     style={{

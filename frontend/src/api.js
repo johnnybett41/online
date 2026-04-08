@@ -8,5 +8,7 @@ if (normalizedApiUrl !== rawApiUrl) {
 }
 
 axios.defaults.baseURL = normalizedApiUrl;
+axios.defaults.timeout = 10_000; // quicker failover for snappier UI feedback
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 export default axios;

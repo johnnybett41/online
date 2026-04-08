@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bell, X, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import './Toast.css'; // Reuse toast styling
 
@@ -6,9 +6,10 @@ const NotificationCenter = () => {
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const timersRef = useRef(new Map());
 
   const addNotification = (message, type = 'info', duration = 5000) => {
-    const id = Date.now();
+    const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const notification = {
       id,
       message,
@@ -20,29 +21,60 @@ const NotificationCenter = () => {
     setUnreadCount((prev) => prev + 1);
 
     if (duration > 0) {
-      setTimeout(() => removeNotification(id), duration);
+      const timerId = window.setTimeout(() => removeNotification(id), duration);
+      timersRef.current.set(id, timerId);
     }
   };
 
   const removeNotification = (id) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    const timerId = timersRef.current.get(id);
+    if (timerId) {
+      window.clearTimeout(timerId);
+      timersRef.current.delete(id);
+    }
+
+    setNotifications((prev) => {
+      const target = prev.find((n) => n.id === id);
+      if (target && !target.read) {
+        setUnreadCount((count) => Math.max(0, count - 1));
+      }
+      return prev.filter((n) => n.id !== id);
+    });
   };
 
   const markAsRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id && !n.read ? { ...n, read: true } : n))
-    );
-    setUnreadCount((prev) => Math.max(0, prev - 1));
+    setNotifications((prev) => {
+      const target = prev.find((n) => n.id === id);
+      if (target && !target.read) {
+        setUnreadCount((prevCount) => Math.max(0, prevCount - 1));
+      }
+
+      return prev.map((n) => (n.id === id && !n.read ? { ...n, read: true } : n));
+    });
   };
 
   const clearAll = () => {
+    timersRef.current.forEach((timerId) => window.clearTimeout(timerId));
+    timersRef.current.clear();
     setNotifications([]);
     setUnreadCount(0);
   };
 
-  // Store notifications in context for global access
+  // Store notifications in context for global access + listen to custom events
   useEffect(() => {
     window.addNotification = addNotification;
+
+    const listener = (event) => {
+      if (!event?.detail?.message) return;
+      addNotification(event.detail.message, event.detail.type || 'info');
+    };
+
+    window.addEventListener('app:notify', listener);
+    return () => {
+      window.removeEventListener('app:notify', listener);
+      timersRef.current.forEach((timerId) => window.clearTimeout(timerId));
+      timersRef.current.clear();
+    };
   }, []);
 
   const getIcon = (type) => {

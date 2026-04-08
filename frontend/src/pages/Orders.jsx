@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDemoMode } from '../context/DemoModeContext';
 import { loadOrderCache, saveOrderCache } from '../utils/orderCache';
@@ -13,8 +13,10 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [usingCachedOrders, setUsingCachedOrders] = useState(false);
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const selectedOrderId = searchParams.get('order');
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -48,6 +50,21 @@ const Orders = () => {
 
     fetchOrders();
   }, [user, isDemoMode]);
+
+  useEffect(() => {
+    if (!selectedOrderId) {
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      document.getElementById(`order-${selectedOrderId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }, 250);
+
+    return () => window.clearTimeout(timerId);
+  }, [selectedOrderId, orders.length]);
 
   if (!user) {
     return (
@@ -149,8 +166,14 @@ const Orders = () => {
                 ? 'Paid'
                 : order.status;
 
+            const isSelected = selectedOrderId && String(order.id) === String(selectedOrderId);
+
             return (
-              <article key={order.id} className="purchase-card order-card">
+              <article
+                key={order.id}
+                id={`order-${order.id}`}
+                className={`purchase-card order-card ${isSelected ? 'order-card--highlight' : ''}`}
+              >
                 <div className="order-card__top">
                   <div>
                     <p className="item-category">Order #{order.id}</p>
@@ -178,9 +201,14 @@ const Orders = () => {
 
                 <div className="order-card__footer">
                   <span>Ready for review in your purchase timeline</span>
-                  <Link to="/products" className="inline-link">
-                    Shop again <ArrowRight size={16} />
-                  </Link>
+                  <div className="order-card__actions">
+                    <Link to={`/orders?order=${order.id}#order-${order.id}`} className="inline-link">
+                      Track delivery <ArrowRight size={16} />
+                    </Link>
+                    <Link to="/products" className="inline-link">
+                      Shop again <ArrowRight size={16} />
+                    </Link>
+                  </div>
                 </div>
               </article>
             );

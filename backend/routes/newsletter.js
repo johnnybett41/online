@@ -70,29 +70,22 @@ router.post('/subscribe', async (req, res) => {
       });
     }
 
-    let notificationSent = true;
-
-    try {
-      await sendEmail({
-        to: notificationEmail,
-        subject: 'New newsletter subscription',
-        text: `A new visitor subscribed to the newsletter: ${email}`,
-        html: `
-          <h2>New newsletter subscription</h2>
-          <p>A new visitor subscribed to the ElectroHub newsletter.</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Submitted at:</strong> ${new Date().toISOString()}</p>
-        `,
-      });
-    } catch (emailError) {
-      notificationSent = false;
+    void sendEmail({
+      to: notificationEmail,
+      subject: 'New newsletter subscription',
+      text: `A new visitor subscribed to the newsletter: ${email}`,
+      html: `
+        <h2>New newsletter subscription</h2>
+        <p>A new visitor subscribed to the ElectroHub newsletter.</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Submitted at:</strong> ${new Date().toISOString()}</p>
+      `,
+    }).catch((emailError) => {
       console.warn('Newsletter email notification could not be sent:', emailError.message);
-    }
+    });
 
     return res.status(201).json({
-      message: notificationSent
-        ? 'Subscription successful. You will receive a confirmation soon.'
-        : 'Subscription successful. Email notification is unavailable on this deployment.',
+      message: 'Subscription successful. You will receive a confirmation soon.',
       subscribed: true,
     });
   } catch (error) {

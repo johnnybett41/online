@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, LockKeyhole, Mail, ShieldCheck, Sparkles, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useDemoMode } from '../context/DemoModeContext';
+import { useToast } from '../components/Toast';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 import logoLight from '../assets/electrohub-mark.svg';
 import logoDark from '../assets/electrohub-mark-dark.svg';
@@ -14,10 +15,24 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, googleLogin } = useAuth();
+  const [rememberEmail, setRememberEmail] = useState(true);
+  const { user, login, googleLogin } = useAuth();
   const { isDarkMode } = useTheme();
   const { enableDemoMode } = useDemoMode();
+  const { showToast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+      return;
+    }
+
+    const cachedEmail = localStorage.getItem('lastEmail');
+    if (cachedEmail) {
+      setEmail(cachedEmail);
+    }
+  }, [navigate, user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,10 +40,18 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(email, password, { rememberMe: rememberEmail });
+      if (rememberEmail) {
+        localStorage.setItem('lastEmail', email);
+      } else {
+        localStorage.removeItem('lastEmail');
+      }
+      showToast('Welcome back. Login successful.', 'success');
       navigate('/');
     } catch (authError) {
-      setError('Login failed. Please check your credentials.');
+      const message = authError.response?.data?.message || 'Login failed. Please check your credentials.';
+      setError(message);
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -36,7 +59,18 @@ const Login = () => {
 
   const handleDemoMode = () => {
     enableDemoMode();
+    showToast('Demo mode enabled for quick browsing.', 'info');
     navigate('/');
+  };
+
+  const handleUseSavedEmail = () => {
+    const cachedEmail = localStorage.getItem('lastEmail');
+    if (cachedEmail) {
+      setEmail(cachedEmail);
+      showToast('Last email filled in for a faster sign in.', 'info');
+    } else {
+      showToast('No saved email yet. Sign in once to enable this shortcut.', 'info');
+    }
   };
 
   return (
@@ -103,16 +137,22 @@ const Login = () => {
 
               try {
                 await googleLogin(credential);
+                showToast('Signed in with Google.', 'success');
                 navigate('/');
               } catch (authError) {
-                setError(authError.response?.data?.message || 'Google sign-in failed. Please try again.');
+                const message =
+                  authError.response?.data?.message || 'Google sign-in failed. Please try again.';
+                setError(message);
+                showToast(message, 'error');
               } finally {
                 setLoading(false);
               }
             }}
-            onError={(error) => {
-              console.error('Google sign-in error:', error);
-              setError('Google sign-in is unavailable right now.');
+            onError={(googleError) => {
+              console.error('Google sign-in error:', googleError);
+              const message = 'Google sign-in is unavailable right now.';
+              setError(message);
+              showToast(message, 'error');
             }}
           />
 
@@ -120,7 +160,7 @@ const Login = () => {
             <span>or use email</span>
           </div>
 
-          <button 
+          <button
             type="button"
             onClick={handleDemoMode}
             className="demo-mode-btn"
@@ -128,6 +168,16 @@ const Login = () => {
           >
             <Zap size={18} />
             Quick Browse (Demo Mode)
+          </button>
+
+          <button
+            type="button"
+            onClick={handleUseSavedEmail}
+            className="demo-mode-btn"
+            title="Fill your last saved email"
+          >
+            <Sparkles size={18} />
+            Use saved email
           </button>
 
           <form className="auth-form" onSubmit={handleSubmit} autoComplete="on">
@@ -171,8 +221,12 @@ const Login = () => {
 
             <div className="auth-meta">
               <label className="auth-check">
-                <input type="checkbox" />
-                <span>Keep me signed in</span>
+                <input
+                  type="checkbox"
+                  checked={rememberEmail}
+                  onChange={(e) => setRememberEmail(e.target.checked)}
+                />
+                <span>Remember my email</span>
               </label>
               <Link to="/forgot-password" className="text-link">
                 Forgot password?

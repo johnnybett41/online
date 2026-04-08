@@ -512,6 +512,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
   padding: 14px 16px;
   border-radius: 18px;
   background: linear-gradient(180deg, #effaf2, #e4f7ea);
@@ -535,6 +536,11 @@
 .order-card {
   display: grid;
   gap: 16px;
+}
+
+.order-card--highlight {
+  border-color: rgba(39, 64, 107, 0.24);
+  box-shadow: 0 0 0 1px rgba(39, 64, 107, 0.08), 0 20px 48px rgba(12, 20, 35, 0.1);
 }
 
 .order-card__top {
@@ -594,6 +600,12 @@
   align-items: center;
   flex-wrap: wrap;
   color: #5d6b82;
+}
+
+.order-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .inline-link {

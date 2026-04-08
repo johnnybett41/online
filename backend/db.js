@@ -36,14 +36,16 @@ const db = {
       if (err) {
         return callback(err);
       }
-      // Handle RETURNING id for INSERT/UPDATE queries
-      const lastID = result.rows?.[0]?.id || null;
-      callback(null, { 
+
+      // Keep SQLite-style callers working by exposing the result on `this`
+      // and as the second callback argument.
+      const runResult = {
         changes: result.rowCount,
-        lastID: lastID,
-        // Make it compatible with SQLite's this context
-        rows: result.rows
-      });
+        lastID: result.rows?.[0]?.id || null,
+        rows: result.rows,
+      };
+
+      callback.call(runResult, null, runResult);
     });
   },
   get: (sql, params = [], callback = () => {}) => {

@@ -134,22 +134,28 @@ router.post('/register', async (req, res) => {
 
 // Login
 router.post('/login', (req, res) => {
-  const { email, password } = req.body;
-  console.log('Login attempt:', email);
+  const { email, password, rememberMe } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
 
-  db.get(`SELECT * FROM users WHERE email = $1`, [email], async (err, user) => {
-    console.log('Database query result:', err, user);
+  if (!normalizedEmail || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
+
+  db.get(`SELECT * FROM users WHERE LOWER(email) = LOWER($1)`, [normalizedEmail], async (err, user) => {
     if (err || !user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
-    console.log('Password comparison:', validPassword);
     if (!validPassword) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY);
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      SECRET_KEY,
+      { expiresIn: rememberMe ? '30d' : '7d' }
+    );
     res.json({ token, user: { id: user.id, username: user.username, email: user.email } });
   });
 });
