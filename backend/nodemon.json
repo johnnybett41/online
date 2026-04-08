@@ -1,0 +1,6 @@
+{
+  "watch": ["."],
+  "ignore": ["database.db", "dev.out.log", "dev.err.log", ".pgdata", "*.log"],
+  "ext": "js,mjs,cjs,json",
+  "delay": 200
+}

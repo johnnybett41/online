@@ -1,6 +1,6 @@
 # Electrical Devices E-commerce Website
 
-A full-stack e-commerce website for electrical devices built with React (frontend), Node.js/Express (backend), and PostgreSQL (database).
+A full-stack e-commerce website for electrical devices built with React (frontend), Node.js/Express (backend), and SQLite locally, with PostgreSQL on Render/production.
 
 ## Features
 
@@ -74,6 +74,10 @@ online/
 
    On first launch, the backend creates the schema and seeds the product catalog automatically if it is empty.
 
+   For local development, the backend uses the bundled `database.db` file by default when `DATABASE_URL` is not set. That means you can run the app without installing PostgreSQL first.
+
+   If you want to use PostgreSQL locally instead, set `DATABASE_URL` in `backend/.env`.
+
 ### Frontend
 
 1. Navigate to the frontend directory:
@@ -126,7 +130,7 @@ online/
 
 ## Database Schema
 
-The PostgreSQL database includes the following tables:
+The local SQLite database and the PostgreSQL deployment use the same tables:
 
 - users (id, username, email, password)
 - products (id, name, description, price, image, category)
@@ -137,8 +141,8 @@ The PostgreSQL database includes the following tables:
 ## Technologies Used
 
 - **Frontend:** React, React Router, Axios, Vite
-- **Backend:** Node.js, Express.js, bcryptjs, jsonwebtoken, pg
-- **Database:** PostgreSQL
+- **Backend:** Node.js, Express.js, bcryptjs, jsonwebtoken, pg, node:sqlite
+- **Database:** SQLite locally, PostgreSQL on Render
 
 ## M-Pesa Integration
 
@@ -163,8 +167,11 @@ MPESA_SHORTCODE=your-shortcode
 MPESA_PASSKEY=your-passkey
 MPESA_BASE_URL=https://sandbox.safaricom.co.ke
 BASE_URL=http://localhost:5000
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/online_db
+# Optional for local PostgreSQL use only:
+# DATABASE_URL=postgresql://postgres:postgres@localhost:5432/online_db
 ```
+
+If `DATABASE_URL` is omitted, the backend automatically uses the local `database.db` SQLite file in the backend folder.
 
 For production Daraja credentials, change:
 
@@ -191,6 +198,7 @@ If you are deploying to Render:
 3. Add your live credentials later when Safaricom approves production access.
 4. Use the Render backend URL as the callback destination. The app now builds that URL automatically.
 5. Make sure the frontend points to the backend through `VITE_API_URL`.
+6. Keep `DATABASE_URL` pointed at the Render PostgreSQL instance; the SQLite fallback is only for local development.
 
 ### M-Pesa API Endpoints
 
@@ -206,6 +214,8 @@ This repo includes a `render.yaml` blueprint for one database and two services:
 - `online-frontend` as a static site
 
 Render provisions a managed PostgreSQL database for the backend, and the backend seeds products automatically on startup if the catalog is empty, so the catalog survives restarts.
+
+Locally, the backend uses `backend/database.db` unless you set `DATABASE_URL`.
 
 You still need to add your M-Pesa credentials in the backend service environment variables on Render:
 
