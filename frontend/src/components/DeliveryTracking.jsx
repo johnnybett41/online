@@ -11,12 +11,13 @@ const DeliveryTracking = ({ order }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const { showToast } = useToast();
-  const lastStatusRef = useRef(order.status);
+  const lastStatusRef = useRef(order?.status);
   const activeOrder = liveOrder || order;
+  const currentStatus = activeOrder?.status || 'pending_payment';
 
   useEffect(() => {
     setLiveOrder(order);
-    lastStatusRef.current = order.status;
+    lastStatusRef.current = order?.status;
   }, [order]);
 
   const getOrderDetails = async (signal) => {
@@ -67,7 +68,7 @@ const DeliveryTracking = ({ order }) => {
       window.clearInterval(intervalId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order?.id, activeOrder.status]);
+  }, [order?.id, currentStatus]);
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -129,13 +130,13 @@ const DeliveryTracking = ({ order }) => {
   );
   const currentStepIndex = Math.max(
     0,
-    statusSteps.indexOf(activeOrder.status)
+    statusSteps.indexOf(currentStatus)
   );
-  const etaText = activeOrder.estimated_delivery_date
+  const etaText = activeOrder?.estimated_delivery_date
     ? new Date(activeOrder.estimated_delivery_date).toLocaleDateString()
     : 'To be confirmed';
 
-  if (!activeOrder.delivery_address) {
+  if (!activeOrder?.delivery_address) {
     return null;
   }
 
@@ -145,9 +146,9 @@ const DeliveryTracking = ({ order }) => {
         <Truck size={24} className="delivery-icon" />
         <div className="delivery-header-content">
           <h4>Delivery Details</h4>
-          <p className={`status-badge status-${getStatusColor(activeOrder.status)}`}>
-            {getStatusIcon(activeOrder.status)}
-            {getStatusText(activeOrder.status)}
+          <p className={`status-badge status-${getStatusColor(currentStatus)}`}>
+            {getStatusIcon(currentStatus)}
+            {getStatusText(currentStatus)}
           </p>
         </div>
 
@@ -189,7 +190,7 @@ const DeliveryTracking = ({ order }) => {
       <div className="delivery-summary-strip">
         <div>
           <span>Current stage</span>
-          <strong>{getStatusText(activeOrder.status)}</strong>
+          <strong>{getStatusText(currentStatus)}</strong>
         </div>
         <div>
           <span>ETA</span>
@@ -243,11 +244,11 @@ const DeliveryTracking = ({ order }) => {
             <strong>
               {activeOrder.mpesa_paid_at
                 ? 'Paid'
-                : activeOrder.status === 'pending_payment'
+                : currentStatus === 'pending_payment'
                   ? 'Awaiting payment'
-                  : activeOrder.status === 'pending_confirmation'
+                  : currentStatus === 'pending_confirmation'
                     ? 'Awaiting confirmation'
-                    : activeOrder.status}
+                    : currentStatus}
             </strong>
           </p>
           {activeOrder.mpesa_receipt_number && (

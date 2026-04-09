@@ -6,19 +6,23 @@ import { useDemoMode } from '../context/DemoModeContext';
 import { loadOrderCache, saveOrderCache } from '../utils/orderCache';
 import { loadCatalogCache } from '../utils/catalogCache';
 import { buildRecommendations, getRecentlyViewedWithinCatalog } from '../utils/recentActivity';
-import { ArrowRight, FileText, Package, ShieldCheck, ShoppingBag } from 'lucide-react';
+import { Archive, ArrowRight, FileText, Package, RotateCcw, ShieldCheck, ShoppingBag } from 'lucide-react';
 import Skeleton, { SkeletonLine } from '../components/Skeleton';
 import DeliveryTracking from '../components/DeliveryTracking';
+import { useToast } from '../components/Toast';
 import './PurchaseFlow.css';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [usingCachedOrders, setUsingCachedOrders] = useState(false);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [deletingOrderId, setDeletingOrderId] = useState(null);
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
+  const { showToast } = useToast();
   const selectedOrderId = searchParams.get('order');
+  const showArchivedOrders = searchParams.get('archived') === '1';
   const catalog = useMemo(() => loadCatalogCache(), []);
   const recommendedProducts = useMemo(
     () =>
@@ -78,6 +82,105 @@ const Orders = () => {
     return () => window.clearTimeout(timerId);
   }, [selectedOrderId, orders.length]);
 
+  const visibleOrders = useMemo(
+    () => orders.filter((order) => (showArchivedOrders ? Boolean(order.archived_at) : !order.archived_at)),
+    [orders, showArchivedOrders]
+  );
+
+  const archivedOrdersCount = useMemo(
+    () => orders.filter((order) => Boolean(order.archived_at)).length,
+    [orders]
+  );
+
+  const activeOrdersCount = orders.length - archivedOrdersCount;
+
+  const updateOrderStatusInState = (orderId, updater) => {
+    setOrders((currentOrders) => {
+      const nextOrders = currentOrders.map((item) =>
+        String(item.id) === String(orderId) ? updater(item) : item
+      );
+
+      if (user?.id) {
+        saveOrderCache(user.id, nextOrders);
+      }
+
+      return nextOrders;
+    });
+  };
+
+  const clearSelectedOrder = (orderId) => {
+    if (String(selectedOrderId) !== String(orderId)) {
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('order');
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const handleArchiveToggle = async (order) => {
+    if (!order?.id) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      order.archived_at
+        ? 'Restore this purchase back into your active order history?'
+        : 'Archive this purchase so it is hidden from your main order history?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const orderId = order.id;
+    setDeletingOrderId(orderId);
+    const isArchived = Boolean(order.archived_at);
+
+    try {
+      if (isDemoMode || !navigator.onLine) {
+        updateOrderStatusInState(orderId, (item) => ({
+          ...item,
+          archived_at: isArchived ? null : new Date().toISOString(),
+        }));
+        showToast(
+          isArchived ? 'Purchase restored.' : 'Purchase archived.',
+          'info'
+        );
+      } else {
+        const endpoint = isArchived ? 'restore' : 'archive';
+        const response = await axios.patch(`/orders/${orderId}/${endpoint}`);
+        updateOrderStatusInState(orderId, (item) => ({
+          ...item,
+          archived_at: response.data?.archivedAt || (isArchived ? null : new Date().toISOString()),
+        }));
+        showToast(
+          isArchived ? 'Purchase restored.' : 'Purchase archived.',
+          'success'
+        );
+      }
+
+      clearSelectedOrder(orderId);
+    } catch (error) {
+      console.error('Failed to update order archive state:', error);
+      showToast(error.response?.data?.message || 'Failed to update purchase.', 'error');
+    } finally {
+      setDeletingOrderId(null);
+    }
+  };
+
+  const toggleArchivedView = () => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (showArchivedOrders) {
+      nextParams.delete('archived');
+    } else {
+      nextParams.set('archived', '1');
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  };
+
   if (!user) {
     return (
       <div className="purchase-shell">
@@ -121,8 +224,17 @@ const Orders = () => {
         </div>
         <div className="purchase-hero__badges">
           <span><ShieldCheck size={16} /> Secure records</span>
-          <span><Package size={16} /> Purchase history</span>
-          <span><ShoppingBag size={16} /> {orders.length} orders</span>
+          <span><Package size={16} /> {activeOrdersCount} active</span>
+          <span><ShoppingBag size={16} /> {archivedOrdersCount} archived</span>
+        </div>
+        <div className="orders-hero-actions">
+          <button
+            type="button"
+            className="purchase-button secondary"
+            onClick={toggleArchivedView}
+          >
+            {showArchivedOrders ? 'View active orders' : 'View archived orders'}
+          </button>
         </div>
       </section>
 
@@ -150,13 +262,17 @@ const Orders = () => {
             </div>
           </div>
         </div>
-      ) : orders.length === 0 ? (
+      ) : visibleOrders.length === 0 ? (
         <div className="purchase-empty-state purchase-card purchase-empty-state--hero">
           <div className="empty-state-icon">
             <Package size={44} />
           </div>
-          <h2>No orders yet</h2>
-          <p>When you complete a checkout, your orders will show up here with live tracking and delivery milestones.</p>
+          <h2>{showArchivedOrders ? 'No archived orders yet' : 'No active orders yet'}</h2>
+          <p>
+            {showArchivedOrders
+              ? 'Archived purchases will appear here when you hide them from your active order history.'
+              : 'When you complete a checkout, your active orders will show up here with live tracking and delivery milestones.'}
+          </p>
           <div className="empty-state-badges">
             <span><ShieldCheck size={14} /> Secure records</span>
             <span><ShoppingBag size={14} /> Start shopping</span>
@@ -166,8 +282,11 @@ const Orders = () => {
             <Link to="/products" className="purchase-button primary">
               Browse Products <ArrowRight size={16} />
             </Link>
+            <button type="button" className="purchase-button secondary" onClick={toggleArchivedView}>
+              {showArchivedOrders ? 'Back to active orders' : 'View archived orders'}
+            </button>
           </div>
-          {recommendedProducts.length > 0 && (
+          {!showArchivedOrders && recommendedProducts.length > 0 && (
             <div className="orders-empty-shelf">
               <div className="orders-empty-shelf__header">
                 <h3>Recommended products</h3>
@@ -189,9 +308,12 @@ const Orders = () => {
         </div>
       ) : (
         <div className="orders-grid">
-          {orders.map((order) => {
+          {visibleOrders.map((order) => {
+            const isArchived = Boolean(order.archived_at);
             const statusLabel =
-              order.status === 'pending_payment'
+              isArchived
+                ? 'Archived'
+                : order.status === 'pending_payment'
                 ? 'Payment pending'
                 : order.status === 'paid'
                 ? 'Paid'
@@ -210,7 +332,7 @@ const Orders = () => {
                     <p className="item-category">Order #{order.id}</p>
                     <h2>KES {Number(order.total).toFixed(2)}</h2>
                   </div>
-                  <span className={`status-pill status-${order.status}`}>{statusLabel}</span>
+                  <span className={`status-pill ${isArchived ? 'status-archived' : `status-${order.status}`}`}>{statusLabel}</span>
                 </div>
 
                 <div className="order-card__meta">
@@ -250,6 +372,19 @@ const Orders = () => {
                 <div className="order-card__footer">
                   <span>Ready for review in your purchase timeline</span>
                   <div className="order-card__actions">
+                    <button
+                      type="button"
+                      className="inline-link inline-link--danger"
+                      onClick={() => handleArchiveToggle(order)}
+                      disabled={deletingOrderId === order.id}
+                    >
+                      {isArchived ? <RotateCcw size={16} /> : <Archive size={16} />}
+                      {deletingOrderId === order.id
+                        ? 'Saving...'
+                        : isArchived
+                        ? 'Restore purchase'
+                        : 'Archive purchase'}
+                    </button>
                     <Link to={`/orders?order=${order.id}#order-${order.id}`} className="inline-link">
                       Track delivery <ArrowRight size={16} />
                     </Link>

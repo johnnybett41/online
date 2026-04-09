@@ -51,6 +51,12 @@
   justify-content: flex-end;
 }
 
+.orders-hero-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
 .purchase-hero__badges span {
   display: inline-flex;
   align-items: center;
@@ -649,6 +655,11 @@
   color: #196f45;
 }
 
+.status-archived {
+  background: #eef1f6;
+  color: #475569;
+}
+
 .status-card {
   background: #edf3ff;
   color: #23416f;
@@ -803,6 +814,20 @@
   text-decoration: none;
 }
 
+.order-card__actions .inline-link,
+.order-card__actions button.inline-link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  appearance: none;
+}
+
+.inline-link--danger {
+  color: #b42318;
+}
+
 .inline-link:hover {
   text-decoration: underline;
 }
@@ -818,6 +843,10 @@
   }
 
   .purchase-hero__badges {
+    justify-content: flex-start;
+  }
+
+  .orders-hero-actions {
     justify-content: flex-start;
   }
 
@@ -873,6 +902,26 @@
   }
 
   .status-banner__actions .purchase-button {
+    width: 100%;
+  }
+
+  .order-card__actions {
+    width: 100%;
+  }
+
+  .order-card__actions .inline-link {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: rgba(39, 64, 107, 0.06);
+  }
+
+  .order-card__actions .inline-link--danger {
+    background: rgba(180, 35, 24, 0.08);
+  }
+
+  .orders-hero-actions .purchase-button {
     width: 100%;
   }
 

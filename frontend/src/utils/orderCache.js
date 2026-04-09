@@ -23,3 +23,14 @@ export const saveOrderCache = (userId, orders) => {
     console.warn('Unable to save order cache:', error);
   }
 };
+
+export const removeOrderFromCache = (userId, orderId) => {
+  try {
+    const orders = loadOrderCache(userId);
+    const nextOrders = orders.filter((order) => String(order.id) !== String(orderId));
+    saveOrderCache(userId, nextOrders);
+    return nextOrders;
+  } catch (error) {
+    return null;
+  }
+};

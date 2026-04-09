@@ -120,6 +120,103 @@ router.get('/:id', authenticateToken, (req, res) => {
   });
 });
 
+// Archive a single order owned by the current user
+router.patch('/:id/archive', authenticateToken, (req, res) => {
+  (async () => {
+    try {
+      await db.query('BEGIN');
+
+      const orderResult = await db.query(
+        `SELECT id, archived_at FROM orders WHERE id = $1 AND user_id = $2 LIMIT 1`,
+        [req.params.id, req.user.id]
+      );
+
+      if (!orderResult.rows.length) {
+        await db.query('ROLLBACK');
+        return res.status(404).json({ message: 'Order not found' });
+      }
+
+      if (orderResult.rows[0].archived_at) {
+        await db.query('ROLLBACK');
+        return res.json({
+          message: 'Order is already archived',
+          orderId: req.params.id,
+          archivedAt: orderResult.rows[0].archived_at,
+        });
+      }
+
+      await db.query(
+        `UPDATE orders SET archived_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2`,
+        [req.params.id, req.user.id]
+      );
+
+      const updatedOrder = await db.query(
+        `SELECT archived_at FROM orders WHERE id = $1 AND user_id = $2 LIMIT 1`,
+        [req.params.id, req.user.id]
+      );
+
+      await db.query('COMMIT');
+
+      return res.json({
+        message: 'Order archived successfully',
+        orderId: req.params.id,
+        archivedAt: updatedOrder.rows[0]?.archived_at || new Date().toISOString(),
+      });
+    } catch (error) {
+      await db.query('ROLLBACK').catch(() => {});
+      return res.status(error.statusCode || 500).json({
+        message: error.message || 'Failed to archive order',
+      });
+    }
+  })();
+});
+
+// Restore a single archived order owned by the current user
+router.patch('/:id/restore', authenticateToken, (req, res) => {
+  (async () => {
+    try {
+      await db.query('BEGIN');
+
+      const orderResult = await db.query(
+        `SELECT id, archived_at FROM orders WHERE id = $1 AND user_id = $2 LIMIT 1`,
+        [req.params.id, req.user.id]
+      );
+
+      if (!orderResult.rows.length) {
+        await db.query('ROLLBACK');
+        return res.status(404).json({ message: 'Order not found' });
+      }
+
+      if (!orderResult.rows[0].archived_at) {
+        await db.query('ROLLBACK');
+        return res.json({
+          message: 'Order is already active',
+          orderId: req.params.id,
+          archivedAt: null,
+        });
+      }
+
+      await db.query(
+        `UPDATE orders SET archived_at = NULL WHERE id = $1 AND user_id = $2`,
+        [req.params.id, req.user.id]
+      );
+
+      await db.query('COMMIT');
+
+      return res.json({
+        message: 'Order restored successfully',
+        orderId: req.params.id,
+        archivedAt: null,
+      });
+    } catch (error) {
+      await db.query('ROLLBACK').catch(() => {});
+      return res.status(error.statusCode || 500).json({
+        message: error.message || 'Failed to restore order',
+      });
+    }
+  })();
+});
+
 // Create order with delivery information
 router.post('/delivery/checkout', authenticateToken, (req, res) => {
   const {
