@@ -23,6 +23,7 @@ export const useToast = () => {
 
 export const ToastProvider = ({ children }) => {
   const [toast, setToast] = useState(null);
+  const TOAST_DURATION_MS = 30000;
 
   const showToast = (message, type = 'info') => {
     if (typeof window !== 'undefined') {
@@ -43,7 +44,7 @@ export const ToastProvider = ({ children }) => {
 
     const timeoutId = window.setTimeout(() => {
       setToast(null);
-    }, 4000);
+    }, TOAST_DURATION_MS);
 
     return () => window.clearTimeout(timeoutId);
   }, [toast]);

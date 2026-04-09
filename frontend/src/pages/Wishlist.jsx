@@ -70,22 +70,18 @@ const Wishlist = () => {
         allowNetwork: !isDemoMode,
       });
 
-      if (result.pending || result.queued) {
-        showToast(
-          isDemoMode
-            ? 'Added to cart in demo mode. It will sync when you leave demo mode.'
-            : 'Added to cart. It will sync when you are back online.',
-          'info'
-        );
-      } else {
-        showToast('Added to cart!', 'success');
-      }
-
       removeFromWishlist(product.id, true);
-      showToast('Moved to cart and removed from wishlist.', 'success');
+      showToast(
+        result.pending || result.queued
+          ? isDemoMode
+            ? 'Moved to cart in demo mode and removed from wishlist.'
+            : 'Moved to cart. It will sync when you are back online.'
+          : 'Moved to cart and removed from wishlist.',
+        result.pending || result.queued ? 'info' : 'success'
+      );
     } catch (error) {
       console.error('Error adding to cart:', error);
-      showToast('Error adding to cart.', 'error');
+      showToast(error.response?.data?.message || 'Error adding to cart.', 'error');
     }
   };
 

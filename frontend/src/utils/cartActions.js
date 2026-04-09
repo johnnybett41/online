@@ -33,7 +33,9 @@ export const addCartItem = async ({
   if (onlineAllowed) {
     try {
       await axios.post('/cart', payload);
-      return { queued: false, pending: false, cart: loadCartCache(userId) };
+      const freshCart = await axios.get('/cart');
+      saveCartCache(userId, freshCart.data);
+      return { queued: false, pending: false, cart: freshCart.data };
     } catch (error) {
       if (!isNetworkProblem(error)) {
         throw error;

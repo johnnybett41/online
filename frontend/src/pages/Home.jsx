@@ -140,7 +140,7 @@ const Home = () => {
 
       showToast('Added to cart!', 'success');
     } catch (error) {
-      showToast('Failed to add to cart.', 'error');
+      showToast(error.response?.data?.message || 'Failed to add to cart.', 'error');
     }
   };
 
