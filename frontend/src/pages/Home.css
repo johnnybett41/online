@@ -177,6 +177,248 @@
   gap: 14px;
 }
 
+.hero-anime-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  width: 100%;
+  max-width: 100%;
+  min-height: 260px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(111, 208, 255, 0.22), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(255, 186, 92, 0.16), transparent 26%),
+    linear-gradient(180deg, rgba(8, 12, 28, 0.98), rgba(23, 36, 70, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 60px rgba(5, 12, 25, 0.35);
+}
+
+.hero-anime-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 24%),
+    radial-gradient(circle at 65% 22%, rgba(255, 160, 92, 0.14), transparent 18%);
+  pointer-events: none;
+}
+
+.hero-anime-card__badge {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+}
+
+.hero-video-frame {
+  position: relative;
+  margin-top: 16px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 220px;
+  border-radius: 24px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    linear-gradient(180deg, #0f1730 0%, #1e3560 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hero-video-fallback {
+  position: relative;
+  margin-top: 16px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 220px;
+  border-radius: 24px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(111, 208, 255, 0.18), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(255, 186, 92, 0.18), transparent 26%),
+    linear-gradient(180deg, #101c36 0%, #1d3561 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  text-align: center;
+}
+
+.hero-video-fallback__label {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-video-fallback__scene {
+  position: relative;
+  width: min(100%, 420px);
+  height: 100%;
+  min-height: 180px;
+}
+
+.fallback-moon,
+.fallback-window,
+.fallback-package,
+.fallback-bike {
+  position: absolute;
+  display: block;
+}
+
+.fallback-moon {
+  top: 8%;
+  right: 8%;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff7d8 0%, rgba(255, 247, 216, 0.2) 65%, transparent 70%);
+  box-shadow: 0 0 28px rgba(255, 244, 190, 0.5);
+}
+
+.fallback-window {
+  left: 14%;
+  bottom: 24%;
+  width: 40%;
+  height: 48%;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02)),
+    linear-gradient(180deg, #0f1730, #1f3762);
+  box-shadow: 0 20px 40px rgba(8, 12, 28, 0.28);
+}
+
+.fallback-window::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.92), transparent 12px),
+    radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.6), transparent 10px),
+    linear-gradient(180deg, rgba(255, 190, 92, 0.2), transparent 45%);
+}
+
+.fallback-package {
+  right: 24%;
+  bottom: 20%;
+  width: 64px;
+  height: 50px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffca74, #f39b3d);
+  box-shadow: 0 14px 22px rgba(255, 166, 72, 0.26);
+}
+
+.fallback-package::before,
+.fallback-package::after {
+  content: '';
+  position: absolute;
+  background: rgba(16, 33, 61, 0.2);
+}
+
+.fallback-package::before {
+  inset: 0 46% 0 46%;
+}
+
+.fallback-package::after {
+  inset: 40% 0 40% 0;
+}
+
+.fallback-bike {
+  left: 54%;
+  bottom: 10%;
+  width: 92px;
+  height: 38px;
+  border-radius: 999px;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  border-bottom-color: transparent;
+  transform: skewX(-10deg);
+}
+
+.fallback-bike::before,
+.fallback-bike::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid #e7f3ff;
+  box-shadow: 0 0 0 2px rgba(8, 12, 28, 0.4);
+}
+
+.fallback-bike::before {
+  left: 0;
+}
+
+.fallback-bike::after {
+  right: 0;
+}
+
+.hero-video-fallback p {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.hero-video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.hero-video-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(8, 12, 28, 0.05), rgba(8, 12, 28, 0.18)),
+    radial-gradient(circle at top right, rgba(255, 186, 92, 0.12), transparent 26%);
+}
+
+.hero-anime-caption {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.hero-anime-caption strong {
+  color: #fff;
+  font-size: 0.98rem;
+}
+
+.hero-anime-caption span {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .hero-visual-card {
   position: relative;
   border-radius: 28px;
@@ -745,6 +987,22 @@
   flex-shrink: 0;
 }
 
+.category-quick-view-btn {
+  padding: 12px 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #23416f;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.category-quick-view-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.92);
+}
+
 .category-link {
   margin-top: auto;
   display: inline-flex;
@@ -775,6 +1033,19 @@
 
 .featured-section {
   background: linear-gradient(180deg, #eff4fa, #f7faff);
+}
+
+.newsletter-section--loading {
+  padding: 88px 20px;
+}
+
+.newsletter-loading-card {
+  height: 260px;
+  border-radius: 28px;
+  background: linear-gradient(90deg, #e8eef8 0%, #f7faff 45%, #e8eef8 100%);
+  background-size: 200% 100%;
+  animation: loading-sheen 1.2s ease-in-out infinite;
+  box-shadow: 0 18px 50px rgba(12, 20, 35, 0.08);
 }
 
 .products-grid {
@@ -906,10 +1177,122 @@
   }
 }
 
+@keyframes sky-shift {
+  from {
+    transform: translateY(0);
+    opacity: 0.9;
+  }
+
+  to {
+    transform: translateY(6px);
+    opacity: 1;
+  }
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.45;
+  }
+
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-glow {
+  from {
+    transform: scale(0.88);
+    opacity: 0.72;
+  }
+
+  to {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes package-bob {
+  from {
+    transform: translateY(0) rotate(-1deg);
+  }
+
+  to {
+    transform: translateY(-6px) rotate(2deg);
+  }
+}
+
+@keyframes skyline-rise {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes rain-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.82;
+  }
+
+  100% {
+    transform: translateY(320px);
+    opacity: 0;
+  }
+}
+
+@keyframes trail-slide {
+  0% {
+    transform: translateX(-12%);
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translateX(140%);
+    opacity: 0;
+  }
+}
+
+@keyframes bike-sprint {
+  0% {
+    transform: translateX(-10%);
+    opacity: 0;
+  }
+
+  18% {
+    opacity: 1;
+  }
+
+  55% {
+    transform: translateX(6%);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(24%);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-orb,
   .hero-visual-card,
-  .hero-image-frame img {
+  .hero-image-frame img,
+  .hero-anime-card *,
+  .hero-anime-card {
     animation: none;
   }
 
@@ -1002,6 +1385,22 @@
   transform: translateY(-1px);
 }
 
+.quick-view-btn {
+  flex: 1;
+  padding: 13px 14px;
+  background: rgba(237, 243, 255, 0.92);
+  color: #23416f;
+  border: 1px solid #d6deeb;
+  border-radius: 16px;
+  font-weight: 800;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.quick-view-btn:hover {
+  background: #dce8ff;
+  transform: translateY(-1px);
+}
+
 .add-to-cart-btn {
   flex: 1;
   padding: 13px 14px;
@@ -1078,6 +1477,18 @@
     min-height: 260px;
   }
 
+  .hero-anime-card {
+    min-height: 240px;
+  }
+
+  .hero-video-frame {
+    aspect-ratio: 16 / 8.5;
+  }
+
+  .hero-video-fallback {
+    aspect-ratio: 16 / 8.5;
+  }
+
   .hero-floating-card-bottom {
     bottom: 18px;
   }
@@ -1124,6 +1535,13 @@
   .product-actions {
     flex-direction: column;
   }
+
+  .quick-view-btn,
+  .view-btn,
+  .add-to-cart-btn,
+  .category-quick-view-btn {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1146,6 +1564,26 @@
   .hero-visual-copy,
   .hero-visual-image {
     padding: 18px;
+  }
+
+  .hero-anime-card {
+    padding: 16px;
+  }
+
+  .hero-video-frame {
+    aspect-ratio: 16 / 10;
+    min-height: 220px;
+    margin-top: 14px;
+  }
+
+  .hero-video-fallback {
+    aspect-ratio: 16 / 10;
+    min-height: 220px;
+    margin-top: 14px;
+  }
+
+  .hero-video-fallback p {
+    font-size: 0.82rem;
   }
 
   .hero-floating-card {

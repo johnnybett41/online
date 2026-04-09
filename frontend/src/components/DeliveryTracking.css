@@ -177,7 +177,17 @@
   margin-bottom: 16px;
 }
 
-.delivery-address svg {
+.delivery-payment {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.delivery-address svg,
+.delivery-payment svg {
   color: var(--primary-color);
   flex-shrink: 0;
   margin-top: 2px;
@@ -204,16 +214,26 @@
 }
 
 .delivery-method,
+.delivery-location,
 .delivery-cost,
-.estimated-date {
+.estimated-date,
+.payment-method,
+.payment-status,
+.payment-receipt,
+.payment-phone {
   margin: 0 0 6px;
   font-size: 13px;
   color: var(--text-secondary);
 }
 
 .delivery-method strong,
+.delivery-location strong,
 .delivery-cost strong,
-.estimated-date strong {
+.estimated-date strong,
+.payment-method strong,
+.payment-status strong,
+.payment-receipt strong,
+.payment-phone strong {
   color: var(--text-primary);
   font-weight: 600;
 }
@@ -280,6 +300,10 @@
   }
 
   .delivery-address {
+    flex-direction: column;
+  }
+
+  .delivery-payment {
     flex-direction: column;
   }
 }

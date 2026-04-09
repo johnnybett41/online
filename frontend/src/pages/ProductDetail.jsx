@@ -8,6 +8,7 @@ import { loadCatalogCache, loadCachedProductById, saveCatalogCache } from '../ut
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import { useToast } from '../components/Toast';
+import OptimizedImage from '../components/OptimizedImage';
 import Skeleton, { SkeletonLine } from '../components/Skeleton';
 import './ProductDetail.css';
 
@@ -166,11 +167,6 @@ const ProductDetail = () => {
     });
   };
 
-  const handleImageError = (event) => {
-    event.currentTarget.src =
-      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="%23f2f2f2"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23777" font-family="Arial, sans-serif" font-size="28">Image unavailable</text></svg>';
-  };
-
   if (loading) {
     return (
       <div className="product-detail-container product-detail-loading">
@@ -251,7 +247,7 @@ const ProductDetail = () => {
       <div className="product-detail">
         <div className="product-gallery">
           <div className="main-image">
-            <img src={product.image} alt={product.name} onError={handleImageError} decoding="async" />
+            <OptimizedImage src={product.image} alt={product.name} fallbackSrc="data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;800&quot; height=&quot;600&quot;><rect width=&quot;100%&quot; height=&quot;100%&quot; fill=&quot;%23f2f2f2&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; fill=&quot;%23777&quot; font-family=&quot;Arial, sans-serif&quot; font-size=&quot;28&quot;>Image unavailable</text></svg>" priority />
           </div>
         </div>
 
@@ -329,7 +325,11 @@ const ProductDetail = () => {
                 to={`/product/${relatedProduct.id}`}
                 className="related-card"
               >
-                <img src={relatedProduct.image} alt={relatedProduct.name} onError={handleImageError} loading="lazy" decoding="async" />
+                <OptimizedImage
+                  src={relatedProduct.image}
+                  alt={relatedProduct.name}
+                  fallbackSrc="data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;800&quot; height=&quot;600&quot;><rect width=&quot;100%&quot; height=&quot;100%&quot; fill=&quot;%23f2f2f2&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; fill=&quot;%23777&quot; font-family=&quot;Arial, sans-serif&quot; font-size=&quot;28&quot;>Image unavailable</text></svg>"
+                />
                 <h4>{relatedProduct.name}</h4>
                 <p>KES {relatedProduct.price}</p>
               </Link>

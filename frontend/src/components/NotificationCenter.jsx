@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Bell, X, CheckCircle, AlertCircle, Info } from 'lucide-react';
-import './Toast.css'; // Reuse toast styling
+import './NotificationCenter.css';
 
 const NotificationCenter = () => {
   const [notifications, setNotifications] = useState([]);
@@ -92,16 +92,20 @@ const NotificationCenter = () => {
   return (
     <>
       <button
-        className="notification-button"
+        type="button"
+        className={`nav-icon-link notification-button ${isOpen ? 'active' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Notifications"
+        aria-expanded={isOpen}
+        aria-controls="notification-panel"
       >
         <Bell size={24} />
+        <span className="icon-label">Alerts</span>
         {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
       </button>
 
       {isOpen && (
-        <div className="notification-panel">
+        <div id="notification-panel" className="notification-panel">
           <div className="notification-header">
             <h3>Notifications</h3>
             <button onClick={() => setIsOpen(false)} className="close-btn">

@@ -122,7 +122,15 @@ router.get('/:id', authenticateToken, (req, res) => {
 
 // Create order with delivery information
 router.post('/delivery/checkout', authenticateToken, (req, res) => {
-  const { delivery_address, delivery_method, payment_method, phone_number } = req.body;
+  const {
+    delivery_address,
+    delivery_method,
+    payment_method,
+    phone_number,
+    delivery_county,
+    delivery_town,
+    delivery_postal_code,
+  } = req.body;
 
   if (!delivery_address || !delivery_method || !payment_method || !phone_number) {
     return res.status(400).json({ message: 'Missing required delivery information' });
@@ -180,8 +188,22 @@ router.post('/delivery/checkout', authenticateToken, (req, res) => {
       // Create order with delivery info
       const orderResult = await run(
         db,
-        `INSERT INTO orders (user_id, total, status, delivery_address, delivery_method, delivery_cost, estimated_delivery_date, payment_method, phone_number, stock_deducted_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP) RETURNING id`,
+        `INSERT INTO orders (
+          user_id,
+          total,
+          status,
+          delivery_address,
+          delivery_method,
+          delivery_cost,
+          estimated_delivery_date,
+          payment_method,
+          phone_number,
+          delivery_county,
+          delivery_town,
+          delivery_postal_code,
+          stock_deducted_at
+        )
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP) RETURNING id`,
         [
           req.user.id,
           total,
@@ -192,6 +214,9 @@ router.post('/delivery/checkout', authenticateToken, (req, res) => {
           estimated_delivery_date.toISOString(),
           payment_method,
           phone_number,
+          delivery_county || null,
+          delivery_town || null,
+          delivery_postal_code || null,
         ]
       );
 
@@ -228,6 +253,9 @@ router.post('/delivery/checkout', authenticateToken, (req, res) => {
         delivery_cost,
         payment_method,
         estimated_delivery_date,
+        delivery_county: delivery_county || null,
+        delivery_town: delivery_town || null,
+        delivery_postal_code: delivery_postal_code || null,
         status: payment_method === 'mpesa' ? 'pending_payment' : 'pending_confirmation',
       });
     } catch (orderError) {

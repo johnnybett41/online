@@ -1,18 +1,21 @@
 .notification-button {
   position: relative;
+  min-width: 58px;
   background: none;
   border: none;
+  appearance: none;
   cursor: pointer;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-primary);
-  transition: all 0.2s;
+  padding: 8px 10px;
+  font: inherit;
 }
 
 .notification-button:hover {
-  color: var(--primary-color);
+  color: #667eea;
+}
+
+.notification-button .notification-badge {
+  top: 4px;
+  right: 8px;
 }
 
 .notification-badge {

@@ -193,6 +193,23 @@ const Orders = () => {
                   </div>
                 </div>
 
+                <div className="order-card__meta order-card__meta--details">
+                  <div>
+                    <span>Delivery</span>
+                    <strong>{order.delivery_method || 'standard'}</strong>
+                  </div>
+                  <div>
+                    <span>Payment</span>
+                    <strong>{order.payment_method || 'mpesa'}</strong>
+                  </div>
+                  {order.estimated_delivery_date && (
+                    <div>
+                      <span>ETA</span>
+                      <strong>{new Date(order.estimated_delivery_date).toLocaleDateString()}</strong>
+                    </div>
+                  )}
+                </div>
+
                 {order.delivery_address && (
                   <div className="order-card__tracking">
                     <DeliveryTracking order={order} />

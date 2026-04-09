@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { DemoModeProvider } from './context/DemoModeContext';
@@ -8,29 +9,41 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CartQueueSync from './components/CartQueueSync';
 import MobileBottomNav from './components/MobileBottomNav';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Products from './pages/Products';
-import ProductDetail from './pages/ProductDetail';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Orders from './pages/Orders';
-import AdminStock from './pages/AdminStock';
-import Blog from './pages/Blog';
-import Contact from './pages/Contact';
-import Shipping from './pages/Shipping';
-import Returns from './pages/Returns';
-import Warranty from './pages/Warranty';
-import FAQ from './pages/FAQ';
-import Support from './pages/Support';
-import Privacy from './pages/Privacy';
-import Terms from './pages/Terms';
-import ForgotPassword from './pages/ForgotPassword';
-import About from './pages/About';
-import Wishlist from './pages/Wishlist';
 import ConnectionStatus from './components/ConnectionStatus';
 import './App.css';
+
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Products = lazy(() => import('./pages/Products'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Orders = lazy(() => import('./pages/Orders'));
+const AdminStock = lazy(() => import('./pages/AdminStock'));
+const Blog = lazy(() => import('./pages/Blog'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Shipping = lazy(() => import('./pages/Shipping'));
+const Returns = lazy(() => import('./pages/Returns'));
+const Warranty = lazy(() => import('./pages/Warranty'));
+const FAQ = lazy(() => import('./pages/FAQ'));
+const Support = lazy(() => import('./pages/Support'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Terms = lazy(() => import('./pages/Terms'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const About = lazy(() => import('./pages/About'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+
+const RouteFallback = () => (
+  <div className="page-loading-shell" aria-busy="true" aria-live="polite">
+    <div className="page-loading-card">
+      <div className="page-loading-badge" />
+      <div className="page-loading-line page-loading-line--title" />
+      <div className="page-loading-line" />
+      <div className="page-loading-line page-loading-line--short" />
+    </div>
+  </div>
+);
 
 function App() {
   return (
@@ -41,10 +54,11 @@ function App() {
             <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <ScrollToTop />
               <div className="App">
-                <ConnectionStatus />
-                <CartQueueSync />
-                <Navbar />
-                <main className="main-content">
+              <ConnectionStatus />
+              <CartQueueSync />
+              <Navbar />
+              <main className="main-content">
+                <Suspense fallback={<RouteFallback />}>
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/login" element={<Login />} />
@@ -68,6 +82,7 @@ function App() {
                     <Route path="/about" element={<About />} />
                     <Route path="/wishlist" element={<Wishlist />} />
                   </Routes>
+                </Suspense>
                 </main>
                 <Footer />
                 <MobileBottomNav />

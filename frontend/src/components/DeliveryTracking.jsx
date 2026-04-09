@@ -193,6 +193,16 @@ const DeliveryTracking = ({ order }) => {
               Method: <strong>{activeOrder.delivery_method}</strong>
             </p>
           )}
+          {(activeOrder.delivery_county || activeOrder.delivery_town || activeOrder.delivery_postal_code) && (
+            <p className="delivery-location">
+              Location:{' '}
+              <strong>
+                {[activeOrder.delivery_town, activeOrder.delivery_county, activeOrder.delivery_postal_code]
+                  .filter(Boolean)
+                  .join(', ')}
+              </strong>
+            </p>
+          )}
           {activeOrder.delivery_cost !== undefined && activeOrder.delivery_cost !== null && (
             <p className="delivery-cost">
               Cost: <strong>KES {Number(activeOrder.delivery_cost).toFixed(2)}</strong>
@@ -202,6 +212,38 @@ const DeliveryTracking = ({ order }) => {
             <p className="estimated-date">
               Est. Delivery:{' '}
               <strong>{new Date(activeOrder.estimated_delivery_date).toLocaleDateString()}</strong>
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="delivery-payment">
+        <CreditCard size={18} />
+        <div className="address-content">
+          <p className="address-label">Payment Details</p>
+          <p className="payment-method">
+            Method: <strong>{activeOrder.payment_method || 'n/a'}</strong>
+          </p>
+          <p className="payment-status">
+            Status:{' '}
+            <strong>
+              {activeOrder.mpesa_paid_at
+                ? 'Paid'
+                : activeOrder.status === 'pending_payment'
+                  ? 'Awaiting payment'
+                  : activeOrder.status === 'pending_confirmation'
+                    ? 'Awaiting confirmation'
+                    : activeOrder.status}
+            </strong>
+          </p>
+          {activeOrder.mpesa_receipt_number && (
+            <p className="payment-receipt">
+              Receipt: <strong>{activeOrder.mpesa_receipt_number}</strong>
+            </p>
+          )}
+          {activeOrder.mpesa_phone_number && (
+            <p className="payment-phone">
+              Phone: <strong>{activeOrder.mpesa_phone_number}</strong>
             </p>
           )}
         </div>

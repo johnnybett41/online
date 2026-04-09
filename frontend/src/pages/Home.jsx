@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -18,15 +18,58 @@ import { loadCatalogCache, saveCatalogCache } from '../utils/catalogCache';
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import { useToast } from '../components/Toast';
-import NewsletterSection from '../components/NewsletterSection';
+import OptimizedImage from '../components/OptimizedImage';
+import ProductQuickViewModal from '../components/ProductQuickViewModal';
 import './Home.css';
+
+const NewsletterSection = lazy(() => import('../components/NewsletterSection'));
 
 const FALLBACK_PRODUCT_IMAGE =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="%2312213d"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23ffffff" font-family="Arial, sans-serif" font-size="28">ElectroHub</text></svg>';
 
+const HOME_CATEGORIES = [
+  {
+    name: 'Lighting',
+    icon: 'LGT',
+    description: 'Energy-saving bulbs and sensor lighting for modern rooms.',
+    link: `/products?category=${encodeURIComponent('Lighting')}`,
+    tone: 'sunrise',
+  },
+  {
+    name: 'Switches & Sockets',
+    icon: 'SOK',
+    description: 'Clean wall finishes, sockets, switches, and waterproof options.',
+    link: `/products?category=${encodeURIComponent('Switches & Sockets')}`,
+    tone: 'ocean',
+  },
+  {
+    name: 'Adaptors & Extensions',
+    icon: 'EXT',
+    description: 'Flexible extension sockets and adaptor bundles for busy spaces.',
+    link: `/products?category=${encodeURIComponent('Adaptors & Extensions')}`,
+    tone: 'violet',
+  },
+  {
+    name: 'Protection Devices',
+    icon: 'PRT',
+    description: 'MCBs, guards, timers, and safety hardware for peace of mind.',
+    link: `/products?category=${encodeURIComponent('Protection Devices')}`,
+    tone: 'emerald',
+  },
+  {
+    name: 'Accessories',
+    icon: 'ACC',
+    description: 'Practical finishing pieces for neat electrical installations.',
+    link: `/products?category=${encodeURIComponent('Accessories')}`,
+    tone: 'amber',
+  },
+];
+
 const Home = () => {
   const [catalog, setCatalog] = useState([]);
   const [usingCachedCatalog, setUsingCachedCatalog] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
   const { showToast } = useToast();
@@ -34,6 +77,19 @@ const Home = () => {
   useEffect(() => {
     fetchCatalog();
   }, [isDemoMode]);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const fetchCatalog = async () => {
     if (isDemoMode) {
@@ -107,100 +163,78 @@ const Home = () => {
     showToast('Added to wishlist!', 'success');
   };
 
-  const featuredProducts = catalog.slice(0, 6);
-  const spotlightProduct = catalog[0];
-  const categoryCount = new Set(catalog.map((product) => product.category)).size;
-  const lowStockProducts = catalog.filter((product) => Number(product.stock_quantity || 0) > 0 && Number(product.stock_quantity || 0) <= 5);
+  const openQuickView = (product) => {
+    setQuickViewProduct(product);
+  };
 
-  const categories = [
-    {
-      name: 'Lighting',
-      icon: 'LGT',
-      description: 'Energy-saving bulbs and sensor lighting for modern rooms.',
-      link: `/products?category=${encodeURIComponent('Lighting')}`,
-      tone: 'sunrise',
-    },
-    {
-      name: 'Switches & Sockets',
-      icon: 'SOK',
-      description: 'Clean wall finishes, sockets, switches, and waterproof options.',
-      link: `/products?category=${encodeURIComponent('Switches & Sockets')}`,
-      tone: 'ocean',
-    },
-    {
-      name: 'Adaptors & Extensions',
-      icon: 'EXT',
-      description: 'Flexible extension sockets and adaptor bundles for busy spaces.',
-      link: `/products?category=${encodeURIComponent('Adaptors & Extensions')}`,
-      tone: 'violet',
-    },
-    {
-      name: 'Protection Devices',
-      icon: 'PRT',
-      description: 'MCBs, guards, timers, and safety hardware for peace of mind.',
-      link: `/products?category=${encodeURIComponent('Protection Devices')}`,
-      tone: 'emerald',
-    },
-    {
-      name: 'Accessories',
-      icon: 'ACC',
-      description: 'Practical finishing pieces for neat electrical installations.',
-      link: `/products?category=${encodeURIComponent('Accessories')}`,
-      tone: 'amber',
-    },
-  ];
+  const { showHeroVideo, featuredProducts, spotlightProduct, categoryCount, lowStockProducts, categoryShowcases, features, stats } =
+    useMemo(() => {
+      const featuredProductsList = catalog.slice(0, 6);
+      const spotlight = catalog[0];
+      const categoryTotal = new Set(catalog.map((product) => product.category)).size;
+      const lowStock = catalog.filter(
+        (product) => Number(product.stock_quantity || 0) > 0 && Number(product.stock_quantity || 0) <= 5
+      );
 
-  const categoryShowcases = categories.map((category, index) => {
-    const matches = catalog.filter((product) => product.category === category.name);
-    const highlight = matches[index % matches.length] || matches[0] || spotlightProduct;
+      const showcases = HOME_CATEGORIES.map((category, index) => {
+        const matches = catalog.filter((product) => product.category === category.name);
+        const highlight = matches[index % matches.length] || matches[0] || spotlight;
 
-    return {
-      ...category,
-      highlight,
-      itemCount: matches.length,
-    };
-  });
+        return {
+          ...category,
+          highlight,
+          itemCount: matches.length,
+        };
+      });
 
-  const features = [
-    {
-      icon: <Sparkles size={36} />,
-      title: 'Curated Tronic Catalog',
-      description: 'A tighter selection of practical, install-ready electrical essentials.',
-    },
-    {
-      icon: <Shield size={36} />,
-      title: 'Safer Shopping',
-      description: 'Cleaner categories and product groupings to help customers find the right part faster.',
-    },
-    {
-      icon: <Truck size={36} />,
-      title: 'Fast Delivery',
-      description: 'Built for easy ordering and quick dispatch across Kenya.',
-    },
-    {
-      icon: <BadgeCheck size={36} />,
-      title: 'Trusted Quality',
-      description: 'Product images and pricing now map to a more consistent catalog style.',
-    },
-  ];
-
-  const stats = [
-    {
-      value: `${catalog.length || 0}+`,
-      label: 'Active products',
-      icon: <ShoppingBag size={18} />,
-    },
-    {
-      value: `${categoryCount || 0}`,
-      label: 'Clean categories',
-      icon: <Sparkles size={18} />,
-    },
-    {
-      value: '24/7',
-      label: 'Online access',
-      icon: <Clock3 size={18} />,
-    },
-  ];
+      return {
+        showHeroVideo: isOnline && !isDemoMode,
+        featuredProducts: featuredProductsList,
+        spotlightProduct: spotlight,
+        categoryCount: categoryTotal,
+        lowStockProducts: lowStock,
+        categoryShowcases: showcases,
+        features: [
+          {
+            icon: <Sparkles size={36} />,
+            title: 'Curated Tronic Catalog',
+            description: 'A tighter selection of practical, install-ready electrical essentials.',
+          },
+          {
+            icon: <Shield size={36} />,
+            title: 'Safer Shopping',
+            description: 'Cleaner categories and product groupings to help customers find the right part faster.',
+          },
+          {
+            icon: <Truck size={36} />,
+            title: 'Fast Delivery',
+            description: 'Built for easy ordering and quick dispatch across Kenya.',
+          },
+          {
+            icon: <BadgeCheck size={36} />,
+            title: 'Trusted Quality',
+            description: 'Product images and pricing now map to a more consistent catalog style.',
+          },
+        ],
+        stats: [
+          {
+            value: `${catalog.length || 0}+`,
+            label: 'Active products',
+            icon: <ShoppingBag size={18} />,
+          },
+          {
+            value: `${categoryTotal || 0}`,
+            label: 'Clean categories',
+            icon: <Sparkles size={18} />,
+          },
+          {
+            value: '24/7',
+            label: 'Online access',
+            icon: <Clock3 size={18} />,
+          },
+        ],
+      };
+    }, [catalog, isDemoMode, isOnline]);
 
   return (
     <div className="home-container">
@@ -242,6 +276,43 @@ const Home = () => {
         </div>
 
         <div className="hero-visual">
+          <div className="hero-anime-card" aria-label="Anime-inspired delivery scene">
+            <div className="hero-anime-card__badge">
+              <Sparkles size={14} />
+              Anime-style loop
+            </div>
+            {showHeroVideo ? (
+              <div className="hero-video-frame">
+                <iframe
+                  src="https://www.youtube.com/embed/2iwm5SnAe8E?autoplay=1&mute=1&loop=1&playlist=2iwm5SnAe8E&controls=0&playsinline=1&rel=0&modestbranding=1"
+                  title="Anime cozy rain video"
+                  loading="lazy"
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                />
+                <div className="hero-video-overlay" />
+              </div>
+            ) : (
+              <div className="hero-video-fallback">
+                <div className="hero-video-fallback__label">Offline preview</div>
+                <div className="hero-video-fallback__scene">
+                  <span className="fallback-moon" />
+                  <span className="fallback-window" />
+                  <span className="fallback-package" />
+                  <span className="fallback-bike" />
+                </div>
+                <p>
+                  You are viewing the offline-friendly hero. The animated storefront experience returns once
+                  the network is back.
+                </p>
+              </div>
+            )}
+            <div className="hero-anime-caption">
+              <strong>Fast orders, glowing city nights, and calm checkout flow.</strong>
+              <span>Designed to match the app&apos;s delivery and payment journey.</span>
+            </div>
+          </div>
+
           <div className="hero-visual-card hero-visual-main">
             <div className="hero-visual-copy">
               <div className="hero-visual-copy-top">
@@ -271,10 +342,11 @@ const Home = () => {
             </div>
             <div className="hero-visual-image">
               <div className="hero-image-frame">
-                <img
+                <OptimizedImage
                   src={spotlightProduct?.image || FALLBACK_PRODUCT_IMAGE}
                   alt={spotlightProduct?.name || 'Electrical product'}
-                  decoding="async"
+                  priority
+                  fallbackSrc={FALLBACK_PRODUCT_IMAGE}
                 />
                 <div className="hero-image-overlay">
                   <span className="hero-image-chip">Live stock</span>
@@ -301,7 +373,7 @@ const Home = () => {
           <div className="hero-mini-grid">
             {featuredProducts.slice(1, 4).map((product) => (
               <div key={product.id} className="hero-mini-card">
-                <img src={product.image} alt={product.name} loading="lazy" decoding="async" />
+                <OptimizedImage src={product.image} alt={product.name} fallbackSrc={FALLBACK_PRODUCT_IMAGE} />
                 <div>
                   <h4>{product.name}</h4>
                   <p>KES {product.price}</p>
@@ -391,11 +463,10 @@ const Home = () => {
             {categoryShowcases.map((category) => (
               <Link key={category.name} to={category.link} className={`category-card tone-${category.tone}`}>
                 <div className="category-banner">
-                  <img
+                  <OptimizedImage
                     src={category.highlight?.image || FALLBACK_PRODUCT_IMAGE}
                     alt={category.highlight?.name || category.name}
-                    loading="lazy"
-                    decoding="async"
+                    fallbackSrc={FALLBACK_PRODUCT_IMAGE}
                   />
                   <div className="category-banner-overlay">
                     <span>{category.itemCount || 0} items</span>
@@ -412,6 +483,19 @@ const Home = () => {
                   <strong>{category.highlight?.name || 'Featured device'}</strong>
                   <span>KES {category.highlight?.price || '---'}</span>
                 </div>
+                <button
+                  type="button"
+                  className="category-quick-view-btn"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (category.highlight) {
+                      openQuickView(category.highlight);
+                    }
+                  }}
+                >
+                  Quick View
+                </button>
                 <div className="category-link">
                   Explore category <ArrowRight size={16} />
                 </div>
@@ -436,7 +520,7 @@ const Home = () => {
             {featuredProducts.map((product) => (
               <div key={product.id} className="product-card">
                 <div className="product-image">
-                  <img src={product.image} alt={product.name} />
+                  <OptimizedImage src={product.image} alt={product.name} fallbackSrc={FALLBACK_PRODUCT_IMAGE} />
                   <button
                     className="wishlist-btn"
                     aria-label={`Save ${product.name}`}
@@ -452,9 +536,9 @@ const Home = () => {
                   <div className="product-footer">
                     <p className="product-price">KES {product.price}</p>
                     <div className="product-actions">
-                      <Link to={`/product/${product.id}`} className="view-btn">
-                        View
-                      </Link>
+                      <button type="button" className="quick-view-btn" onClick={() => openQuickView(product)}>
+                        Quick View
+                      </button>
                       <button className="add-to-cart-btn" onClick={() => addToCart(product)}>
                         <ShoppingBag size={16} />
                         Add
@@ -468,7 +552,24 @@ const Home = () => {
         </div>
       </section>
 
-      <NewsletterSection mode="fullPage" />
+      <ProductQuickViewModal
+        product={quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+        onAddToCart={addToCart}
+        onAddToWishlist={addToWishlist}
+      />
+
+      <Suspense
+        fallback={
+          <section className="newsletter-section newsletter-section--loading" aria-busy="true">
+            <div className="section-container">
+              <div className="newsletter-loading-card" />
+            </div>
+          </section>
+        }
+      >
+        <NewsletterSection mode="fullPage" />
+      </Suspense>
 
       <section className="cta-section">
         <div className="section-container">

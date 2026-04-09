@@ -1,15 +1,21 @@
 import { useState } from 'react';
 import { Truck, CreditCard, AlertCircle } from 'lucide-react';
+import { KENYA_COUNTIES, getCountyLocationProfile } from '../utils/kenyaLocations';
 import './DeliveryCheckout.css';
 
 const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
   const [deliveryMethod, setDeliveryMethod] = useState('standard');
   const [paymentMethod, setPaymentMethod] = useState('mpesa');
   const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
+  const [county, setCounty] = useState('');
+  const [town, setTown] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [phone, setPhone] = useState('');
   const [errors, setErrors] = useState({});
+
+  const selectedCountyProfile = getCountyLocationProfile(county);
+  const townOptions = selectedCountyProfile?.towns || [];
+  const postalHint = selectedCountyProfile?.postalCode || '';
 
   const deliveryOptions = {
     standard: { name: 'Standard Delivery', cost: 200, days: '3-5' },
@@ -21,7 +27,8 @@ const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
     const newErrors = {};
     
     if (!address.trim()) newErrors.address = 'Address is required';
-    if (!city.trim()) newErrors.city = 'City is required';
+    if (!county.trim()) newErrors.county = 'County is required';
+    if (!town.trim()) newErrors.town = 'Town is required';
     if (!phone.trim()) newErrors.phone = 'Phone number is required';
     if (deliveryMethod !== 'pickup' && !postalCode.trim()) {
       newErrors.postalCode = 'Postal code is required for delivery';
@@ -35,15 +42,43 @@ const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const fullAddress = `${address}, ${city}${postalCode ? `, ${postalCode}` : ''}`;
+    const fullAddress = `${address}, ${town}, ${county}${postalCode ? `, ${postalCode}` : ''}`;
     
     onSubmit({
       delivery_method: deliveryMethod,
       delivery_address: fullAddress,
+      delivery_county: county,
+      delivery_town: town,
+      delivery_postal_code: postalCode,
       delivery_cost: deliveryOptions[deliveryMethod].cost,
       payment_method: paymentMethod,
       phone_number: phone,
     });
+  };
+
+  const handleCountyChange = (event) => {
+    const nextCounty = event.target.value;
+    const nextProfile = getCountyLocationProfile(nextCounty);
+    const nextTown = nextProfile?.defaultTown || '';
+    setCounty(nextCounty);
+    setTown(nextTown);
+    setPostalCode(nextProfile?.postalCode || '');
+    setErrors((current) => ({
+      ...current,
+      county: '',
+      town: '',
+      postalCode: '',
+    }));
+  };
+
+  const handleTownChange = (event) => {
+    const nextTown = event.target.value;
+    setTown(nextTown);
+
+    const matchedTown = townOptions.find((option) => option.name.toLowerCase() === nextTown.trim().toLowerCase());
+    if (matchedTown?.postalCode) {
+      setPostalCode(matchedTown.postalCode);
+    }
   };
 
   const selectedDelivery = deliveryOptions[deliveryMethod];
@@ -52,8 +87,14 @@ const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
 
   return (
     <form onSubmit={handleSubmit} className="delivery-checkout">
-      <div className="checkout-section">
-        <h3>Delivery Method</h3>
+      <div className="checkout-section checkout-section--delivery">
+        <div className="checkout-section__header">
+          <span className="checkout-section__kicker">Step 1</span>
+          <div>
+            <h3>Delivery Method</h3>
+            <p>Choose how you want the order to reach you.</p>
+          </div>
+        </div>
         <div className="delivery-options">
           {Object.entries(deliveryOptions).map(([key, option]) => (
             <label key={key} className={`delivery-option ${deliveryMethod === key ? 'selected' : ''}`}>
@@ -68,7 +109,7 @@ const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
                 <Truck size={20} />
                 <div>
                   <p className="option-name">{option.name}</p>
-                  <p className="option-details">{option.days} days • KES {option.cost}</p>
+                  <p className="option-details">{option.days} days | KES {option.cost}</p>
                 </div>
               </div>
             </label>
@@ -76,8 +117,14 @@ const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
         </div>
       </div>
 
-      <div className="checkout-section">
-        <h3>Delivery Address</h3>
+      <div className="checkout-section checkout-section--address">
+        <div className="checkout-section__header">
+          <span className="checkout-section__kicker">Step 2</span>
+          <div>
+            <h3>Delivery Address</h3>
+            <p>We use this address for dispatch and tracking.</p>
+          </div>
+        </div>
         <div className="form-group">
           <label>Street Address *</label>
           <input
@@ -93,35 +140,70 @@ const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
 
         <div className="form-row">
           <div className="form-group flex-1">
-            <label>City *</label>
-            <input
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder="Nairobi"
+            <label>County *</label>
+            <select
+              value={county}
+              onChange={handleCountyChange}
               disabled={loading}
-              className={errors.city ? 'error' : ''}
-            />
-            {errors.city && <span className="error-message">{errors.city}</span>}
+              className={errors.county ? 'error' : ''}
+            >
+              <option value="">Select a county</option>
+              {KENYA_COUNTIES.map((countyName) => (
+                <option key={countyName} value={countyName}>
+                  {countyName}
+                </option>
+              ))}
+            </select>
+            {errors.county && <span className="error-message">{errors.county}</span>}
           </div>
 
           <div className="form-group flex-1">
-            <label>Postal Code {deliveryMethod !== 'pickup' && '*'}</label>
+            <label>Town / City *</label>
             <input
               type="text"
-              value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value)}
-              placeholder="00100"
-              disabled={loading || deliveryMethod === 'pickup'}
-              className={errors.postalCode ? 'error' : ''}
+              value={town}
+              onChange={handleTownChange}
+              placeholder={selectedCountyProfile?.defaultTown || 'Nairobi'}
+              disabled={loading}
+              className={errors.town ? 'error' : ''}
+              list="town-suggestions"
             />
-            {errors.postalCode && <span className="error-message">{errors.postalCode}</span>}
+            <datalist id="town-suggestions">
+              {townOptions.map((option) => (
+                <option key={option.name} value={option.name} />
+              ))}
+            </datalist>
+            {townOptions.length > 0 && (
+              <span className="form-hint">
+                Popular towns in {county || 'your county'}
+              </span>
+            )}
+            {errors.town && <span className="error-message">{errors.town}</span>}
           </div>
+        </div>
+
+        <div className="form-group">
+          <label>Postal Code {deliveryMethod !== 'pickup' && '*'}</label>
+          <input
+            type="text"
+            value={postalCode}
+            onChange={(e) => setPostalCode(e.target.value)}
+            placeholder={postalHint || '00100'}
+            disabled={loading || deliveryMethod === 'pickup'}
+            className={errors.postalCode ? 'error' : ''}
+          />
+          {errors.postalCode && <span className="error-message">{errors.postalCode}</span>}
         </div>
       </div>
 
-      <div className="checkout-section">
-        <h3>Payment Method</h3>
+      <div className="checkout-section checkout-section--payment">
+        <div className="checkout-section__header">
+          <span className="checkout-section__kicker">Step 3</span>
+          <div>
+            <h3>Payment Method</h3>
+            <p>Select M-Pesa or cash on delivery.</p>
+          </div>
+        </div>
         <div className="payment-options">
           <label className={`payment-option ${paymentMethod === 'mpesa' ? 'selected' : ''}`}>
             <input
@@ -159,8 +241,14 @@ const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
         </div>
       </div>
 
-      <div className="checkout-section">
-        <h3>Contact Information</h3>
+      <div className="checkout-section checkout-section--contact">
+        <div className="checkout-section__header">
+          <span className="checkout-section__kicker">Step 4</span>
+          <div>
+            <h3>Contact Information</h3>
+            <p>We'll use this number for updates if needed.</p>
+          </div>
+        </div>
         <div className="form-group">
           <label>Phone Number *</label>
           <input

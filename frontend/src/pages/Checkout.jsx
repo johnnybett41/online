@@ -57,6 +57,13 @@ const Checkout = () => {
         message: res.data.payment_method === 'mpesa' 
           ? 'Order created! Preparing M-Pesa payment...'
           : 'Order confirmed! We will contact you to confirm delivery.',
+        delivery: deliveryData,
+        paymentMethod: res.data.payment_method,
+        deliveryCost: res.data.delivery_cost,
+        estimatedDeliveryDate: res.data.estimated_delivery_date,
+        deliveryCounty: res.data.delivery_county,
+        deliveryTown: res.data.delivery_town,
+        deliveryPostalCode: res.data.delivery_postal_code,
       });
       showToast('Your order was placed successfully.', 'success');
 
@@ -195,14 +202,67 @@ const Checkout = () => {
             />
 
             {paymentStatus && (
-              <div className="status-banner" style={{ marginTop: '20px' }}>
-                <CheckCircle2 size={18} />
-                <span>{paymentStatus.message}</span>
-                {lastOrderId && (
-                  <Link to={`/orders?order=${lastOrderId}`} className="purchase-button secondary" style={{ marginLeft: 'auto' }}>
-                    Track delivery
+              <div className="status-banner status-banner--success" style={{ marginTop: '20px' }}>
+                <div className="status-banner__header">
+                  <CheckCircle2 size={20} />
+                  <div>
+                    <strong>{paymentStatus.message}</strong>
+                    <p>Delivery and payment details are saved on your order now.</p>
+                  </div>
+                </div>
+
+                <div className="status-banner__grid">
+                  <div>
+                    <span>Delivery</span>
+                    <strong>{paymentStatus.delivery?.delivery_method || 'standard'}</strong>
+                  </div>
+                  <div>
+                    <span>Payment</span>
+                    <strong>{paymentStatus.paymentMethod || 'mpesa'}</strong>
+                  </div>
+                  <div>
+                    <span>Phone</span>
+                    <strong>{paymentStatus.delivery?.phone_number || 'n/a'}</strong>
+                  </div>
+                  <div>
+                    <span>ETA</span>
+                    <strong>
+                      {paymentStatus.estimatedDeliveryDate
+                        ? new Date(paymentStatus.estimatedDeliveryDate).toLocaleDateString()
+                        : 'n/a'}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="status-banner__details">
+                  <p>
+                    <span>Address:</span> {paymentStatus.delivery?.delivery_address || 'n/a'}
+                  </p>
+                  {paymentStatus.deliveryCounty && (
+                    <p>
+                      <span>County:</span> {paymentStatus.deliveryCounty}
+                    </p>
+                  )}
+                  {paymentStatus.deliveryTown && (
+                    <p>
+                      <span>Town:</span> {paymentStatus.deliveryTown}
+                    </p>
+                  )}
+                  <p>
+                    <span>Delivery cost:</span> KES {Number(paymentStatus.deliveryCost || 0).toFixed(2)}
+                  </p>
+                </div>
+
+                <div className="status-banner__actions">
+                  {lastOrderId && (
+                    <Link to={`/orders?order=${lastOrderId}`} className="purchase-button primary">
+                      Track delivery
+                    </Link>
+                  )}
+                  <Link to="/products" className="purchase-button secondary">
+                    Continue shopping
                   </Link>
-                )}
+                </div>
               </div>
             )}
           </aside>

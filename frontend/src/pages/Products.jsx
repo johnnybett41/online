@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,8 @@ import { loadCatalogCache, saveCatalogCache } from '../utils/catalogCache';
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import { useToast } from '../components/Toast';
+import OptimizedImage from '../components/OptimizedImage';
+import ProductQuickViewModal from '../components/ProductQuickViewModal';
 import Skeleton, { SkeletonLine } from '../components/Skeleton';
 import './Products.css';
 
@@ -48,33 +50,43 @@ const getStockLabel = (product) => {
   return `${stockCount} in stock`;
 };
 
+const VIRTUALIZED_GRID_THRESHOLD = 24;
+
+const GRID_LAYOUTS = [
+  { minWidth: 1180, columns: 4, rowHeight: 540 },
+  { minWidth: 880, columns: 3, rowHeight: 540 },
+  { minWidth: 540, columns: 2, rowHeight: 600 },
+  { minWidth: 0, columns: 1, rowHeight: 700 },
+];
+
+const getGridLayout = (width) =>
+  GRID_LAYOUTS.find((layout) => width >= layout.minWidth) || GRID_LAYOUTS[GRID_LAYOUTS.length - 1];
+
 const Products = () => {
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [sortBy, setSortBy] = useState('name');
   const [viewMode, setViewMode] = useState('grid');
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [gridWindow, setGridWindow] = useState({
+    startRow: 0,
+    endRow: 0,
+    columns: 1,
+    rowHeight: GRID_LAYOUTS[0].rowHeight,
+    totalRows: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [usingCachedCatalog, setUsingCachedCatalog] = useState(false);
+  const gridViewportRef = useRef(null);
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
   const { showToast } = useToast();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   const categoryQuery = searchParams.get('category') || 'all';
-  const categoryChips = ['all', ...categories];
-  const totalRemainingStock = products.reduce((sum, product) => sum + Math.max(0, getStockCount(product)), 0);
-  const lowStockCount = products.filter((product) => {
-    const stockCount = getStockCount(product);
-    return stockCount > 0 && stockCount <= 5;
-  }).length;
-  const soldOutCount = products.filter((product) => getStockCount(product) <= 0).length;
-  const almostSoldOutProducts = products
-    .filter((product) => getStockCount(product) > 0 && getStockCount(product) <= 5)
-    .sort((a, b) => getStockCount(a) - getStockCount(b))
-    .slice(0, 6);
+  const categoryChips = useMemo(() => ['all', ...categories], [categories]);
 
   useEffect(() => {
     fetchProducts();
@@ -83,10 +95,6 @@ const Products = () => {
   useEffect(() => {
     setSelectedCategory(categoryQuery);
   }, [categoryQuery]);
-
-  useEffect(() => {
-    filterAndSortProducts();
-  }, [products, selectedCategory, priceRange, sortBy, searchQuery]);
 
   const fetchProducts = async () => {
     if (isDemoMode) {
@@ -120,7 +128,7 @@ const Products = () => {
     }
   };
 
-  const filterAndSortProducts = () => {
+  const filteredProducts = useMemo(() => {
     let filtered = [...products];
 
     // Search filter
@@ -158,8 +166,79 @@ const Products = () => {
       }
     });
 
-    setFilteredProducts(filtered);
-  };
+    return filtered;
+  }, [products, selectedCategory, priceRange.min, priceRange.max, sortBy, searchQuery]);
+
+  const shouldVirtualizeGrid = viewMode === 'grid' && filteredProducts.length > VIRTUALIZED_GRID_THRESHOLD;
+
+  useEffect(() => {
+    if (!shouldVirtualizeGrid) {
+      setGridWindow({
+        startRow: 0,
+        endRow: 0,
+        columns: 1,
+        rowHeight: GRID_LAYOUTS[0].rowHeight,
+        totalRows: 0,
+      });
+      return undefined;
+    }
+
+    let rafId = 0;
+
+    const updateGridWindow = () => {
+      const viewport = gridViewportRef.current;
+
+      if (!viewport) {
+        return;
+      }
+
+      const layout = getGridLayout(viewport.clientWidth || window.innerWidth);
+      const totalRows = Math.ceil(filteredProducts.length / layout.columns);
+      const scrollTop = window.scrollY || window.pageYOffset || 0;
+      const viewportHeight = window.innerHeight || 0;
+      const gridTop = viewport.getBoundingClientRect().top + scrollTop;
+      const overscanRows = 2;
+      const currentRow = Math.max(0, Math.floor((scrollTop - gridTop) / layout.rowHeight));
+      const visibleRows = Math.max(1, Math.ceil(viewportHeight / layout.rowHeight));
+      const startRow = Math.max(0, currentRow - overscanRows);
+      const endRow = Math.min(totalRows, currentRow + visibleRows + overscanRows);
+
+      setGridWindow((currentWindow) => {
+        if (
+          currentWindow.startRow === startRow &&
+          currentWindow.endRow === endRow &&
+          currentWindow.columns === layout.columns &&
+          currentWindow.rowHeight === layout.rowHeight &&
+          currentWindow.totalRows === totalRows
+        ) {
+          return currentWindow;
+        }
+
+        return {
+          startRow,
+          endRow,
+          columns: layout.columns,
+          rowHeight: layout.rowHeight,
+          totalRows,
+        };
+      });
+    };
+
+    const scheduleGridUpdate = () => {
+      window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(updateGridWindow);
+    };
+
+    scheduleGridUpdate();
+    window.addEventListener('scroll', scheduleGridUpdate, { passive: true });
+    window.addEventListener('resize', scheduleGridUpdate);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', scheduleGridUpdate);
+      window.removeEventListener('resize', scheduleGridUpdate);
+    };
+  }, [filteredProducts.length, shouldVirtualizeGrid]);
 
   const addToCart = async (product) => {
     if (!user) {
@@ -210,6 +289,10 @@ const Products = () => {
     showToast('Added to wishlist!', 'success');
   };
 
+  const openQuickView = (product) => {
+    setQuickViewProduct(product);
+  };
+
   const handleImageError = (event) => {
     event.currentTarget.src =
       'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="%23f2f2f2"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23777" font-family="Arial, sans-serif" font-size="28">Image unavailable</text></svg>';
@@ -221,11 +304,95 @@ const Products = () => {
     setSortBy('name');
   };
 
-  const quickTrustBadges = [
-    { icon: <ShieldCheck size={16} />, label: 'Warranty included' },
-    { icon: <Truck size={16} />, label: 'Fast delivery' },
-    { icon: <BadgeCheck size={16} />, label: 'Safe electrical products' },
-  ];
+  const renderProductCard = (product) => (
+    <div className="product-card">
+      <div className="product-image">
+        <OptimizedImage
+          src={product.image}
+          alt={product.name}
+          fallbackSrc="data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;800&quot; height=&quot;600&quot;><rect width=&quot;100%&quot; height=&quot;100%&quot; fill=&quot;%23f2f2f2&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; fill=&quot;%23777&quot; font-family=&quot;Arial, sans-serif&quot; font-size=&quot;28&quot;>Image unavailable</text></svg>"
+          onError={handleImageError}
+        />
+        <span
+          className={`stock-badge ${getStockCount(product) <= 0 ? 'sold-out' : getStockCount(product) <= 5 ? 'low-stock' : ''}`}
+        >
+          {getStockLabel(product)}
+        </span>
+        <button className="wishlist-btn" onClick={() => addToWishlist(product)}>
+          <Heart size={20} />
+        </button>
+      </div>
+      <div className="product-info">
+        <h3>{product.name}</h3>
+        <p className="product-description">{product.description}</p>
+        <p className="product-category">{product.category}</p>
+        <p className="product-price">KES {product.price}</p>
+        <p
+          className={`product-stock ${
+            getStockCount(product) <= 0 ? 'sold-out' : getStockCount(product) <= 5 ? 'low-stock' : ''
+          }`}
+        >
+          {getStockLabel(product)}
+        </p>
+        <div className="product-actions">
+          <button type="button" className="quick-view-btn" onClick={() => openQuickView(product)}>
+            Quick View
+          </button>
+          <button className="add-to-cart-btn" disabled={getStockCount(product) <= 0} onClick={() => addToCart(product)}>
+            {getStockCount(product) <= 0 ? 'Sold Out' : 'Add to Cart'}
+          </button>
+          <Link to={`/product/${product.id}`} className="view-details-btn">
+            View Details
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+
+  const virtualizedGridRows = useMemo(() => {
+    if (!shouldVirtualizeGrid) {
+      return null;
+    }
+
+    const startIndex = gridWindow.startRow * gridWindow.columns;
+    const endIndex = Math.min(filteredProducts.length, gridWindow.endRow * gridWindow.columns);
+    const visibleProducts = filteredProducts.slice(startIndex, endIndex);
+    const rows = [];
+
+    for (let index = 0; index < visibleProducts.length; index += gridWindow.columns) {
+      rows.push(visibleProducts.slice(index, index + gridWindow.columns));
+    }
+
+    return {
+      topSpacer: gridWindow.startRow * gridWindow.rowHeight,
+      bottomSpacer: Math.max(0, (gridWindow.totalRows - gridWindow.endRow) * gridWindow.rowHeight),
+      rows,
+    };
+  }, [filteredProducts, gridWindow, shouldVirtualizeGrid]);
+
+  const quickTrustBadges = useMemo(
+    () => [
+      { icon: <ShieldCheck size={16} />, label: 'Warranty included' },
+      { icon: <Truck size={16} />, label: 'Fast delivery' },
+      { icon: <BadgeCheck size={16} />, label: 'Safe electrical products' },
+    ],
+    []
+  );
+
+  const stockSummary = useMemo(() => {
+    const totalRemainingStock = products.reduce((sum, product) => sum + Math.max(0, getStockCount(product)), 0);
+    const lowStockCount = products.filter((product) => {
+      const stockCount = getStockCount(product);
+      return stockCount > 0 && stockCount <= 5;
+    }).length;
+    const soldOutCount = products.filter((product) => getStockCount(product) <= 0).length;
+    const almostSoldOutProducts = products
+      .filter((product) => getStockCount(product) > 0 && getStockCount(product) <= 5)
+      .sort((a, b) => getStockCount(a) - getStockCount(b))
+      .slice(0, 6);
+
+    return { totalRemainingStock, lowStockCount, soldOutCount, almostSoldOutProducts };
+  }, [products]);
 
   if (loading) {
     return (
@@ -315,15 +482,15 @@ const Products = () => {
 
       <div className="stock-overview">
         <div className="stock-stat">
-          <span className="stock-value">{totalRemainingStock}</span>
+          <span className="stock-value">{stockSummary.totalRemainingStock}</span>
           <span className="stock-label">Items left in store</span>
         </div>
         <div className="stock-stat">
-          <span className="stock-value">{lowStockCount}</span>
+          <span className="stock-value">{stockSummary.lowStockCount}</span>
           <span className="stock-label">Low-stock products</span>
         </div>
         <div className="stock-stat">
-          <span className="stock-value">{soldOutCount}</span>
+          <span className="stock-value">{stockSummary.soldOutCount}</span>
           <span className="stock-label">Sold out</span>
         </div>
       </div>
@@ -404,7 +571,7 @@ const Products = () => {
         {searchQuery && <p>Search results for: "{searchQuery}"</p>}
       </div>
 
-      {almostSoldOutProducts.length > 0 && (
+      {stockSummary.almostSoldOutProducts.length > 0 && (
         <section className="low-stock-section">
           <div className="low-stock-header">
             <div>
@@ -413,14 +580,19 @@ const Products = () => {
               <p>These products are running low, so shoppers can see the remaining stock before checkout.</p>
             </div>
             <div className="low-stock-summary">
-              <span>{almostSoldOutProducts.length} items</span>
+              <span>{stockSummary.almostSoldOutProducts.length} items</span>
               <span>stock at 5 or below</span>
             </div>
           </div>
           <div className="low-stock-grid">
-            {almostSoldOutProducts.map((product) => (
+            {stockSummary.almostSoldOutProducts.map((product) => (
               <Link key={product.id} to={`/product/${product.id}`} className="low-stock-card">
-                <img src={product.image} alt={product.name} onError={handleImageError} loading="lazy" decoding="async" />
+                <OptimizedImage
+                  src={product.image}
+                  alt={product.name}
+                  className="low-stock-card__image"
+                  fallbackSrc="data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;800&quot; height=&quot;600&quot;><rect width=&quot;100%&quot; height=&quot;100%&quot; fill=&quot;%23f2f2f2&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; fill=&quot;%23777&quot; font-family=&quot;Arial, sans-serif&quot; font-size=&quot;28&quot;>Image unavailable</text></svg>"
+                />
                 <div className="low-stock-card-body">
                   <span className={`low-stock-pill ${getStockCount(product) <= 0 ? 'sold-out' : ''}`}>
                     {getStockLabel(product)}
@@ -434,45 +606,29 @@ const Products = () => {
         </section>
       )}
 
-      <div className={`products-grid ${viewMode}`}>
-        {filteredProducts.map(product => (
-          <div key={product.id} className="product-card">
-            <div className="product-image">
-              <img src={product.image} alt={product.name} onError={handleImageError} loading="lazy" decoding="async" />
-              <span className={`stock-badge ${getStockCount(product) <= 0 ? 'sold-out' : getStockCount(product) <= 5 ? 'low-stock' : ''}`}>
-                {getStockLabel(product)}
-              </span>
-              <button
-                className="wishlist-btn"
-                onClick={() => addToWishlist(product)}
-              >
-                <Heart size={20} />
-              </button>
+      {shouldVirtualizeGrid ? (
+        <div className="products-virtual-grid" ref={gridViewportRef}>
+          <div style={{ height: `${virtualizedGridRows?.topSpacer || 0}px` }} aria-hidden="true" />
+          {(virtualizedGridRows?.rows || []).map((row, rowIndex) => (
+            <div
+              key={`virtual-row-${gridWindow.startRow + rowIndex}`}
+              className="products-virtual-row"
+              style={{ minHeight: `${gridWindow.rowHeight}px` }}
+            >
+              {row.map((product) => (
+                <div key={product.id}>{renderProductCard(product)}</div>
+              ))}
             </div>
-            <div className="product-info">
-              <h3>{product.name}</h3>
-              <p className="product-description">{product.description}</p>
-              <p className="product-category">{product.category}</p>
-              <p className="product-price">KES {product.price}</p>
-              <p className={`product-stock ${getStockCount(product) <= 0 ? 'sold-out' : getStockCount(product) <= 5 ? 'low-stock' : ''}`}>
-                {getStockLabel(product)}
-              </p>
-              <div className="product-actions">
-                <button
-                  className="add-to-cart-btn"
-                  disabled={getStockCount(product) <= 0}
-                  onClick={() => addToCart(product)}
-                >
-                  {getStockCount(product) <= 0 ? 'Sold Out' : 'Add to Cart'}
-                </button>
-                <Link to={`/product/${product.id}`} className="view-details-btn">
-                  View Details
-                </Link>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+          <div style={{ height: `${virtualizedGridRows?.bottomSpacer || 0}px` }} aria-hidden="true" />
+        </div>
+      ) : (
+        <div className={`products-grid ${viewMode}`}>
+          {filteredProducts.map((product) => (
+            <div key={product.id}>{renderProductCard(product)}</div>
+          ))}
+        </div>
+      )}
 
       {filteredProducts.length === 0 && (
         <div className="no-products">
@@ -489,6 +645,13 @@ const Products = () => {
           <button onClick={clearFilters}>Clear Filters</button>
         </div>
       )}
+
+      <ProductQuickViewModal
+        product={quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+        onAddToCart={addToCart}
+        onAddToWishlist={addToWishlist}
+      />
     </div>
   );
 };

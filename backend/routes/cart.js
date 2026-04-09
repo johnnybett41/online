@@ -70,11 +70,27 @@ router.post('/', authenticateToken, async (req, res) => {
 
   try {
     await validateProductStock(db, parsedProductId, parsedQuantity);
-    await run(
-      `INSERT INTO cart (user_id, product_id, quantity) VALUES ($1, $2, $3)
-       ON CONFLICT(user_id, product_id) DO UPDATE SET quantity = $3`,
-      [req.user.id, parsedProductId, parsedQuantity]
+    const existingCartItem = await get(
+      `SELECT id
+       FROM cart
+       WHERE user_id = $1 AND product_id = $2
+       LIMIT 1`,
+      [req.user.id, parsedProductId]
     );
+
+    if (existingCartItem) {
+      await run(
+        `UPDATE cart
+         SET quantity = $1
+         WHERE id = $2 AND user_id = $3`,
+        [parsedQuantity, existingCartItem.id, req.user.id]
+      );
+    } else {
+      await run(
+        `INSERT INTO cart (user_id, product_id, quantity) VALUES ($1, $2, $3)`,
+        [req.user.id, parsedProductId, parsedQuantity]
+      );
+    }
     return res.status(201).json({ message: 'Added to cart' });
   } catch (error) {
     return res.status(error.statusCode || 500).json({ message: error.message || 'Failed to add to cart' });

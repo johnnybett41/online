@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Search, ShoppingCart, User, Menu, X, Heart, Sun, Moon } from 'lucide-react';
 import NotificationCenter from './NotificationCenter';
+import OptimizedImage from './OptimizedImage';
 import logoLight from '../assets/electrohub-mark.svg';
 import logoDark from '../assets/electrohub-mark-dark.svg';
 import './Navbar.css';
@@ -42,10 +43,11 @@ const Navbar = () => {
       <div className="navbar-container">
         <div className="navbar-brand">
           <Link to="/" className="brand-link">
-            <img
+            <OptimizedImage
               src={isDarkMode ? logoDark : logoLight}
               alt="ElectroHub logo"
               className="brand-logo"
+              priority
             />
             <span className="brand-text">ElectroHub</span>
           </Link>
