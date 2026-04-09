@@ -1,60 +1,70 @@
 databases:
-  - name: technocratkip41-online-db
-    plan: free
-    databaseName: online_db
-    region: oregon
-    ipAllowList: []
+  - name: electrohub-db
+    databaseName: electrohub
+    user: electrohub
 
 services:
   - type: web
-    name: technocratkip41-online-backend
-    runtime: node
+    name: electrohub-backend
+    env: node
+    plan: free
     rootDir: backend
     buildCommand: npm install
     startCommand: npm start
+    healthCheckPath: /products
+    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: technocratkip41-online-db
-          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: GOOGLE_CLIENT_ID
-        value: 636383910379-pbd733qol3g7j3uvd9um27lb1ap7t1p0.apps.googleusercontent.com
-      - key: NEWSLETTER_NOTIFICATION_EMAIL
-        value: johnbett414@gmail.com
+        sync: false
       - key: ADMIN_EMAILS
-        value: johnbett356@gmail.com
+        sync: false
+      - key: NEWSLETTER_NOTIFICATION_EMAIL
+        sync: false
       - key: SMTP_HOST
-        value: smtp.gmail.com
+        sync: false
       - key: SMTP_PORT
-        value: "587"
+        sync: false
       - key: SMTP_SECURE
-        value: "false"
+        sync: false
       - key: SMTP_USER
         sync: false
       - key: SMTP_PASS
         sync: false
       - key: MAIL_FROM_NAME
-        value: ElectroHub
+        sync: false
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MPESA_CONSUMER_KEY
+        sync: false
+      - key: MPESA_CONSUMER_SECRET
+        sync: false
+      - key: MPESA_SHORTCODE
+        sync: false
+      - key: MPESA_PASSKEY
+        sync: false
+      - key: MPESA_BASE_URL
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: electrohub-db
+          property: connectionString
 
-  - type: web
-    name: technocratkip41-online-frontend
-    runtime: static
+  - type: static
+    name: electrohub-frontend
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+    autoDeploy: true
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          name: technocratkip41-online-backend
-          type: web
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://electrohub-backend.onrender.com
       - key: VITE_GOOGLE_CLIENT_ID
-        value: 636383910379-pbd733qol3g7j3uvd9um27lb1ap7t1p0.apps.googleusercontent.com
+        sync: false
