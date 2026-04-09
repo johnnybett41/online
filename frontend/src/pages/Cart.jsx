@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDemoMode } from '../context/DemoModeContext';
 import { loadCartCache, saveCartCache } from '../utils/cartCache';
+import { loadCatalogCache } from '../utils/catalogCache';
 import { removeCartItem, updateCartItem } from '../utils/cartActions';
 import { useToast } from '../components/Toast';
+import { buildRecommendations, getRecentlyViewedWithinCatalog } from '../utils/recentActivity';
 import {
   ArrowRight,
   Minus,
@@ -122,6 +124,16 @@ const Cart = () => {
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const checkoutBlocked = isDemoMode || !navigator.onLine;
+  const catalog = useMemo(() => loadCatalogCache(), [usingCachedCart, cartItems.length]);
+  const recommendedProducts = useMemo(
+    () =>
+      buildRecommendations({
+        catalog,
+        recentlyViewed: getRecentlyViewedWithinCatalog(catalog, 4),
+        limit: 4,
+      }),
+    [catalog]
+  );
 
   const handleCheckoutClick = (event) => {
     if (!checkoutBlocked) {
@@ -202,6 +214,25 @@ const Cart = () => {
               Browse Products <ArrowRight size={16} />
             </Link>
           </div>
+          {recommendedProducts.length > 0 && (
+            <div className="empty-product-shelf">
+              <div className="empty-product-shelf__header">
+                <h3>Recommended for you</h3>
+                <p>Quick picks to help you get moving.</p>
+              </div>
+              <div className="empty-product-shelf__grid">
+                {recommendedProducts.map((product) => (
+                  <Link key={product.id} to={`/product/${product.id}`} className="empty-product-card">
+                    <img src={product.image} alt={product.name} loading="lazy" decoding="async" />
+                    <div>
+                      <strong>{product.name}</strong>
+                      <span>KES {product.price}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="purchase-layout">
@@ -295,6 +326,23 @@ const Cart = () => {
               Proceed to Checkout <ArrowRight size={16} />
             </Link>
           </aside>
+        </div>
+      )}
+
+      {cartItems.length > 0 && (
+        <div className="mobile-cart-summary">
+          <div>
+            <span>Cart total</span>
+            <strong>KES {total.toFixed(2)}</strong>
+          </div>
+          <Link
+            to="/checkout"
+            className={`purchase-button primary ${checkoutBlocked ? 'is-disabled' : ''}`}
+            onClick={handleCheckoutClick}
+            aria-disabled={checkoutBlocked}
+          >
+            Checkout
+          </Link>
         </div>
       )}
     </div>

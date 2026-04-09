@@ -57,6 +57,13 @@
   margin: 0 0 18px;
 }
 
+.quick-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+
 .category-chip {
   padding: 10px 14px;
   border: 1px solid rgba(102, 126, 234, 0.16);
@@ -72,6 +79,25 @@
 .category-chip.active {
   transform: translateY(-1px);
   background: #27406b;
+  color: #fff;
+  box-shadow: 0 12px 22px rgba(16, 33, 61, 0.14);
+}
+
+.quick-filter-chip {
+  padding: 10px 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #27406b;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.quick-filter-chip:hover,
+.quick-filter-chip.active {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #10213d 0%, #27406b 100%);
   color: #fff;
   box-shadow: 0 12px 22px rgba(16, 33, 61, 0.14);
 }
@@ -790,6 +816,13 @@
   border-radius: 16px;
 }
 
+.product-card:focus-within,
+.category-card:focus-within,
+.low-stock-card:focus-within {
+  outline: 3px solid rgba(102, 126, 234, 0.35);
+  outline-offset: 2px;
+}
+
 @media (max-width: 1100px) {
   .stock-overview {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -911,6 +944,17 @@
   }
 
   .category-chip {
+    flex: 0 0 auto;
+  }
+
+  .quick-filter-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 16px;
+  }
+
+  .quick-filter-chip {
     flex: 0 0 auto;
   }
 

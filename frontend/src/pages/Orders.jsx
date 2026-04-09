@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDemoMode } from '../context/DemoModeContext';
 import { loadOrderCache, saveOrderCache } from '../utils/orderCache';
+import { loadCatalogCache } from '../utils/catalogCache';
+import { buildRecommendations, getRecentlyViewedWithinCatalog } from '../utils/recentActivity';
 import { ArrowRight, FileText, Package, ShieldCheck, ShoppingBag } from 'lucide-react';
 import Skeleton, { SkeletonLine } from '../components/Skeleton';
 import DeliveryTracking from '../components/DeliveryTracking';
@@ -17,6 +19,16 @@ const Orders = () => {
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
   const selectedOrderId = searchParams.get('order');
+  const catalog = useMemo(() => loadCatalogCache(), []);
+  const recommendedProducts = useMemo(
+    () =>
+      buildRecommendations({
+        catalog,
+        recentlyViewed: getRecentlyViewedWithinCatalog(catalog, 4),
+        limit: 4,
+      }),
+    [catalog]
+  );
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -144,7 +156,7 @@ const Orders = () => {
             <Package size={44} />
           </div>
           <h2>No orders yet</h2>
-          <p>When you complete a checkout, your orders will show up here.</p>
+          <p>When you complete a checkout, your orders will show up here with live tracking and delivery milestones.</p>
           <div className="empty-state-badges">
             <span><ShieldCheck size={14} /> Secure records</span>
             <span><ShoppingBag size={14} /> Start shopping</span>
@@ -155,6 +167,25 @@ const Orders = () => {
               Browse Products <ArrowRight size={16} />
             </Link>
           </div>
+          {recommendedProducts.length > 0 && (
+            <div className="orders-empty-shelf">
+              <div className="orders-empty-shelf__header">
+                <h3>Recommended products</h3>
+                <p>Start with something that fits your browsing history.</p>
+              </div>
+              <div className="orders-empty-shelf__grid">
+                {recommendedProducts.map((product) => (
+                  <Link key={product.id} to={`/product/${product.id}`} className="orders-empty-shelf__card">
+                    <img src={product.image} alt={product.name} loading="lazy" decoding="async" />
+                    <div>
+                      <strong>{product.name}</strong>
+                      <span>KES {product.price}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="orders-grid">

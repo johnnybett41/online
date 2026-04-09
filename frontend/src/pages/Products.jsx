@@ -69,6 +69,7 @@ const Products = () => {
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [sortBy, setSortBy] = useState('name');
   const [viewMode, setViewMode] = useState('grid');
+  const [quickFilter, setQuickFilter] = useState('all');
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [gridWindow, setGridWindow] = useState({
     startRow: 0,
@@ -145,6 +146,32 @@ const Products = () => {
       filtered = filtered.filter(product => product.category === selectedCategory);
     }
 
+    if (quickFilter !== 'all') {
+      filtered = filtered.filter((product) => {
+        const stockCount = getStockCount(product);
+        const price = Number(product.price || 0);
+
+        switch (quickFilter) {
+          case 'in-stock':
+            return stockCount > 0;
+          case 'low-stock':
+            return stockCount > 0 && stockCount <= 5;
+          case 'sold-out':
+            return stockCount <= 0;
+          case 'fast-delivery':
+            return stockCount > 0;
+          case 'budget':
+            return price < 1000;
+          case 'mid':
+            return price >= 1000 && price <= 5000;
+          case 'premium':
+            return price > 5000;
+          default:
+            return true;
+        }
+      });
+    }
+
     // Price filter
     if (priceRange.min) {
       filtered = filtered.filter(product => product.price >= parseFloat(priceRange.min));
@@ -167,7 +194,7 @@ const Products = () => {
     });
 
     return filtered;
-  }, [products, selectedCategory, priceRange.min, priceRange.max, sortBy, searchQuery]);
+  }, [products, selectedCategory, priceRange.min, priceRange.max, sortBy, searchQuery, quickFilter]);
 
   const shouldVirtualizeGrid = viewMode === 'grid' && filteredProducts.length > VIRTUALIZED_GRID_THRESHOLD;
 
@@ -302,6 +329,7 @@ const Products = () => {
     setSelectedCategory('all');
     setPriceRange({ min: '', max: '' });
     setSortBy('name');
+    setQuickFilter('all');
   };
 
   const renderProductCard = (product) => (
@@ -378,6 +406,16 @@ const Products = () => {
     ],
     []
   );
+
+  const quickFilterChips = [
+    { value: 'all', label: 'All products' },
+    { value: 'in-stock', label: 'In stock' },
+    { value: 'low-stock', label: 'Low stock' },
+    { value: 'fast-delivery', label: 'Fast delivery' },
+    { value: 'budget', label: 'Under 1,000' },
+    { value: 'mid', label: '1,000 - 5,000' },
+    { value: 'premium', label: '5,000+' },
+  ];
 
   const stockSummary = useMemo(() => {
     const totalRemainingStock = products.reduce((sum, product) => sum + Math.max(0, getStockCount(product)), 0);
@@ -478,6 +516,19 @@ const Products = () => {
             </button>
           );
         })}
+      </div>
+
+      <div className="quick-filter-chips" aria-label="Quick product filters">
+        {quickFilterChips.map((chip) => (
+          <button
+            key={chip.value}
+            type="button"
+            className={`quick-filter-chip ${quickFilter === chip.value ? 'active' : ''}`}
+            onClick={() => setQuickFilter(chip.value)}
+          >
+            {chip.label}
+          </button>
+        ))}
       </div>
 
       <div className="stock-overview">

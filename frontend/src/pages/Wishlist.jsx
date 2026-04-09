@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDemoMode } from '../context/DemoModeContext';
 import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
+import { loadCatalogCache } from '../utils/catalogCache';
+import { buildRecommendations, getRecentlyViewedWithinCatalog } from '../utils/recentActivity';
 import { useToast } from '../components/Toast';
 import { Heart, ShoppingBag, ShieldCheck, Truck } from 'lucide-react';
 import './Wishlist.css';
@@ -15,6 +17,16 @@ const Wishlist = () => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [usingCachedWishlist, setUsingCachedWishlist] = useState(false);
+  const catalog = useMemo(() => loadCatalogCache(), []);
+  const recommendedProducts = useMemo(
+    () =>
+      buildRecommendations({
+        catalog,
+        recentlyViewed: getRecentlyViewedWithinCatalog(catalog, 4),
+        limit: 4,
+      }),
+    [catalog]
+  );
 
   useEffect(() => {
     if (user) {
@@ -121,7 +133,7 @@ const Wishlist = () => {
               <ShoppingBag size={40} />
             </div>
             <h2>Your wishlist is empty</h2>
-            <p>Start adding items you love to your wishlist!</p>
+            <p>Save products you love, compare them later, and move favourites to cart in one tap.</p>
             <div className="wishlist-badges">
               <span><ShieldCheck size={14} /> Warranty included</span>
               <span><Truck size={14} /> Fast delivery</span>
@@ -129,6 +141,25 @@ const Wishlist = () => {
             </div>
             <Link to="/products" className="shop-btn">Browse Products</Link>
           </div>
+          {recommendedProducts.length > 0 && (
+            <div className="wishlist-empty-shelf">
+              <div className="wishlist-empty-shelf__header">
+                <h3>Recommended for you</h3>
+                <p>Popular picks to start your wishlist.</p>
+              </div>
+              <div className="wishlist-empty-shelf__grid">
+                {recommendedProducts.map((product) => (
+                  <Link key={product.id} to={`/product/${product.id}`} className="wishlist-empty-shelf__card">
+                    <img src={product.image} alt={product.name} loading="lazy" decoding="async" />
+                    <div>
+                      <strong>{product.name}</strong>
+                      <span>KES {product.price}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="wishlist-grid">

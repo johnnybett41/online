@@ -198,6 +198,7 @@ const Checkout = () => {
             <DeliveryCheckout 
               cartTotal={total}
               loading={submitting}
+              userId={user?.id}
               onSubmit={handleDeliveryCheckout}
             />
 

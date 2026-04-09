@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import CartQueueSync from './components/CartQueueSync';
 import MobileBottomNav from './components/MobileBottomNav';
 import ConnectionStatus from './components/ConnectionStatus';
+import FloatingHelpWidget from './components/FloatingHelpWidget';
 import './App.css';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -86,6 +87,7 @@ function App() {
                 </main>
                 <Footer />
                 <MobileBottomNav />
+                <FloatingHelpWidget />
               </div>
             </Router>
           </ToastProvider>

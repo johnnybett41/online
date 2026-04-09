@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -9,8 +9,16 @@ import { addCartItem } from '../utils/cartActions';
 import { loadWishlistCache, saveWishlistCache } from '../utils/wishlistCache';
 import { useToast } from '../components/Toast';
 import OptimizedImage from '../components/OptimizedImage';
+import {
+  buildRecommendations,
+  getRecentlyViewedWithinCatalog,
+  saveRecentlyViewed,
+} from '../utils/recentActivity';
 import Skeleton, { SkeletonLine } from '../components/Skeleton';
 import './ProductDetail.css';
+
+const FALLBACK_PRODUCT_IMAGE =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="%23f2f2f2"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23777" font-family="Arial, sans-serif" font-size="28">Image unavailable</text></svg>';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -19,6 +27,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [usingCachedData, setUsingCachedData] = useState(false);
+  const [activeImage, setActiveImage] = useState('');
   const { user } = useAuth();
   const { isDemoMode } = useDemoMode();
   const { showToast } = useToast();
@@ -47,6 +56,15 @@ const ProductDetail = () => {
 
     setQuantity((currentQuantity) => Math.min(Math.max(currentQuantity, 1), stockCount));
   }, [product, stockCount]);
+
+  useEffect(() => {
+    if (!product) {
+      return;
+    }
+
+    setActiveImage(product.image || '');
+    saveRecentlyViewed(product);
+  }, [product]);
 
   const fetchProduct = async () => {
     if (isDemoMode) {
@@ -167,6 +185,33 @@ const ProductDetail = () => {
     });
   };
 
+  const catalog = useMemo(() => loadCatalogCache(), [product?.id, relatedProducts.length, usingCachedData]);
+  const recentlyViewedProducts = useMemo(
+    () => getRecentlyViewedWithinCatalog(catalog, 4),
+    [catalog, product?.id]
+  );
+  const recommendedProducts = useMemo(
+    () =>
+      buildRecommendations({
+        catalog,
+        currentProduct: product,
+        recentlyViewed: recentlyViewedProducts,
+        limit: 6,
+      }),
+    [catalog, product, recentlyViewedProducts]
+  );
+  const galleryImages = useMemo(() => {
+    const images = [
+      { src: product?.image, label: product?.name || 'Main product' },
+      ...relatedProducts.slice(0, 3).map((item, index) => ({
+        src: item.image,
+        label: item.name || `Related item ${index + 1}`,
+      })),
+    ].filter((entry) => Boolean(entry.src));
+
+    return images;
+  }, [product, relatedProducts]);
+
   if (loading) {
     return (
       <div className="product-detail-container product-detail-loading">
@@ -247,8 +292,22 @@ const ProductDetail = () => {
       <div className="product-detail">
         <div className="product-gallery">
           <div className="main-image">
-            <OptimizedImage src={product.image} alt={product.name} fallbackSrc="data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;800&quot; height=&quot;600&quot;><rect width=&quot;100%&quot; height=&quot;100%&quot; fill=&quot;%23f2f2f2&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; fill=&quot;%23777&quot; font-family=&quot;Arial, sans-serif&quot; font-size=&quot;28&quot;>Image unavailable</text></svg>" priority />
+            <OptimizedImage src={activeImage || product.image} alt={product.name} fallbackSrc={FALLBACK_PRODUCT_IMAGE} priority />
           </div>
+          {galleryImages.length > 1 && (
+            <div className="product-gallery__thumbs" aria-label="Product image gallery">
+              {galleryImages.map((image, index) => (
+                <button
+                  key={`${image.src}-${index}`}
+                  type="button"
+                  className={`product-gallery__thumb ${activeImage === image.src ? 'active' : ''}`}
+                  onClick={() => setActiveImage(image.src)}
+                >
+                  <OptimizedImage src={image.src} alt={image.label} fallbackSrc={FALLBACK_PRODUCT_IMAGE} />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="product-info">
@@ -328,10 +387,50 @@ const ProductDetail = () => {
                 <OptimizedImage
                   src={relatedProduct.image}
                   alt={relatedProduct.name}
-                  fallbackSrc="data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;800&quot; height=&quot;600&quot;><rect width=&quot;100%&quot; height=&quot;100%&quot; fill=&quot;%23f2f2f2&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; fill=&quot;%23777&quot; font-family=&quot;Arial, sans-serif&quot; font-size=&quot;28&quot;>Image unavailable</text></svg>"
+                  fallbackSrc={FALLBACK_PRODUCT_IMAGE}
                 />
                 <h4>{relatedProduct.name}</h4>
                 <p>KES {relatedProduct.price}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {recommendedProducts.length > 0 && (
+        <div className="related-products related-products--recommendations">
+          <h2>Recommended for you</h2>
+          <p className="related-subtitle">
+            Picks based on this product, your recent browsing, and what is in stock now.
+          </p>
+          <div className="related-grid">
+            {recommendedProducts.map((recommendedProduct) => (
+              <Link
+                key={recommendedProduct.id}
+                to={`/product/${recommendedProduct.id}`}
+                className="related-card"
+              >
+                <OptimizedImage
+                  src={recommendedProduct.image}
+                  alt={recommendedProduct.name}
+                  fallbackSrc={FALLBACK_PRODUCT_IMAGE}
+                />
+                <h4>{recommendedProduct.name}</h4>
+                <p>KES {recommendedProduct.price}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {recentlyViewedProducts.length > 0 && (
+        <div className="recently-viewed">
+          <h2>Recently viewed</h2>
+          <div className="recently-viewed__chips">
+            {recentlyViewedProducts.map((item) => (
+              <Link key={item.id} to={`/product/${item.id}`} className="recently-viewed__chip">
+                <span>{item.name}</span>
+                <strong>KES {item.price}</strong>
               </Link>
             ))}
           </div>

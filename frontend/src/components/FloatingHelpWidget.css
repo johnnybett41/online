@@ -1,0 +1,109 @@
+.help-widget {
+  position: fixed;
+  right: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 1300;
+  display: grid;
+  gap: 12px;
+}
+
+.help-widget__panel {
+  width: min(320px, calc(100vw - 36px));
+  padding: 16px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 18px 42px rgba(12, 20, 35, 0.14);
+  backdrop-filter: blur(18px);
+}
+
+[data-theme='dark'] .help-widget__panel {
+  background: rgba(17, 24, 39, 0.96);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.help-widget__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.help-widget__header strong {
+  display: block;
+  color: #10213d;
+}
+
+[data-theme='dark'] .help-widget__header strong {
+  color: #fff;
+}
+
+.help-widget__header span {
+  display: block;
+  margin-top: 4px;
+  color: #5d6b82;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+[data-theme='dark'] .help-widget__header span {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.help-widget__close,
+.help-widget__toggle,
+.help-widget__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.help-widget__close {
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #27406b;
+  flex-shrink: 0;
+}
+
+.help-widget__toggle {
+  justify-content: center;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #10213d 0%, #27406b 100%);
+  color: #fff;
+  box-shadow: 0 16px 30px rgba(16, 33, 61, 0.2);
+}
+
+.help-widget__action {
+  justify-content: center;
+  width: 100%;
+  padding: 12px 14px;
+  margin-top: 10px;
+  background: rgba(237, 243, 255, 0.95);
+  color: #23416f;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.help-widget__action--primary {
+  background: linear-gradient(135deg, #25d366 0%, #1e9f52 100%);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .help-widget {
+    right: 12px;
+    bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+
+  .help-widget__panel {
+    width: min(100vw - 24px, 320px);
+  }
+}

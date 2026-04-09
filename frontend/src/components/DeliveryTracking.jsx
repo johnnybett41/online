@@ -131,6 +131,9 @@ const DeliveryTracking = ({ order }) => {
     0,
     statusSteps.indexOf(activeOrder.status)
   );
+  const etaText = activeOrder.estimated_delivery_date
+    ? new Date(activeOrder.estimated_delivery_date).toLocaleDateString()
+    : 'To be confirmed';
 
   if (!activeOrder.delivery_address) {
     return null;
@@ -177,10 +180,21 @@ const DeliveryTracking = ({ order }) => {
                 <Circle size={24} />
               )}
             </div>
-            <div className="timeline-label">{getStatusText(step).split(' ')[0]}</div>
+            <div className="timeline-label">{getStatusText(step)}</div>
             {index < statusSteps.length - 1 && <div className="timeline-connector" />}
           </div>
         ))}
+      </div>
+
+      <div className="delivery-summary-strip">
+        <div>
+          <span>Current stage</span>
+          <strong>{getStatusText(activeOrder.status)}</strong>
+        </div>
+        <div>
+          <span>ETA</span>
+          <strong>{etaText}</strong>
+        </div>
       </div>
 
       <div className="delivery-address">

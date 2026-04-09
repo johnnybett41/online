@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Truck, CreditCard, AlertCircle } from 'lucide-react';
 import { KENYA_COUNTIES, getCountyLocationProfile } from '../utils/kenyaLocations';
+import { loadSavedAddresses, saveAddressBookEntry } from '../utils/savedAddresses';
 import './DeliveryCheckout.css';
 
-const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
+const DeliveryCheckout = ({ cartTotal, onSubmit, loading, userId }) => {
   const [deliveryMethod, setDeliveryMethod] = useState('standard');
   const [paymentMethod, setPaymentMethod] = useState('mpesa');
   const [address, setAddress] = useState('');
@@ -12,6 +13,29 @@ const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
   const [postalCode, setPostalCode] = useState('');
   const [phone, setPhone] = useState('');
   const [errors, setErrors] = useState({});
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedSavedAddressId, setSelectedSavedAddressId] = useState('');
+
+  useEffect(() => {
+    if (!userId) {
+      setSavedAddresses([]);
+      setSelectedSavedAddressId('');
+      return;
+    }
+
+    const addresses = loadSavedAddresses(userId);
+    setSavedAddresses(addresses);
+    const firstAddress = addresses[0];
+    setSelectedSavedAddressId(firstAddress?.savedAt ? String(firstAddress.savedAt) : '');
+
+    if (firstAddress) {
+      setAddress(firstAddress.delivery_address || '');
+      setCounty(firstAddress.delivery_county || '');
+      setTown(firstAddress.delivery_town || '');
+      setPostalCode(firstAddress.delivery_postal_code || '');
+      setPhone(firstAddress.phone_number || '');
+    }
+  }, [userId]);
 
   const selectedCountyProfile = getCountyLocationProfile(county);
   const townOptions = selectedCountyProfile?.towns || [];
@@ -43,6 +67,16 @@ const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
     if (!validateForm()) return;
 
     const fullAddress = `${address}, ${town}, ${county}${postalCode ? `, ${postalCode}` : ''}`;
+
+    if (userId) {
+      saveAddressBookEntry(userId, {
+        delivery_address: address.trim(),
+        delivery_county: county.trim(),
+        delivery_town: town.trim(),
+        delivery_postal_code: postalCode.trim(),
+        phone_number: phone.trim(),
+      });
+    }
     
     onSubmit({
       delivery_method: deliveryMethod,
@@ -79,6 +113,26 @@ const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
     if (matchedTown?.postalCode) {
       setPostalCode(matchedTown.postalCode);
     }
+  };
+
+  const handleSavedAddressChange = (event) => {
+    const savedAt = event.target.value;
+    setSelectedSavedAddressId(savedAt);
+
+    if (!savedAt) {
+      return;
+    }
+
+    const selectedAddress = savedAddresses.find((entry) => String(entry.savedAt) === savedAt);
+    if (!selectedAddress) {
+      return;
+    }
+
+    setAddress(selectedAddress.delivery_address || '');
+    setCounty(selectedAddress.delivery_county || '');
+    setTown(selectedAddress.delivery_town || '');
+    setPostalCode(selectedAddress.delivery_postal_code || '');
+    setPhone(selectedAddress.phone_number || '');
   };
 
   const selectedDelivery = deliveryOptions[deliveryMethod];
@@ -125,6 +179,27 @@ const DeliveryCheckout = ({ cartTotal, onSubmit, loading }) => {
             <p>We use this address for dispatch and tracking.</p>
           </div>
         </div>
+        <div className="form-group">
+          {savedAddresses.length > 0 && (
+            <>
+              <label>Saved Address</label>
+              <select
+                value={selectedSavedAddressId}
+                onChange={handleSavedAddressChange}
+                disabled={loading}
+              >
+                <option value="">Enter a new address</option>
+                {savedAddresses.map((savedAddress) => (
+                  <option key={savedAddress.savedAt} value={savedAddress.savedAt}>
+                    {savedAddress.delivery_town}, {savedAddress.delivery_county}
+                  </option>
+                ))}
+              </select>
+              <span className="form-hint">Pick a saved address to fill the form instantly.</span>
+            </>
+          )}
+        </div>
+
         <div className="form-group">
           <label>Street Address *</label>
           <input
