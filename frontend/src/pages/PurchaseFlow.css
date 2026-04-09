@@ -723,7 +723,7 @@
 
 @media (max-width: 720px) {
   .purchase-shell {
-    padding: 24px 14px 60px;
+    padding: 24px 14px calc(140px + env(safe-area-inset-bottom));
   }
 
   .cart-item {
@@ -769,5 +769,16 @@
 
   .status-banner__actions .purchase-button {
     width: 100%;
+  }
+
+  .purchase-card,
+  .checkout-section {
+    scroll-margin-bottom: calc(160px + env(safe-area-inset-bottom));
+  }
+
+  .purchase-field input,
+  .form-group input,
+  .form-group select {
+    min-height: 52px;
   }
 }

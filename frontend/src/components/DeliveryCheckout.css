@@ -171,6 +171,7 @@
   font-size: 16px;
   transition: all 0.2s;
   caret-color: #10213d;
+  -webkit-text-fill-color: #10213d;
 }
 
 .form-group select {
@@ -312,6 +313,10 @@
 }
 
 @media (max-width: 640px) {
+  .delivery-checkout {
+    padding-bottom: calc(28px + env(safe-area-inset-bottom));
+  }
+
   .form-row {
     grid-template-columns: 1fr;
   }
@@ -339,5 +344,10 @@
 
   .form-group select {
     font-size: 16px;
+  }
+
+  .form-group input,
+  .form-group select {
+    min-height: 52px;
   }
 }

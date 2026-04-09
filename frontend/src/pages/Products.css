@@ -866,6 +866,7 @@
 @media (max-width: 540px) {
   .products-container {
     padding-inline: 0;
+    padding-bottom: calc(140px + env(safe-area-inset-bottom));
   }
 
   .products-header,
@@ -915,5 +916,9 @@
 
   .loading-grid {
     grid-template-columns: 1fr;
+  }
+
+  .product-card {
+    scroll-margin-bottom: calc(160px + env(safe-area-inset-bottom));
   }
 }

@@ -204,7 +204,8 @@ body {
 @media (max-width: 768px) {
   .main-content {
     padding-inline: 12px;
-    padding-bottom: 104px;
+    padding-bottom: calc(144px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(176px + env(safe-area-inset-bottom));
   }
 
   .connection-banner {
@@ -224,6 +225,13 @@ body {
   .page-loading-card {
     padding: 22px;
     border-radius: 22px;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    scroll-margin-bottom: calc(176px + env(safe-area-inset-bottom));
   }
 }
 
